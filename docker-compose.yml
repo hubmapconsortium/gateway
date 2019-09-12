@@ -1,0 +1,20 @@
+version: "3.7"
+services:
+
+  web-gateway:
+    build: ./web-gateway
+    hostname: web-gateway
+    container_name: web-gateway
+    networks:
+      - hubmap
+
+
+  nginx:
+    image: nginx:latest
+    hostname: nginx
+    container_name: nginx
+    networks:
+      - hubmap
+
+networks:
+  hubmap:
