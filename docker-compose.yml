@@ -1,20 +1,24 @@
 version: "3.7"
 services:
 
-  web-gateway:
-    build: ./web-gateway
-    hostname: web-gateway
-    container_name: web-gateway
+  gateway:
+    build: ./gateway
+    hostname: gateway
+    container_name: gateway
     networks:
       - hubmap
 
 
   nginx:
-    image: nginx:latest
+    build: ./nginx
     hostname: nginx
     container_name: nginx
+    ports:
+      - "5000:80"
     networks:
       - hubmap
+    depends_on:
+      - gateway
 
 networks:
   hubmap:

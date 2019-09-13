@@ -1,0 +1,21 @@
+#header {
+margin-bottom: 20px;
+box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05),
+inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+#content {
+padding-bottom: 40px;
+}
+
+#body {
+background-color: #f4f4f4;
+}
+
+.username {
+margin-right: 20px;
+}
+
+ul{
+list-style-type: none !important;
+}
