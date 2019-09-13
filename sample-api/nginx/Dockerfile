@@ -7,9 +7,9 @@ LABEL version="0.1.0"
 # /etc/nginx/nginx.conf includes
 RUN rm /etc/nginx/conf.d/default.conf
 
-# We copy the requirements file in order to install
-# Python dependencies
 COPY app.conf /etc/nginx/conf.d
 
-# Nginx will listen on this port
+COPY favicon.ico /usr/share/nginx/html
+
+# Nginx will listen on port 80 inside the container
 EXPOSE 80

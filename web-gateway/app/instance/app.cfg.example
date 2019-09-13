@@ -1,21 +1,19 @@
 # App name and deployment URI
 FLASK_APP_NAME = 'HuBMAP Web Gateway'
 # Works regardless the trailing slash /
-FLASK_APP_BASE_URI = 'http://localhost:5000'
+FLASK_APP_BASE_URI = 'http://localhost:8080'
 
 # Flask app session key
-SECRET_KEY = 'fsfdsfdsf54esfdasd8jf99adsf909oel'
+SECRET_KEY = ''
 
 # Globus app client ID and secret
-GLOBUS_APP_ID = '21f293b0-5fa5-4ee1-9e0e-3cf88bd70114'
-GLOBUS_APP_SECRET = 'gimzYEgm/jMtPmNJ0qoV11gdicAK8dgu+yigj2m3MTE='
+GLOBUS_APP_ID = ''
+GLOBUS_APP_SECRET = ''
 
 # Cross-domain cookie
-COOKIE_DOMAIN = 'localhost'
+COOKIE_DOMAIN = ''
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)
 CACHE_TTL = 7200
-
-

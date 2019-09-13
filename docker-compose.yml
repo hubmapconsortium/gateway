@@ -1,24 +1,45 @@
 version: "3.7"
+
+# Will use the hostname when talking between services on the same network
 services:
 
-  gateway:
-    build: ./gateway
-    hostname: gateway
-    container_name: gateway
+  web-gateway-app:
+    build: ./web-gateway/app
+    hostname: web-gateway-app
+    container_name: web-gateway-app
     networks:
       - hubmap
 
-
-  nginx:
-    build: ./nginx
-    hostname: nginx
-    container_name: nginx
+  web-gateway-nginx:
+    build: ./web-gateway/nginx
+    hostname: web-gateway-nginx
+    container_name: web-gateway-nginx
     ports:
-      - "5000:80"
+      # Map port 8080 on host to the 80 on this container
+      - "8080:80"
     networks:
       - hubmap
     depends_on:
-      - gateway
+      - web-gateway-app
+
+  sample-api-app:
+    build: ./sample-api/app
+    hostname: sample-api-app
+    container_name: sample-api-app
+    networks:
+      - hubmap
+
+  sample-api-nginx:
+    build: ./sample-api/nginx
+    hostname: sample-api-nginx
+    container_name: sample-api-nginx
+    ports:
+      # Map port 8080 on host to the 80 on this container
+      - "8181:80"
+    networks:
+      - hubmap
+    depends_on:
+      - sample-api-app
 
 networks:
   hubmap:
