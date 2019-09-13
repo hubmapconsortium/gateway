@@ -56,3 +56,19 @@ You can take `down` 1 step further and add the `-v` flag to remove all volumes t
 ````
 docker-compose down -v
 ````
+
+## Debugging
+
+We can list all running containers:
+
+````
+docker container ls
+```
+
+Then we can get into a container;s shell by running:
+
+````
+docker exec -it <mycontainer> bash
+````
+
+From inside the container, we can check the log file, etc...

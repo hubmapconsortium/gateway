@@ -131,6 +131,9 @@ def api_auth():
                     else:
                         # Not authenticated at all
                         return response_401
+                else:
+                	# No MAuthorization header or couldn't parse
+                	return response_401
             # It's possible the comming URI doesn't belong to either public or private
             # Idealy, we should return 404. But auth_request will send back a 500 for any codes
             # other than 200, 401/403

@@ -9,6 +9,12 @@ services:
     container_name: web-gateway-app
     networks:
       - hubmap
+    volumes:
+      # Mount code app folder onto the container when it is spun up
+      # This way, as we make changes on the app, 
+      # we won’t have to keep building the image unless it is a major change, 
+      # such as a software module dependency.
+      - "./web-gateway/app:/usr/src/app"
 
   web-gateway-nginx:
     build: ./web-gateway/nginx
