@@ -12,8 +12,9 @@ COPY . .
 # Install app dependencies
 RUN pip install -r requirements.txt
 
-# Expose the port uWSGI will listen on
-EXPOSE 5001
+# The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime. 
+# EXPOSE does not make the ports of the container accessible to the host.
+EXPOSE 5000
 
 # Finally, we run uWSGI with the ini file
 CMD [ "uwsgi", "--ini", "uwsgi.ini" ]

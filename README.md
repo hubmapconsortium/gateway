@@ -1,11 +1,14 @@
 # HuBMAP Web Gateway With Multi-Container Stack
 
-The HuBMAP Web Gateway serves as an authentication gateway for the HuBMAP API services. All access requests that require authentication will come to this gateway first. 
+The HuBMAP Web Gateway serves as an authentication gateway for the HuBMAP API services. All API requests will be passed to this gateway service for authentication and authorization before reaching to the API endpoints. 
 
-## Tools
+## Overview of tools and workflow
 
 - Docker v19.03.2: https://docs.docker.com/install/
 - Docker Compose v3.7: https://docs.docker.com/compose/install/
+
+We first use `Dockerfile` to define the image for each service componment. With Docker Compose, we define the services and their relation to each other in the `docker-compose.yml` file. Then spin this multi-container application stack up in a single command which does everything that needs to be done to get it running. 
+
 
 ## Build stack images with Docker Compose
 
@@ -63,7 +66,7 @@ We can list all running containers:
 
 ````
 docker container ls
-```
+````
 
 Then we can get into a container;s shell by running:
 
