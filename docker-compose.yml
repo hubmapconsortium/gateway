@@ -4,17 +4,17 @@ version: "3.7"
 services:
 
   web-gateway-app:
-    build: ./web-gateway/app
+    build: ./web-gateway/app/build
     hostname: web-gateway-app
     container_name: web-gateway-app
     networks:
       - hubmap
     volumes:
-      # Mount code app folder onto the container when it is spun up
-      # This way, as we make changes on the app, 
-      # we won’t have to keep building the image unless it is a major change, 
+      # Mount code app/src folder onto the container when it is spun up
+      # This way, as we make changes on the app source code, 
+      # we won't have to keep building the image unless it is a major change, 
       # such as a software module dependency.
-      - "./web-gateway/app:/usr/src/app"
+      - "./web-gateway/app/src:/usr/src/app/src"
 
   web-gateway-nginx:
     build: ./web-gateway/nginx
@@ -29,11 +29,17 @@ services:
       - web-gateway-app
 
   sample-api-app:
-    build: ./sample-api/app
+    build: ./sample-api/app/build
     hostname: sample-api-app
     container_name: sample-api-app
     networks:
       - hubmap
+    volumes:
+      # Mount code app/src folder onto the container when it is spun up
+      # This way, as we make changes on the app source code, 
+      # we won't have to keep building the image unless it is a major change, 
+      # such as a software module dependency.
+      - "./sample-api/app/src:/usr/src/app/src"
 
   sample-api-nginx:
     build: ./sample-api/nginx

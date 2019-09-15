@@ -3,10 +3,14 @@ FROM python:3
 
 LABEL version="0.1.0"
 
-# Create app directory
-WORKDIR /usr/src/app
+# Create app build directory and src directory
+RUN mkdir -p /usr/src/app/build
+RUN mkdir -p /usr/src/app/src
 
-# Copy the source code from host to image
+# Change to directory that contains the Dockerfile
+WORKDIR /usr/src/app/build
+
+# Copy the Dockerfile and requirements.txt from host to image
 COPY . .
 
 # Install app dependencies
@@ -17,4 +21,5 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # Finally, we run uWSGI with the ini file
+WORKDIR /usr/src/app/src
 CMD [ "uwsgi", "--ini", "uwsgi.ini" ]
