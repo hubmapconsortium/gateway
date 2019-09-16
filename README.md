@@ -13,6 +13,9 @@ Note: Docker Compose requires Docker to be installed and running first.
 
 We first use individual `Dockerfile` to define the image for each service componment. Then with Docker Compose, we define all the services and their relation to each other in the `docker-compose.yml` file. This allows us to spin this multi-container application stack up in a single command which does everything that needs to be done to get it running. 
 
+Note: Don't confuse with the term of `service` and `container` when we talk about Docker Compose. A service only runs one image, but it codifies the way that image runs&mdash;what ports it should use, how many replicas of the container should run so the service has the capacity it needs, and so on. That's why in `docker-compose.yml` we see `services` defined.
+
+In our `docker-compose.yml` configuration, you'll also see the `volumes` for each service. We use volumes to mount the app source code to the container when it's spun up and the log file generated on the containers are also made reachable by mounting to the host via volumes. 
 
 ### Build images
 
@@ -23,7 +26,7 @@ docker-compose build --no-cache
 The command will go through all services in the `docker-compose.yml` file and build the ones that have a build section defined. 
 
 
-## Start up services
+### Start up services
 
 ````
 docker-compose up
@@ -34,7 +37,7 @@ This command spins up all the containers defiened in the `docker-compose.yml` an
 Once the stack is up running, you'll be able to access the Sample API service at `http://localhost:8181/`. The Gateway is running at `http://localhost:8080` for API authentication and authorization purposes. 
 
 
-### Stop the running containers
+### Stop the running services
 
 ````
 docker-compose stop
@@ -47,7 +50,7 @@ Instead of stopping all the containers, you can also specifically stop a particu
 docker-compose stop <service-name>
 ````
 
-## Restart
+### Restart services
 
 ````
 docker-compose restart
