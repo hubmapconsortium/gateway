@@ -3,10 +3,6 @@ FROM nginx:1.17.2
 
 LABEL version="0.1.0"
 
-# Create build and log directory
-RUN mkdir -p /usr/src/app/build
-RUN mkdir -p /usr/src/app/log
-
 # Change to directory that contains the Dockerfile
 WORKDIR /usr/src/app/build
 

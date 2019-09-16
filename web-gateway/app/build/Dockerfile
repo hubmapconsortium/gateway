@@ -3,11 +3,6 @@ FROM python:3
 
 LABEL version="0.1.0"
 
-# Create build, src, and log directory
-RUN mkdir -p /usr/src/app/build
-RUN mkdir -p /usr/src/app/src
-RUN mkdir -p /usr/src/app/log
-
 # Change to directory that contains the Dockerfile
 WORKDIR /usr/src/app/build
 
