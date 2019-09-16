@@ -2,6 +2,34 @@
 
 The HuBMAP Web Gateway serves as an authentication and authorization gateway for the HuBMAP API services. All API requests will be proxied to this gateway service for authentication and authorization before reaching to the API endpoints. As a result of this design, the API services no longer need to handle the authentication and authorization.
 
+## Project structure
+
+````
+web-gateway-docker
+├── sample-api
+│   ├── app
+│   │   ├── build
+│   │   ├── log
+│   │   └── src
+│   └── nginx
+│       ├── build
+│       └── log
+└── web-gateway
+    ├── app
+    │   ├── build
+    │   ├── log
+    │   └── src
+    └── nginx
+        ├── build
+        └── log
+````
+
+* Each sub-project consists of `app` and `nginx` services, and each service has its own `Dockerfile` under the `build` directory. 
+* The `app/src` directory under each sub-project is mounted to the container during runtime, we don't put the source code in their image during build time. This design allows us to make changes to the source code without needing to rebuild the docker image, we'll just need to restart the services.
+* The `app/log` is another volume mount, this allows us to access the log files generated from the running contianers on the host for easy debugging and monitoring.
+
+When we need to add new sub-project, say another API service, you'll just need to follow the `sample-api` example, and use Nginx to handle the proxy pass by directing all the API requests to the `web-gateway` for authentication and authorization. And this is achieved through Nginx's `auth_request` module. That's also why each new sub-project will need to have Nginx componment.
+
 ## Overview of tools
 
 - [Docker v19.03.2](https://docs.docker.com/install/)
