@@ -1,6 +1,5 @@
 # __pycache__ directories in any path
 **/__pycache__
 
-# log directories and log files in any path
-**/log
+# log files in any path
 **/*.log

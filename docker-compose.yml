@@ -15,9 +15,11 @@ services:
       # we won't have to keep building the image unless it is a major change, 
       # such as a software module dependency.
       - "./web-gateway/app/src:/usr/src/app/src"
+      # Make the logging generated on container available through from host
+      - "./web-gateway/app/log:/usr/src/app/log"
 
   web-gateway-nginx:
-    build: ./web-gateway/nginx
+    build: ./web-gateway/nginx/build
     hostname: web-gateway-nginx
     container_name: web-gateway-nginx
     ports:
@@ -25,6 +27,9 @@ services:
       - "8080:80"
     networks:
       - hubmap
+    volumes:
+      # Make the logging generated on container available through from host
+      - "./web-gateway/nginx/log:/usr/src/app/log"
     depends_on:
       - web-gateway-app
 
@@ -40,9 +45,11 @@ services:
       # we won't have to keep building the image unless it is a major change, 
       # such as a software module dependency.
       - "./sample-api/app/src:/usr/src/app/src"
+      # Make the logging generated on container available through from host
+      - "./sample-api/app/log:/usr/src/app/log"
 
   sample-api-nginx:
-    build: ./sample-api/nginx
+    build: ./sample-api/nginx/build
     hostname: sample-api-nginx
     container_name: sample-api-nginx
     ports:
@@ -50,6 +57,9 @@ services:
       - "8181:80"
     networks:
       - hubmap
+    volumes:
+      # Make the logging generated on container available through from host
+      - "./sample-api/nginx/log:/usr/src/app/log"
     depends_on:
       - sample-api-app
 

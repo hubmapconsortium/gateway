@@ -3,8 +3,14 @@ FROM nginx:1.17.2
 
 LABEL version="0.1.0"
 
-# Remove the default config file that
-# /etc/nginx/nginx.conf includes
+# Create build and log directory
+RUN mkdir -p /usr/src/app/build
+RUN mkdir -p /usr/src/app/log
+
+# Change to directory that contains the Dockerfile
+WORKDIR /usr/src/app/build
+
+# Remove the default config file
 RUN rm /etc/nginx/conf.d/default.conf
 
 COPY app.conf /etc/nginx/conf.d

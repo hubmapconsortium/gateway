@@ -25,11 +25,11 @@ The build subcommand will build all the images that are specified in the Compose
 docker-compose up
 ````
 
-Then you will see the logs of the containers in stdout.
+This command spins up all the containers defiened in the `docker-compose.yml` and you will see the logs of the containers in stdout.
 
-Once the stack is up running, you'll be able to access the Sample API service at http://localhost:8181/. The Gateway is running at http://localhost:8080 for API authentication and authorization purposes. 
+Once the stack is up running, you'll be able to access the Sample API service at `http://localhost:8181/`. The Gateway is running at `http://localhost:8080` for API authentication and authorization purposes. 
 
-If you want to run the containers in background:
+If you want to run the containers in detached mode:
 
 ````
 docker-compose up -d
@@ -39,12 +39,18 @@ The `-d` option made the `docker-compose` command return.
 
 ## Stop or remove the containers
 
-To safely stop the active services in the stack:
+To safely stop all the active services in the stack:
 
 ````
 docker-compose stop
 ````
 The above command will preserve containers, volumes, and networks, along with every modification made to them.
+
+Instead of stopping all the containers, you can also specifically stop a particular service:
+
+````
+docker-compose stop <container-name>
+````
 
 To reset the status of our project:
 
@@ -58,6 +64,18 @@ You can take `down` 1 step further and add the `-v` flag to remove all volumes t
 
 ````
 docker-compose down -v
+````
+
+## Restart containers
+
+````
+docker-compose restart
+````
+
+This command restarts all stopped and running services. To just restart a particular container but not other containers:
+
+````
+docker-compose restart <container-name>
 ````
 
 ## Debugging
