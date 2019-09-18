@@ -3,65 +3,52 @@ version: "3.7"
 # Will use the hostname when talking between services on the same network
 services:
 
-  web-gateway-app:
-    build: ./web-gateway/app/build
-    hostname: web-gateway-app
-    container_name: web-gateway-app
+  auth:
+    build: ./auth/build
+    hostname: auth
+    container_name: auth
     networks:
       - hubmap
     volumes:
-      # Mount code app/src folder onto the container when it is spun up
+      # Mount source code onto the container when it is spun up
       # This way, as we make changes on the app source code, 
       # we won't have to keep building the image unless it is a major change, 
       # such as a software module dependency.
-      - "./web-gateway/app/src:/usr/src/app/src"
+      - "./auth/src:/usr/src/app/src"
       # Make the logging generated on container available through from host
-      - "./web-gateway/app/log:/usr/src/app/log"
+      - "./auth/log:/usr/src/app/log"
 
-  web-gateway-nginx:
-    build: ./web-gateway/nginx/build
-    hostname: web-gateway-nginx
-    container_name: web-gateway-nginx
+  nginx:
+    build: ./nginx/build
+    hostname: nginx
+    container_name: nginx
+    # Mapping ports in the HOST:CONTAINER format
+    # Each API has its dedicated port and needs to be mapped here
     ports:
-      # Map port 8080 on host to the 80 on this container
-      - "8080:80"
+      # auth
+      - "8080:80" 
+      # sample-api
+      - "8181:81" 
     networks:
       - hubmap
     volumes:
       # Make the logging generated on container available through from host
-      - "./web-gateway/nginx/log:/usr/src/app/log"
-    depends_on:
-      - web-gateway-app
-
-  sample-api-app:
-    build: ./sample-api/app/build
-    hostname: sample-api-app
-    container_name: sample-api-app
+      - "./nginx/log:/usr/src/app/log"
+    
+  sample-api:
+    build: ./sample-api/build
+    hostname: sample-api
+    container_name: sample-api
     networks:
       - hubmap
     volumes:
-      # Mount code app/src folder onto the container when it is spun up
+      # Mount source code onto the container when it is spun up
       # This way, as we make changes on the app source code, 
       # we won't have to keep building the image unless it is a major change, 
       # such as a software module dependency.
-      - "./sample-api/app/src:/usr/src/app/src"
+      - "./sample-api/src:/usr/src/app/src"
       # Make the logging generated on container available through from host
-      - "./sample-api/app/log:/usr/src/app/log"
-
-  sample-api-nginx:
-    build: ./sample-api/nginx/build
-    hostname: sample-api-nginx
-    container_name: sample-api-nginx
-    ports:
-      # Map port 8080 on host to the 80 on this container
-      - "8181:80"
-    networks:
-      - hubmap
-    volumes:
-      # Make the logging generated on container available through from host
-      - "./sample-api/nginx/log:/usr/src/app/log"
-    depends_on:
-      - sample-api-app
+      - "./sample-api/log:/usr/src/app/log"
 
 networks:
   hubmap:

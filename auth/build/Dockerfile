@@ -6,8 +6,8 @@ LABEL version="0.1.0"
 # Change to directory that contains the Dockerfile
 WORKDIR /usr/src/app/build
 
-# Copy the Dockerfile and requirements.txt from host to image
-COPY . .
+# Copy requirements.txt from host to image
+COPY requirements.txt .
 
 # Install app dependencies
 RUN pip install -r requirements.txt
