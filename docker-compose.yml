@@ -2,52 +2,36 @@ version: "3.7"
 
 # Will use the hostname when talking between services on the same network
 services:
-
-  auth:
-    build: ./auth/build
-    hostname: auth
-    container_name: auth
+  
+  hubmap-auth:
+    build: ./hubmap-auth
+    hostname: hubmap-auth
+    container_name: hubmap-auth
     networks:
       - hubmap
-    volumes:
-      # Mount source code onto the container when it is spun up
-      # This way, as we make changes on the app source code, 
-      # we won't have to keep building the image unless it is a major change, 
-      # such as a software module dependency.
-      - "./auth/src:/usr/src/app/src"
-      # Make the logging generated on container available through from host
-      - "./auth/log:/usr/src/app/log"
-
-  nginx:
-    build: ./nginx/build
-    hostname: nginx
-    container_name: nginx
     # Mapping ports in the HOST:CONTAINER format
     # Each API has its dedicated port and needs to be mapped here
     ports:
-      # auth
+      # hubmap-auth
       - "8080:80" 
       # sample-api
       - "8181:81" 
-    networks:
-      - hubmap
     volumes:
-      # Make the logging generated on container available through from host
-      - "./nginx/log:/usr/src/app/log"
-    
+      # Make the uwsgi logging generated on container available through from host
+      - "./hubmap-auth/log:/usr/src/app/log"
+      # Mount all hubmap nginx config file to the nginx conf.d on container
+      - "./nginx/conf.d:/etc/nginx/conf.d"
+      # favicon.ico
+      - "./nginx/html:/usr/share/nginx/html"
+
   sample-api:
-    build: ./sample-api/build
+    build: ./sample-api
     hostname: sample-api
     container_name: sample-api
     networks:
       - hubmap
     volumes:
-      # Mount source code onto the container when it is spun up
-      # This way, as we make changes on the app source code, 
-      # we won't have to keep building the image unless it is a major change, 
-      # such as a software module dependency.
-      - "./sample-api/src:/usr/src/app/src"
-      # Make the logging generated on container available through from host
+      # Make the uwsgi logging generated on container available through from host
       - "./sample-api/log:/usr/src/app/log"
 
 networks:
