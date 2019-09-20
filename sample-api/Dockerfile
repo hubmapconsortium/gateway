@@ -17,4 +17,4 @@ RUN pip install -r src/requirements.txt
 EXPOSE 5000
 
 # Finally, we run uWSGI with the ini file
-CMD [ "uwsgi", "--ini", "src/uwsgi.ini" ]
+CMD [ "uwsgi", "--ini", "/usr/src/app/src/uwsgi.ini" ]
