@@ -6,32 +6,33 @@ The HuBMAP Web Gateway serves as an authentication and authorization gateway for
 
 ````
 web-gateway-docker
-├── auth
-│   ├── build
+├── docker-compose.yml
+├── hubmap-auth
+│   ├── Dockerfile
 │   ├── log
-│   └── src
+│   ├── src
+│   └── start.sh
 ├── nginx
-│   ├── build
-│   └── log
+│   ├── conf.d
+│   └── html
 └── sample-api
-    ├── build
+    ├── Dockerfile
     ├── log
     └── src
 ````
 
-* `auth` is the actual HuBMAP authentication and authorization service that verifies all the API requests.
-* `nginx` is the load balancer than handles the proxy pass by directing all the API requests to the `auth`.
+* `hubmap-auth` is the actual HuBMAP authentication and authorization service that verifies all the API requests.
+* `nginx` is the folder used for mounting individual API config file and some static content, like favicon.ico.
 * `sample-api` is an example API service.
-* Each service has its own `Dockerfile` under the `build` directory. 
-* The `src` directory under each service is mounted to the container during runtime, we don't put the source code in their image during build time. This design allows us to make changes to the source code without needing to rebuild the docker image, we'll just need to restart the services.
-* The `log` is another volume mount, this allows us to access the log files generated from the running contianers on the host for easy debugging and monitoring.
+* Each service has its own `Dockerfile`. 
+* The `log` under each project is another volume mount, this allows us to access the log files generated from the running contianers on the host for easy debugging and monitoring.
 
-To add new API service to the stack, you'll just need to follow the `sample-api` example, and add a new `conf` file to instruct Nginx to handle the proxy pass by directing all the API requests to the `auth` for authentication and authorization. And this is achieved through Nginx's `auth_request` module. That's also why each new sub-project will need to have Nginx componment.
+To add new API service to the stack, you'll just need to follow the `sample-api` example, and add a new `conf` file (put it into `nginx/conf.d`) to instruct Nginx to handle the proxy pass by directing all the API requests to the `hubmap-auth` for authentication and authorization. And this is achieved through Nginx's `auth_request` module. That's also why each new sub-project will need to have Nginx componment.
 
 ## Overview of tools
 
 - [Docker v19.03.2](https://docs.docker.com/install/)
-- [Docker Compose v3.7](https://docs.docker.com/compose/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
 Note: Docker Compose requires Docker to be installed and running first.
 
