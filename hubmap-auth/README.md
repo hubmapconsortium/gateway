@@ -2,6 +2,33 @@
 
 This is the HuBMAP Auth service written in Python Flask served with uWSGI and Nginx in a docker container. All API access requests that require authentication and authorization will come to this gateway first.
 
+### Application config
+
+The application confiuration file `app.cfg` is located under `instance` folder. You can read more about [Flask Instance Folders](http://flask.pocoo.org/docs/1.0/config/#instance-folders). In this config file, you can specify the following items:
+
+````
+# App name and deployment URI
+FLASK_APP_NAME = 'HuBMAP Auth'
+# Works regardless the trailing slash /
+FLASK_APP_BASE_URI = 'http://localhost:8080'
+
+# File path of API endpoints json file
+API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
+
+# Flask app session key
+SECRET_KEY = ''
+
+# Globus app client ID and secret
+GLOBUS_APP_ID = ''
+GLOBUS_APP_SECRET = ''
+
+# The maximum integer number of entries in the cache queue
+CACHE_MAXSIZE = 128
+# Expire the cache after the time-to-live (seconds)
+CACHE_TTL = 7200
+
+````
+
 ### Nginx config
 
 This `hubmap-auth.conf` needs to be placed in the `nginx/conf.d` folder under the root project. This file defines how the `hubmap-auth` container handles the API requests via nginx using the `auth_request` module.
@@ -35,7 +62,7 @@ server {
 
 ### API Endpoints Lookup and Caching
 
-For API auth of the Web Gateway, we'll need a json file named `endpoints.json` that specifies all the public and private endpoints. Public endpoints don't require any authentication. However, the private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. Certain endpoints that require certain group access will also require the globus `nexus_token`. The Json file looks like below:
+For API auth of the Web Gateway, we'll need a json file named defined in the `instance/app.cfg` that specifies all the public and private endpoints. Public endpoints don't require any authentication. However, the private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. Certain endpoints that require certain group access will also require the globus `nexus_token`. The Json file looks like below:
 
 ````json
 {
@@ -64,6 +91,8 @@ For API auth of the Web Gateway, we'll need a json file named `endpoints.json` t
   ]
 }
 ````
+
+Note: this endpoints file will be mounted to the docker container when we spin up the service. The mount point is defined in `decoker-compose.yml`.
 
 And the `MAuthorization` header from requests looks like this:
 

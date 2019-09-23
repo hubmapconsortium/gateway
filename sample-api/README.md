@@ -76,7 +76,7 @@ server {
 
 ### API Endpoints
 
-The API endpoints are specified in a json file named `endpoints.json`. Public endpoints don't require any authentication. However, the private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. Certain endpoints that require certain group access will also require the globus `nexus_token`. The Json file looks like below for this sample API service:
+The API endpoints are specified in a json file named `api_endpoints.json` in the root directory of this project and it is mounted to the `hubmap-auth` container. Public endpoints don't require any authentication. However, the private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. Certain endpoints that require certain group access will also require the globus `nexus_token`. The Json file looks like below for this sample API service:
 
 ````json
 {

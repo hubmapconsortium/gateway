@@ -303,7 +303,7 @@ def is_active_auth_token(auth_token):
 # Load all endpoints from json file and cache the data
 @cached(cache)
 def load_endpoints():
-    with open("endpoints.json", "r") as file:
+    with open(app.config['API_ENDPOINTS_FILE'], "r") as file:
         data = json.load(file)
         return data
 

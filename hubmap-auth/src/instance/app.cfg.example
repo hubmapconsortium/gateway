@@ -1,7 +1,10 @@
 # App name and deployment URI
-FLASK_APP_NAME = 'HuBMAP Web Gateway'
+FLASK_APP_NAME = 'HuBMAP Auth'
 # Works regardless the trailing slash /
 FLASK_APP_BASE_URI = 'http://localhost:8080'
+
+# File path of API endpoints json file
+API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
 
 # Flask app session key
 SECRET_KEY = ''
