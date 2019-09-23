@@ -29,6 +29,8 @@ web-gateway-docker
 
 To add new API service to the stack, you'll just need to follow the `sample-api` example, and add a new `conf` file (put it into `nginx/conf.d`) to instruct Nginx to handle the proxy pass by directing all the API requests to the `hubmap-auth` for authentication and authorization. And this is achieved through Nginx's `auth_request` module. That's also why each new sub-project will need to have Nginx componment.
 
+The `sample-api` service is running a flask app behind uWSGi for demonstration purpose. Your API service can be created with Django and running behind Apache HTTP or whatever stack as long as you specify the port that `hubmap-auth` nginx exposes for your service, and the port exposed on your container that nginx can hand over after authentication/authorization in `your-api.conf`.
+
 ## Overview of tools
 
 - [Docker v19.03.2](https://docs.docker.com/install/)
