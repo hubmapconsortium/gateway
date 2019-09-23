@@ -9,6 +9,8 @@ services:
     image: hubmap-auth:0.1.0
     hostname: hubmap-auth
     container_name: hubmap-auth
+    init: true
+    restart: always
     networks:
       - hubmap
     # Mapping ports in the HOST:CONTAINER format
@@ -34,6 +36,8 @@ services:
     image: sample-api:0.1.0
     hostname: sample-api
     container_name: sample-api
+    init: true
+    restart: always
     networks:
       - hubmap
     volumes:
