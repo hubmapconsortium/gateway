@@ -1,6 +1,7 @@
 # Parent image
 FROM python:3
 
+LABEL description="Sample API Service"
 LABEL version="0.1.0"
 
 # Change to directory that contains the Dockerfile

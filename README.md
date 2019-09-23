@@ -121,3 +121,22 @@ Then we can get into a container's shell by running:
 docker exec -it <mycontainer> bash
 ````
 
+If you ever need to make Nginx configuration changes but don't want to stop the `hubmap-auth` container, you can shell into this container like above, and do the following:
+
+````
+nginx -s reload
+````
+
+If by any chance, you have to restart the Nginx but keep the container running:
+
+````
+nginx -s stop
+````
+
+Then 
+
+````
+nginx -g 'daemon off;' &
+````
+
+We can't use the systemd commands due to the base image Centos7 disabled systemd by default.
