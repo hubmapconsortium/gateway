@@ -10,6 +10,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install app dependencies
+# In this example, we install uwsgi as one of the app dependencies via pip
 RUN pip install -r src/requirements.txt
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime. 
