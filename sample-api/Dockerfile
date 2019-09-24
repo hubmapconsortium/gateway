@@ -1,8 +1,8 @@
 # Parent image
-FROM python:3
+FROM centos:7
 
-LABEL description="Sample API Service"
-LABEL version="0.1.0"
+LABEL description="Sample API Service" \
+	version="0.1.0"
 
 # Change to directory that contains the Dockerfile
 WORKDIR /usr/src/app
@@ -10,9 +10,23 @@ WORKDIR /usr/src/app
 # Copy from host to image
 COPY . .
 
-# Install app dependencies
-# In this example, we install uwsgi as one of the app dependencies via pip
-RUN pip install -r src/requirements.txt
+# Reduce the number of layers in image by minimizing the number of separate RUN commands
+# 1 - Update the package listings
+# 2 - Install development tools (gcc, make, etc.) needed for building Python software packages
+# 3 - Install Extra Packages for Enterprise Linux (EPEL) and we'll use the EPEL repo for installing python, pip, uwsgi, uwsgi python plugin
+# 4 - Install python 3.6 and pip. After installation, python3 and pip3 are available in shell
+# 5 - Install uWSGI and the Python 3.6 plugin (it installs the Python 3.6 uWSGI plugin to: /usr/lib64/uwsgi/python3_plugin.so)
+# 6 - Upgrade pip, after upgrading, both pip and pip3 are the same version
+# 7 - Install flask app dependencies with pip (pip3 also works)
+# 8 - Clean all yum cache
+RUN yum update -y && \
+    yum groupinstall -y "Development Tools" && \
+    yum install -y epel-release && \
+    yum install -y python36 python36-pip && \
+    yum install -y uwsgi uwsgi-plugin-python36.x86_64 && \
+    pip3 install --upgrade pip && \
+    pip install -r src/requirements.txt && \
+    yum clean all 
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime. 
 # EXPOSE does not make the ports of the container accessible to the host.
