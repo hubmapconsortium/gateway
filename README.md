@@ -60,7 +60,7 @@ In our `docker-compose.yml` configuration, you'll also see the `volumes` for eac
 ### Build images
 
 ````
-docker-compose build --no-cache
+sudo docker-compose build --no-cache
 ````
 
 The command will go through all services in the `docker-compose.yml` file and build the ones that have a build section defined. 
@@ -69,7 +69,7 @@ The command will go through all services in the `docker-compose.yml` file and bu
 ### Start up services
 
 ````
-docker-compose up
+sudo docker-compose up
 ````
 
 This command spins up all the containers defiened in the `docker-compose.yml` and aggregates the output of each container. When the command exits, all containers are stopped. Running `docker-compose up -d` starts the containers in the background and leaves them running.
@@ -80,20 +80,20 @@ Once the stack is up running, you'll be able to access the Sample API service at
 ### Stop the running services
 
 ````
-docker-compose stop
+sudo docker-compose stop
 ````
 The above command stops all the running containers without removing them. It preserves containers, volumes, and networks, along with every modification made to them. The stopped containers can be started again with `docker-compose start`. 
 
 Instead of stopping all the containers, you can also specifically stop a particular service:
 
 ````
-docker-compose stop <service-name>
+sudo docker-compose stop <service-name>
 ````
 
 ### Restart services
 
 ````
-docker-compose restart
+sudo docker-compose restart
 ````
 
 This restarts all stopped and running services. If you make changes to your `docker-compose.yml` configuration or the individual `Dockerfile` these changes are not reflected after running this restart command. You'll need to rebuild all the images.
@@ -101,13 +101,13 @@ This restarts all stopped and running services. If you make changes to your `doc
 To just restart a particular service but not other services:
 
 ````
-docker-compose restart <service-name>
+sudo docker-compose restart <service-name>
 ````
 
 ### Reset the status of our project
 
 ````
-docker-compose down
+sudo docker-compose down
 ````
 
 This command stops containers and removes containers, networks, volumes, and images created by `docker-compose up`.
@@ -115,7 +115,7 @@ This command stops containers and removes containers, networks, volumes, and ima
 You can take `down` 1 step further and add the `-v` flag to remove all volumes too. This is great for doing a full blown reset on your environment by running:
 
 ````
-docker-compose down -v
+sudo docker-compose down -v
 ````
 
 ## Debugging
@@ -123,13 +123,13 @@ docker-compose down -v
 We can list all running containers:
 
 ````
-docker container ls
+sudo docker container ls
 ````
 
 Then we can get into a container's shell by running:
 
 ````
-docker exec -it <mycontainer> bash
+sudo docker exec -it <mycontainer> bash
 ````
 
 If you ever need to make Nginx configuration changes but don't want to stop the `hubmap-auth` container, you can shell into this container like above, and do the following:
