@@ -1,10 +1,10 @@
 ## HuBMAP Auth Container
 
-This is the HuBMAP Auth service written in Python Flask served with uWSGI and Nginx in a docker container. All API access requests that require authentication and authorization will come to this gateway first.
+This is the HuBMAP Auth service written in Python Flask served with uWSGI application server in conjunction with Nginx (as reverse proxy) in a docker container. All HuBMAP API services requests that require authentication and authorization will come to this gateway first.
 
-### Application config
+### Flask config
 
-The application confiuration file `app.cfg` is located under `instance` folder. You can read more about [Flask Instance Folders](http://flask.pocoo.org/docs/1.0/config/#instance-folders). In this config file, you can specify the following items:
+The Flask application confiuration file `app.cfg` is located under `instance` folder. You can read more about [Flask Instance Folders](http://flask.pocoo.org/docs/1.0/config/#instance-folders). In this config file, you can specify the following items:
 
 ````
 # App name and deployment URI
@@ -27,6 +27,39 @@ CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)
 CACHE_TTL = 7200
 
+````
+
+### uWSGI config
+
+In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin via yum. Following is the configuration file `uwsgi.ini` and it tells uWSGI the details of running this Flask app.
+
+````
+[uwsgi]
+# Need this plugin since uwsgi and uwsgi python plugin are installed with yum
+# If uwsgi installed with pip, no need this
+plugin = python36
+
+# So uwsgi knows where to mount the app
+chdir = /usr/src/app/src
+
+# Application's callbale
+module = wsgi:application
+
+# Location of uwsgi log file
+logto = /usr/src/app/log/uwsgi-hubmap-auth.log
+
+# Master with 2 worker process (based on CPU number)
+master = true
+processes = 2
+
+# Use http socket for integration with nginx
+socket = localhost:5000
+
+# Enable socket cleanup when process stop
+vacuum = true
+
+# Ensure compatibility with init system
+die-on-term = true
 ````
 
 ### Nginx config

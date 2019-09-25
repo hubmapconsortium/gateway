@@ -10,9 +10,44 @@ MAuthorization: MBearer {"name": "User Name", "email": "useremail@example.com", 
 
 The Web Gateway will validate the `auth_token` and `nexus_token` before allowing access to the requested resource endpoint.
 
+### uWSGI config
+
+Our sample API is written in Python Flask, in order to serve this app we'll need to use uWSGI server. In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin via yum. Following is the configuration file `uwsgi.ini` and it tells uWSGI the details of running this Flask app.
+
+````
+[uwsgi]
+# Need this plugin since uwsgi and uwsgi python plugin are installed with yum
+# If uwsgi installed with pip, no need this
+plugin = python36
+
+# So uwsgi knows where to mount the app
+chdir = /usr/src/app/src
+
+# Application's callbale
+module = wsgi:application
+
+# Location of uwsgi log file
+logto = /usr/src/app/log/uwsgi-sample-api.log
+
+# Master with 2 worker process (based on CPU number)
+master = true
+processes = 2
+
+# Use http socket for integration with nginx
+# 127.0.0.1:5000 or localhost:5000 won't work with Docker
+# Because the upstream server is running on another container
+socket = :5000
+
+# Enable socket cleanup when process stop
+vacuum = true
+
+# Ensure compatibility with init system
+die-on-term = true
+````
+
 ### Nginx config
 
-This `sample-api.conf` needs to be placed in the `nginx/conf.d` folder under the root project. This file defines how the `hubmap-auth` container handles the API requests via nginx. 
+Nginx serves as the reverse proxy and passes the requests to the uWSGI server. The `sample-api.conf` needs to be placed in the `nginx/conf.d` folder under the root project. This file defines how the `hubmap-auth` container handles the API requests via nginx. 
 
 ````
 # Define the upstream hubmap-auth server
