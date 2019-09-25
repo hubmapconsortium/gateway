@@ -12,18 +12,14 @@ COPY . .
 
 # Reduce the number of layers in image by minimizing the number of separate RUN commands
 # 1 - Update the package listings
-# 2 - Install development tools (gcc, make, etc.) needed for building Python software packages
-# 3 - Install Extra Packages for Enterprise Linux (EPEL) and we'll use the EPEL repo for installing python, pip, uwsgi, uwsgi python plugin
-# 4 - Install python 3.6 and pip. After installation, python3 and pip3 are available in shell
-# 5 - Install uWSGI and the Python 3.6 plugin (it installs the Python 3.6 uWSGI plugin to: /usr/lib64/uwsgi/python3_plugin.so)
-# 6 - Upgrade pip, after upgrading, both pip and pip3 are the same version
-# 7 - Install flask app dependencies with pip (pip3 also works)
-# 8 - Clean all yum cache
+# 2 - Install Extra Packages for Enterprise Linux (EPEL) 
+# 3 - Use the EPEL repo for installing python, pip, uwsgi, uwsgi python plugin
+# 4 - Upgrade pip, after upgrading, both pip and pip3 are the same version
+# 5 - Install flask app dependencies with pip (pip3 also works)
+# 6 - Clean all yum cache
 RUN yum update -y && \
-    yum groupinstall -y "Development Tools" && \
     yum install -y epel-release && \
-    yum install -y python36 python36-pip && \
-    yum install -y uwsgi uwsgi-plugin-python36.x86_64 && \
+    yum install -y python36 python36-pip uwsgi uwsgi-plugin-python36.x86_64 && \
     pip3 install --upgrade pip && \
     pip install -r src/requirements.txt && \
     yum clean all 
