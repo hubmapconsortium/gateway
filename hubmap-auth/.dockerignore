@@ -1,5 +1,5 @@
 # Ignore app.cfg
-src/instance/app.cfg
+src/instance
 
 # Ignore Dockerfile
 Dockerfile
