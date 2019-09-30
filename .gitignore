@@ -3,3 +3,6 @@
 
 # log files in any path
 **/*.log
+
+# hubmap-auth app.cfg
+hubmap-auth/src/instance/app.cfg

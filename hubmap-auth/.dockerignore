@@ -1,3 +1,6 @@
+# Ignore app.cfg
+src/instance/app.cfg
+
 # Ignore Dockerfile
 Dockerfile
 
