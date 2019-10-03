@@ -1,11 +1,11 @@
-# HuBMAP Web Gateway With Multi-Container Stack
+# HuBMAP Gateway With Multi-Container Stack
 
 The HuBMAP Web Gateway serves as an authentication and authorization gateway for the HuBMAP API services. All API requests will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the API endpoints. As a result of this design, the API services no longer need to handle the authentication and authorization.
 
 ## Project structure
 
 ````
-web-gateway-docker
+gateway
 ├── api_endpoints.json
 ├── docker-compose.yml
 ├── hubmap-auth
