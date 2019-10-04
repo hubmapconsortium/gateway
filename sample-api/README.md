@@ -12,105 +12,12 @@ The Web Gateway will validate the `auth_token` and `nexus_token` before allowing
 
 ### uWSGI config
 
-Our sample API is written in Python Flask, in order to serve this app we'll need to use uWSGI server. In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin via yum. Following is the configuration file `uwsgi.ini` and it tells uWSGI the details of running this Flask app.
-
-````
-[uwsgi]
-# Need this plugin since uwsgi and uwsgi python plugin are installed with yum
-# If uwsgi installed with pip, no need this
-plugin = python36
-
-# So uwsgi knows where to mount the app
-chdir = /usr/src/app/src
-
-# Application's callbale
-module = wsgi:application
-
-# Location of uwsgi log file
-logto = /usr/src/app/log/uwsgi-sample-api.log
-
-# Master with 2 worker process (based on CPU number)
-master = true
-processes = 2
-
-# Use http socket for integration with nginx
-# 127.0.0.1:5000 or localhost:5000 won't work with Docker
-# Because the upstream server is running on another container
-socket = :5000
-
-# Enable socket cleanup when process stop
-vacuum = true
-
-# Ensure compatibility with init system
-die-on-term = true
-````
+Our sample API is written in Python Flask, in order to serve this app we'll need to use uWSGI server. In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin via yum. There's also a uWSGI configuration file `src/uwsgi.ini` and it tells uWSGI the details of running this Flask app.
 
 ### Nginx config
 
-Nginx serves as the reverse proxy and passes the requests to the uWSGI server. The `sample-api.conf` needs to be placed in the `nginx/conf.d` folder under the root project. This file defines how the `hubmap-auth` container handles the API requests via nginx. 
+Nginx serves as the reverse proxy and passes the requests to the uWSGI server. The nginx configuration file for this service is located at `nginx/conf.d/sample-api.conf` under the root project. This file defines how the subreqeusts get proxied to `hubmap-auth` container via nginx. 
 
-````
-# Define the upstream hubmap-auth server
-# This sever will be accessed via http://
-# So we use "localhost:80" because port 80 is exposed on `hubmap-auth` container for nginx
-upstream hubmap-auth-server {
-    # hubmap-auth:80/api_auth is invalid syntax
-    server localhost:80;
-}
-
-server {
-    # Each API has its dedicated port, we use 81 for the sample-api exposed 
-    # on `hubmap-auth` container for nginx
-    # Will need to map to a port on the host at deployment
-    # Currently we use 8181 from the host defined in the docker-compose.yml
-    listen 81;
-    
-    server_name localhost;
-    root /usr/share/nginx/html;
-
-    # Logging to the mounted volume for outside container access
-    access_log /usr/src/app/log/nginx_access_sample-api.log;
-    error_log /usr/src/app/log/nginx_error_sample-api.log warn;
-
-    # No auth_request for favicon    
-    location = /favicon.ico {
-        alias /usr/share/nginx/html/favicon.ico;
-    }
-    
-    # Send all requests to the '/api_auth' endpoint for authentication and authorization   
-    auth_request /api_auth;
-    # Optionally add 'status' as returned by upstream proxy along with the request
-    # We'll be able to use this $auth_status variable later
-    #auth_request_set $auth_status $upstream_status;
-
-    # Exact request URI matching
-    location = /api_auth {
-        internal;
-        # Upstream hubmap-auth server
-        # We can specify the endpoint `api_auth` here but not in the upstream definition
-        proxy_pass http://hubmap-auth-server/api_auth;
-        # No need to send the POST body
-        proxy_pass_request_body off;
-        proxy_set_header Content-Length "";
-        proxy_set_header X-Original-Request-Method $request_method;
-        proxy_set_header X-Original-URI $request_uri;
-        proxy_set_header Host $http_host;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-
-    # Once authenticated/authorized, pass all requests to the uwsgi server
-    location / { 
-        include uwsgi_params;
-        # Pass reqeusts to the uwsgi server using the "uwsgi" protocol on port 5000
-        # Here "sample-api" is the hostname defined in `docker-compose.yml`
-        # We have to use this hostname because the sample API is running on a different container
-        uwsgi_pass uwsgi://sample-api:5000;
-    }
-
-}
-````
 
 ### API Endpoints
 

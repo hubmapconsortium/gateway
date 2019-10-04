@@ -31,69 +31,12 @@ CACHE_TTL = 7200
 
 ### uWSGI config
 
-In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin via yum. Following is the configuration file `uwsgi.ini` and it tells uWSGI the details of running this Flask app.
-
-````
-[uwsgi]
-# Need this plugin since uwsgi and uwsgi python plugin are installed with yum
-# If uwsgi installed with pip, no need this
-plugin = python36
-
-# So uwsgi knows where to mount the app
-chdir = /usr/src/app/src
-
-# Application's callbale
-module = wsgi:application
-
-# Location of uwsgi log file
-logto = /usr/src/app/log/uwsgi-hubmap-auth.log
-
-# Master with 2 worker process (based on CPU number)
-master = true
-processes = 2
-
-# Use http socket for integration with nginx
-socket = localhost:5000
-
-# Enable socket cleanup when process stop
-vacuum = true
-
-# Ensure compatibility with init system
-die-on-term = true
-````
+In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin via yum. There's also a uWSGI configuration file `src/uwsgi.ini` and it tells uWSGI the details of running this Flask app.
 
 ### Nginx config
 
-This `hubmap-auth.conf` needs to be placed in the `nginx/conf.d` folder under the root project. This file defines how the `hubmap-auth` container handles the API requests via nginx using the `auth_request` module.
+Nginx serves as the reverse proxy and passes the requests to the uWSGI server. The nginx configuration file for this service is located at `nginx/conf.d/hubmap-auth.conf` under the root project. This file defines how the `hubmap-auth` container handles the API requests via nginx using the `auth_request` module.
 
-````
-server {
-    # The hubmap-auth service listens port 80 on it's container
-    # Will need to map to a port on the host at deployment
-    # Currently we use 8080 from the host defined in the docker-compose.yml
-    listen 80;
-    
-    server_name localhost;
-    root /usr/share/nginx/html;
-
-    # Logging to the mounted volume for outside container access
-    access_log /usr/src/app/log/nginx_access_hubmap-auth.log;
-    error_log /usr/src/app/log/nginx_error_hubmap-auth.log warn;
-    
-    location = /favicon.ico {
-        alias /usr/share/nginx/html/favicon.ico;
-    }
-    
-    # Let the flask application to verify API requests
-    location / { 
-        include uwsgi_params;
-        # Pass reqeusts to the uwsgi server using the "uwsgi" protocol on port 5000
-        # Use "localhost" becuase the uwsgi server is also running on the same container
-        uwsgi_pass uwsgi://localhost:5000;
-    }
-
-}
-````
 
 ### API Endpoints Lookup and Caching
 
