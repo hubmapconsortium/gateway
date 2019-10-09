@@ -20,6 +20,7 @@ services:
       - "8080:80" 
       # sample-api
       - "8181:81" 
+      - "8282:82" 
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
@@ -47,4 +48,6 @@ services:
       - "./sample-api/log:/usr/src/app/log"
 
 networks:
+  # This is creates the network named "gateway_hubmap" and we'll use this network name to enable communicaton between multiple docker-compose projects
   hubmap:
+    driver: bridge

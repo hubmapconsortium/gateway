@@ -1,6 +1,7 @@
 {
   "public": [
     "GET http://localhost:8181/",
+    "GET http://localhost:8282/",
     "GET http://localhost:8181/status",
     "GET http://localhost:8181/favicon.ico"
   ],
