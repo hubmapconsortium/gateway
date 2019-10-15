@@ -48,6 +48,8 @@ def cache_clear():
 # Nginx auth_request module won't be able to display the JSON message for 401 response
 @app.route('/api_auth')
 def api_auth():
+    wildcard_delimiter = "<*>"
+
     # Debugging
     pprint(request.headers)
 
@@ -88,10 +90,10 @@ def api_auth():
                 
                 # If it comes to this point, it means no exact static match found
                 # So we do the wildcard match next
-                if "<*>" in item['endpoint']:
+                if wildcard_delimiter in item['endpoint']:
                     # Firsr replace all occurrences of the wildcard "<*>" with regular expression
                     # The regular expression pattern takes any alphabetical and numerical characters, also underscore and dash
-                    endpoint_pattern = item['endpoint'].replace("<*>", "[a-zA-Z0-9_-.:#@!&=+*]+")
+                    endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, "[a-zA-Z0-9_.:#@!&=+*-]+")
 
                     # If the whole string matches the regular expression pattern, return a corresponding match object
                     # otherwise return None
