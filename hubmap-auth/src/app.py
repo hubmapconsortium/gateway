@@ -4,6 +4,7 @@ import requests
 import json
 from cachetools import cached, TTLCache
 import functools
+import re
 
 # For debugging
 from pprint import pprint
@@ -55,96 +56,149 @@ def api_auth():
     # We use body here only for direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
-    response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
 
     # Load endpoints from json
     data = load_endpoints()
 
-    public_endpoints = data['public']
-    private_endpoints = data['private']
+    # In the json, we use authority as the key to differ each service section
+    authority = None
+    method = None
+    endpoint = None
 
-    # Next, validate the nexus_token for group access
-    original_uri = None
-    if ("X-Original-Request-Method" in request.headers) and ("X-Forwarded-Proto" in request.headers) and ("Host" in request.headers) and ("X-Original-URI" in request.headers):
+    # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
+    # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
+    # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
+    if ("X-Original-Request-Method" in request.headers) and ("Host" in request.headers) and ("X-Original-URI" in request.headers):
+        authority = request.headers.get("Host")
         method = request.headers.get("X-Original-Request-Method")
-        scheme = request.headers.get("X-Forwarded-Proto")
-        host = request.headers.get("Host")
-        request_uri = request.headers.get("X-Original-URI")
+        endpoint = request.headers.get("X-Original-URI")
 
-        # This is the full uri
-        original_uri = scheme + '://' + host + request_uri
-
-    if original_uri is not None:
-        # Check if this URI is one of the public endpoints
-        endpoint = method.upper() + ' ' + original_uri
-        # Return 200 for all public endpoints
-        # Check the Mauthorization header for private endpoints
-        # Return 200 for endpoints that are not listed in neither public or private lookup
-        if endpoint in public_endpoints:
-            return response_200
-        else:
-            # First we create a list of private endpoints
-            private_endpoints_list = list()
-            for entry in private_endpoints:
-                private_endpoints_list.append(entry['endpoint'])
-
-            # Require Mauthorization header for private endpoints
-            if endpoint in private_endpoints_list:
-                # Parsing the Mauthorization token
-                if ("MAuthorization" in request.headers) and request.headers.get("MAuthorization").upper().startswith("MBEARER"):
-                    mauth = request.headers.get("MAuthorization")[7:].strip()
-                    mauth_json = json.loads(mauth)
-                    # Only need auth token at this point
-                    # Will need nexus token later for group access check
-                    auth_token = mauth_json['auth_token']
-
-                    # Validate the Globus auth token provided from request
-                    # Do this before validating the nexus group token
-                    if is_active_auth_token(auth_token):
-                        # Now further check the group access with nexus token
-                        if 'nexus_token' in mauth_json:
-                            # Get group info
-                            group_response = get_group_info(mauth_json['nexus_token'])
-  
-                            # If returns group info, this nexus token is valid
-                            if group_response.status_code == 200:
-                                # Further check the access based on globus group ID
-                                group_info = group_response.json()
-                                # Create a list of group IDs
-                                assigned_groups = list()
-                                for group in group_info:
-                                    assigned_groups.append(group['id'])
-
-                                # Now we check if the group ID of target endpoint can be found in this assigned_groups IDs list
-                                target_group = get_private_endpoint_group(endpoint)   
-                                if target_group in assigned_groups:
-                                    return response_200
-                                else:
-                                    # Authenticated but not authorized
-                                    return response_403
-                            else:
-                                # Authenticated but not authorized
-                                return response_403
-                        else:
-                            # In case missing nexus token
-                            return response_401
+    # method and endpoint are always not None as long as authority is not None
+    if authority is not None:
+        # Loop through the list
+        for item in data[authority]:
+            # First filter by HTTP request method
+            if item['method'].upper() == method.upper():
+                # Requested endpoint path is found in the json as a static path with no wildcard
+                if item['endpoint'] == endpoint:
+                    if access_allowed(item, request.headers):
+                        return response_200
                     else:
-                        # Not authenticated at all
                         return response_401
-                else:
-                	# No MAuthorization header or couldn't parse
-                	return response_401
-            # It's possible the comming URI doesn't belong to either public or private
-            # Idealy, we should return 404. But auth_request will send back a 500 for any codes
-            # other than 200, 401/403
-            return response_401
+                
+                # If it comes to this point, it means no exact static match found
+                # So we do the wildcard match next
+                if "<*>" in item['endpoint']:
+                    # Firsr replace all occurrences of the wildcard "<*>" with regular expression
+                    # The regular expression pattern takes any alphabetical and numerical characters, also underscore and dash
+                    endpoint_pattern = item['endpoint'].replace("<*>", "[a-zA-Z0-9_-.:#@!&=+*]+")
+
+                    # If the whole string matches the regular expression pattern, return a corresponding match object
+                    # otherwise return None
+                    if re.fullmatch(endpoint_pattern, endpoint) is not None:
+                        if access_allowed(item, request.headers):
+                            return response_200
+                        else:
+                            return response_401
+
+                # If none of the above cases, we iterate to the next item
+
+        # At this point the iteration is over, and there's still no match
+        # It could be either unknown request method or unknown path
+        return response_401
     else:
-        # In case the original_uri is missing
+        # Missing lookup_key
         return response_401
 
 
 ####################################################################################################
-## User Auth, with UI rendering and redirection
+## Internal Functions Used By API Auth
+####################################################################################################
+
+# Validate the Globus auth token provided from request
+# Do this before validating the nexus group token
+# The resulting response has the form {"active": True} when the token is valid, and {"active": False} when it is not.
+def is_active_auth_token(auth_token): 
+    confidential_app_auth_client = ConfidentialAppAuthClient(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
+    result = confidential_app_auth_client.oauth2_validate_token(auth_token)
+    return result['active']
+
+# Load all endpoints from json file and cache the data
+@cached(cache)
+def load_endpoints():
+    with open(app.config['API_ENDPOINTS_FILE'], "r") as file:
+        data = json.load(file)
+        return data
+
+# Fetch the globus group infor for a given nexus token via Globus REST API
+@cached(cache)
+def get_group_info(nexus_token):
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + nexus_token
+    }
+    globus_geoup_api_url = 'https://nexus.api.globusonline.org/groups?fields=id,name,description,group_type,has_subgroups,identity_set_properties&for_all_identities=false&include_identaaaaay_set_properties=false&my_statuses=active'
+    response = requests.get(globus_geoup_api_url, headers = headers)
+    return response
+
+# Chceck if accessed is allowed
+def access_allowed(item, request_headers):
+    if item['auth'] == False:
+        return True
+    else:
+        # Parsing the Mauthorization header
+        if ("MAuthorization" in request_headers) and request_headers.get("MAuthorization").upper().startswith("MBEARER"):
+            mauth = request_headers.get("MAuthorization")[7:].strip()
+            mauth_json = json.loads(mauth)
+            # Only need auth token at this point
+            # Will need nexus token later for group access check
+            auth_token = mauth_json['auth_token']
+
+            # If group access is not required, only validate the auth token
+            if 'groups' not in item:
+                # Just use the auth token
+                if is_active_auth_token(auth_token):
+                    return True
+                else:
+                    # Invalid auth token
+                    return False
+            else:
+                # Now handle cases when group access is required
+                # First verify the nexus token
+                if 'nexus_token' in mauth_json:
+                    # Get group info
+                    group_response = get_group_info(mauth_json['nexus_token'])
+
+                    # If returns group info, this nexus token is valid
+                    if group_response.status_code == 200:
+                        # Further check the access based on globus group ID
+                        group_info = group_response.json()
+                        # Create a list of group IDs
+                        assigned_groups = list()
+                        for group in group_info:
+                            assigned_groups.append(group['id'])
+
+                        # Now we check if the group ID of target endpoint can be found in this assigned_groups IDs list
+                        for grp in assigned_groups:
+                            if grp in item['groups']:
+                                return True
+
+                        # None of the assigned groups found in the required item['groups']
+                        return False
+                    else:
+                        # Invalida token
+                        return False
+                else:
+                    # In case missing nexus token
+                    return False
+        else:
+            # No MAuthorization header or couldn't parse
+            return False
+
+
+####################################################################################################
+## User UI Auth, with UI rendering and redirection
 ####################################################################################################
 
 # User auth with UI rendering
@@ -272,7 +326,7 @@ def logout():
 
 
 ####################################################################################################
-## Internal Functions
+## Internal Functions Used By user UI Auth
 ####################################################################################################
 
 # Get user info from globus with the auth access token
@@ -280,37 +334,4 @@ def get_globus_user_info(token):
     auth_client = AuthClient(authorizer=AccessTokenAuthorizer(token))
     return auth_client.oauth2_userinfo()
 
-# Fetch the globus group infor for a given nexus token via Globus REST API
-def get_group_info(nexus_token):
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + nexus_token
-    }
-    globus_geoup_api_url = 'https://nexus.api.globusonline.org/groups?fields=id,name,description,group_type,has_subgroups,identity_set_properties&for_all_identities=false&include_identaaaaay_set_properties=false&my_statuses=active'
-    response = requests.get(globus_geoup_api_url, headers = headers)
-    return response
 
-
-# Validate the Globus auth token provided from request
-# Do this before validating the nexus group token
-# The resulting response has the form {"active": True} when the token is valid, and {"active": False} when it is not.
-def is_active_auth_token(auth_token): 
-    confidential_app_auth_client = ConfidentialAppAuthClient(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
-    result = confidential_app_auth_client.oauth2_validate_token(auth_token)
-    return result['active']
-
-# Load all endpoints from json file and cache the data
-@cached(cache)
-def load_endpoints():
-    with open(app.config['API_ENDPOINTS_FILE'], "r") as file:
-        data = json.load(file)
-        return data
-
-@cached(cache)
-def get_private_endpoint_group(target_endpoint):
-    data = load_endpoints()
-    private_endpoints = data['private']
-
-    entry = next(item for item in private_endpoints if item['endpoint'] == target_endpoint)
-    return entry['group']

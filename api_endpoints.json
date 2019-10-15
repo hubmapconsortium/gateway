@@ -1,25 +1,86 @@
 {
-  "public": [
-    "GET http://localhost:8181/",
-    "GET http://localhost:8181/status",
-    "GET http://localhost:8181/favicon.ico"
+  "localhost:8181": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/public/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/private/<*>",
+      "auth": true
+    },
+    {
+      "method": "GET",
+      "endpoint": "/private/group",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/private/<*>/group",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/public",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/private",
+      "auth": true
+    },
+    {
+      "method": "GET",
+      "endpoint": "/invalid",
+      "auth": true,
+      "groups": [
+        "fake-group-id"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/post",
+      "auth": true,
+      "groups": [
+        "5bd084c8-edc2-11e8-802f-0e368f3075e8"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/put",
+      "auth": true,
+      "groups": [
+        "5bd084c8-edc2-11e8-802f-0e368f3075e8"
+      ]
+    }
   ],
-  "private": [
+  "localhost:8282": [
     {
-      "endpoint": "GET http://localhost:8181/invalid",
-      "group": "fake-group-id"
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
     },
     {
-      "endpoint": "GET http://localhost:8181/get",
-      "group": "5777527e-ec11-11e8-ab41-0af86edb4424"
-    },
-    {
-      "endpoint": "POST http://localhost:8181/post",
-      "group": "5bd084c8-edc2-11e8-802f-0e368f3075e8"
-    },
-    {
-      "endpoint": "PUT http://localhost:8181/put",
-      "group": "5bd084c8-edc2-11e8-802f-0e368f3075e8"
+      "method": "GET",
+      "endpoint": "/favicon.ico",
+      "auth": false
     }
   ]
 }

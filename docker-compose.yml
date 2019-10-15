@@ -22,8 +22,9 @@ services:
       - "8181:81" 
       - "8282:82" 
     volumes:
+      - "./hubmap-auth/src/:/usr/src/app/src"
       # Mount the app config to container in order to keep it outside of the image
-      - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
+      #- "./hubmap-auth/src/instance:/usr/src/app/src/instance"
       # Make the uwsgi logging generated on container available through from host
       - "./hubmap-auth/log:/usr/src/app/log"
       # Mount all nginx config files to the nginx conf.d on container
@@ -44,6 +45,7 @@ services:
     networks:
       - hubmap
     volumes:
+      - "./sample-api/src/:/usr/src/app/src"
       # Make the uwsgi logging generated on container available through from host
       - "./sample-api/log:/usr/src/app/log"
 
