@@ -82,7 +82,8 @@ def api_auth():
             # First filter by HTTP request method
             if item['method'].upper() == method.upper():
                 # Requested endpoint path is found in the json as a static path with no wildcard
-                if item['endpoint'] == endpoint:
+                # Remove trailing slash for comparison
+                if item['endpoint'].strip('/') == endpoint.strip('/'):
                     if access_allowed(item, request.headers):
                         return response_200
                     else:
