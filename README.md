@@ -8,13 +8,16 @@ The HuBMAP Web Gateway serves as an authentication and authorization gateway for
 gateway
 ├── api_endpoints.json
 ├── docker-compose.yml
+├── docker-compose.dev.yml
+├── docker-compose.prod.yml
 ├── hubmap-auth
 │   ├── Dockerfile
 │   ├── log
 │   ├── src
 │   └── start.sh
 ├── nginx
-│   ├── conf.d
+│   ├── conf.d-dev
+│   ├── conf.d-prod
 │   └── html
 └── sample-api
     ├── Dockerfile
@@ -26,11 +29,15 @@ gateway
 
 * `docker-compose.yml` defines all the services and container details, as well as mounted volumes and ports mapping.
 
+* `docker-compose.dev.yml` should be used for local development along with the base `docker-compose.yml`
+
+* `docker-compose.prod.yml` should be used for production along with the base `docker-compose.yml`
+
 * `hubmap-auth` is the actual HuBMAP Web Gateway authentication and authorization service that verifies all the API requests. It basically sets up the uWSGI application server to launch the Python Flask application and Nginx to act as a front end reverse proxy.
 
 * `nginx` is the folder used for mounting individual API config file of each API service and some static content, like favicon.ico. This folder is mounted to the `hubmap-auth` container using volumes.
 
-* `sample-api` is an example API service builds its own docker image and runs its own container. In this example, the API service is created with Pythong Flask and serviced by uWSGI. But this image doesn't contain Nginx server. We only use `sample-api.conf` and ask the Nginx from `hubmap-auth` to proxy the API requests. That's why we also put the configuration file in the `nginx/conf.d` folder and it will be mounted to the `hubmap-auth` container when it's spun up.
+* `sample-api` is an example API service builds its own docker image and runs its own container. In this example, the API service is created with Pythong Flask and serviced by uWSGI. But this image doesn't contain Nginx server. We only use `sample-api.conf` and ask the Nginx from `hubmap-auth` to proxy the API requests. That's why we also put the configuration file in the `nginx/conf.d-dev` and `nginx/conf.d-prod` folder for development and production purposes and it will be mounted to the `hubmap-auth` container when it's spun up.
 
 Each service has its own `Dockerfile`. We can either build the image separately or use docker compose to build all images as a stack.
 
@@ -40,7 +47,7 @@ The `log` under each project is another volume mount, this allows us to access t
 
 The `sample-api` service is running a flask app behind uWSGi for demonstration purpose. Your API service can be created with Django and running behind Apache HTTP or whatever stack as long as you specify the port that `hubmap-auth` nginx exposes for your service, and the port exposed on your container that nginx can hand over after authentication/authorization in `your-api.conf`. 
 
-To add new API service to the stack, you'll just need to follow the `sample-api` example, and add a new `conf` file (put it into `nginx/conf.d`) to instruct Nginx to handle the proxy pass by directing all the API requests to the `hubmap-auth` for authentication and authorization. And this is achieved through Nginx's `auth_request` module. 
+To add new API service to the stack, you'll just need to follow the `sample-api` example, and add a new `conf` file (put it into `nginx/conf.d-dev` or `nginx/conf.d-prod` according to your environments) to instruct Nginx to handle the proxy pass by directing all the API requests to the `hubmap-auth` for authentication and authorization. And this is achieved through Nginx's `auth_request` module. 
 
 ## Overview of tools
 
@@ -60,22 +67,32 @@ In our `docker-compose.yml` configuration, you'll also see the `volumes` for eac
 ### Build images
 
 ````
-sudo docker-compose build --no-cache
+sudo docker-compose build
 ````
 
-The command will go through all services in the `docker-compose.yml` file and build the ones that have a build section defined. 
+The command will go through all services in the `docker-compose.yml` file and build the ones that have a build section defined. Use `sudo docker-compose build --no-cache` to avoid the cached layers.
 
 
 ### Start up services
 
+In our local development environment, we'll use the additional `docker-compose.dev.yml` file:
+
 ````
-sudo docker-compose up
+sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 ````
 
-This command spins up all the containers defiened in the `docker-compose.yml` and aggregates the output of each container. When the command exits, all containers are stopped. Running `docker-compose up -d` starts the containers in the background and leaves them running.
+For production, we may want to start the containers in the background and leaves them running using the additional `docker-compose.prod.yml` file with the `-d` flag (detached mode):
 
-Once the stack is up running, you'll be able to access the Sample API service at `http://localhost:8181/`. The Gateway is running at `http://localhost:8080` for API authentication and authorization purposes. 
+````
+sudo docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+````
 
+The production changes include:
+
+* Removing any volume bindings for application code, so that code stays inside the container and can’t be changed from outside
+* Binding to different ports on the host
+* Run an `init` inside each container that forwards signals and reaps processes.
+* Specifying a restart policy like `restart: always` to avoid downtime
 
 ### Stop the running services
 

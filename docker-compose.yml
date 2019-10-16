@@ -9,30 +9,13 @@ services:
     image: hubmap-auth:0.1.0
     hostname: hubmap-auth
     container_name: hubmap-auth
-    init: true
-    restart: always
     networks:
       - hubmap
-    # Mapping ports in the HOST:CONTAINER format
-    # Each API has its dedicated port and needs to be mapped here
-    ports:
-      # hubmap-auth
-      - "8080:80" 
-      # sample-api
-      - "8181:81" 
-      - "8282:82" 
     volumes:
-      - "./hubmap-auth/src/:/usr/src/app/src"
-      # Mount the app config to container in order to keep it outside of the image
-      #- "./hubmap-auth/src/instance:/usr/src/app/src/instance"
       # Make the uwsgi logging generated on container available through from host
       - "./hubmap-auth/log:/usr/src/app/log"
-      # Mount all nginx config files to the nginx conf.d on container
-      - "./nginx/conf.d:/etc/nginx/conf.d"
       # favicon.ico
       - "./nginx/html:/usr/share/nginx/html"
-      # Mount the API endpoints json file for API endpoints lookup
-      - "./api_endpoints.json:/usr/src/app/api_endpoints.json"
 
   sample-api:
     build: ./sample-api
@@ -40,12 +23,9 @@ services:
     image: sample-api:0.1.0
     hostname: sample-api
     container_name: sample-api
-    init: true
-    restart: always
     networks:
       - hubmap
     volumes:
-      - "./sample-api/src/:/usr/src/app/src"
       # Make the uwsgi logging generated on container available through from host
       - "./sample-api/log:/usr/src/app/log"
 
