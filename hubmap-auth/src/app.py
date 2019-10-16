@@ -49,6 +49,8 @@ def cache_clear():
 @app.route('/api_auth')
 def api_auth():
     wildcard_delimiter = "<*>"
+    # The regular expression pattern takes any alphabetical and numerical characters, also other characters permitted in the URI
+    regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
     # Debugging
     pprint(request.headers)
@@ -92,9 +94,8 @@ def api_auth():
                 # If it comes to this point, it means no exact static match found
                 # So we do the wildcard match next
                 if wildcard_delimiter in item['endpoint']:
-                    # Firsr replace all occurrences of the wildcard "<*>" with regular expression
-                    # The regular expression pattern takes any alphabetical and numerical characters, also underscore and dash
-                    endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, "[a-zA-Z0-9_.:#@!&=+*-]+")
+                    # Firsr replace all occurrences of the wildcard delimiters with regular expression
+                    endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, regex_pattern)
 
                     # If the whole string matches the regular expression pattern, return a corresponding match object
                     # otherwise return None
