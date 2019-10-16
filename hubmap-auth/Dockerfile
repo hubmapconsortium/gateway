@@ -19,7 +19,7 @@ enabled=1\n'\
 
 # Reduce the number of layers in image by minimizing the number of separate RUN commands
 # 1 - Update the package listings
-# 2 - Install nginx (using the custom yum repo specified earlier) 
+# 2 - Install nginx (using the custom yum repo specified earlier) and git (for pip installing HuBMAP commons from github)
 # 3 - Remove the default nginx config file
 # 4 - Install Extra Packages for Enterprise Linux (EPEL) 
 # 5 - Use the EPEL repo for installing python, pip, uwsgi, uwsgi python plugin
@@ -28,7 +28,7 @@ enabled=1\n'\
 # 8 - Make the start script executable
 # 9 - Clean all yum cache
 RUN yum update -y && \
-    yum install -y nginx && \
+    yum install -y nginx git && \
     rm /etc/nginx/conf.d/default.conf && \
     yum install -y epel-release && \
     yum install -y python36 python36-pip uwsgi uwsgi-plugin-python36.x86_64 && \

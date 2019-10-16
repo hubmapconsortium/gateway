@@ -1,10 +1,13 @@
-from flask import Flask, request, jsonify, make_response, render_template, session, redirect, url_for
+from flask import Flask, request, jsonify, make_response, Response, render_template, session, redirect, url_for
 from globus_sdk import AuthClient, AccessTokenAuthorizer, ConfidentialAppAuthClient
 import requests
 import json
 from cachetools import cached, TTLCache
 import functools
 import re
+
+# HuBMAP commons
+from hubmap_commons.hm_auth import AuthHelper
 
 # For debugging
 from pprint import pprint
@@ -86,7 +89,7 @@ def api_auth():
                 # Requested endpoint path is found in the json as a static path with no wildcard
                 # Remove trailing slash for comparison
                 if item['endpoint'].strip('/') == endpoint.strip('/'):
-                    if access_allowed(item, request.headers):
+                    if access_allowed(item, request):
                         return response_200
                     else:
                         return response_401
@@ -100,7 +103,7 @@ def api_auth():
                     # If the whole string matches the regular expression pattern, return a corresponding match object
                     # otherwise return None
                     if re.fullmatch(endpoint_pattern, endpoint) is not None:
-                        if access_allowed(item, request.headers):
+                        if access_allowed(item, request):
                             return response_200
                         else:
                             return response_401
@@ -147,58 +150,33 @@ def get_group_info(nexus_token):
     return response
 
 # Chceck if accessed is allowed
-def access_allowed(item, request_headers):
+def access_allowed(item, request):
+    # AuthHelper from HuBMAP commons package
+    if AuthHelper.isInitialized() == False:
+        auth_helper = AuthHelper.create(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
+    else:
+        auth_helper = AuthHelper.instance()
+
+    # Check if auth is required for this endpoint
     if item['auth'] == False:
         return True
-    else:
-        # Parsing the Mauthorization header
-        if ("MAuthorization" in request_headers) and request_headers.get("MAuthorization").upper().startswith("MBEARER"):
-            mauth = request_headers.get("MAuthorization")[7:].strip()
-            mauth_json = json.loads(mauth)
-            # Only need auth token at this point
-            # Will need nexus token later for group access check
-            auth_token = mauth_json['auth_token']
+    
+    # Otherwise, auth is required
+    # First we need to check if group access is also required
+    group_required = True if ('groups' in item) else False
+    # Get user info and do further parsing
+    user_info = auth_helper.getUserInfoUsingRequest(request, group_required)
+    
+    # If returns error response, auth invalid
+    if isinstance(user_info, Response):
+        return False
 
-            # If group access is not required, only validate the auth token
-            if 'groups' not in item:
-                # Just use the auth token
-                if is_active_auth_token(auth_token):
-                    return True
-                else:
-                    # Invalid auth token
-                    return False
-            else:
-                # Now handle cases when group access is required
-                # First verify the nexus token
-                if 'nexus_token' in mauth_json:
-                    # Get group info
-                    group_response = get_group_info(mauth_json['nexus_token'])
+    # Otherwise, parse the user_info to get group info
+    pprint(user_info)
 
-                    # If returns group info, this nexus token is valid
-                    if group_response.status_code == 200:
-                        # Further check the access based on globus group ID
-                        group_info = group_response.json()
-                        # Create a list of group IDs
-                        assigned_groups = list()
-                        for group in group_info:
-                            assigned_groups.append(group['id'])
+    
 
-                        # Now we check if the group ID of target endpoint can be found in this assigned_groups IDs list
-                        for grp in assigned_groups:
-                            if grp in item['groups']:
-                                return True
-
-                        # None of the assigned groups found in the required item['groups']
-                        return False
-                    else:
-                        # Invalida token
-                        return False
-                else:
-                    # In case missing nexus token
-                    return False
-        else:
-            # No MAuthorization header or couldn't parse
-            return False
+    return True
 
 
 ####################################################################################################
