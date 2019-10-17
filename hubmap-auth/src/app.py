@@ -56,6 +56,7 @@ def api_auth():
     regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
     # Debugging
+    pprint("===========request.headers=============")
     pprint(request.headers)
 
     # Nginx auth_request only cares about the response status code
@@ -82,35 +83,30 @@ def api_auth():
 
     # method and endpoint are always not None as long as authority is not None
     if authority is not None:
-        # Loop through the list
+        # First pass, loop through the list to find exact static match
         for item in data[authority]:
-            # First filter by HTTP request method
-            if item['method'].upper() == method.upper():
-                # Requested endpoint path is found in the json as a static path with no wildcard
-                # Remove trailing slash for comparison
-                if item['endpoint'].strip('/') == endpoint.strip('/'):
+            # Filter by HTTP request method, and remove trailing slash for comparison
+            if (item['method'].upper() == method.upper()) and (item['endpoint'].strip('/') == endpoint.strip('/')):
+                if access_allowed(item, request):
+                    return response_200
+                else:
+                    return response_401
+                
+        # Second pass, loop through the list to do the wildcard match
+        for item in data[authority]:
+            if (item['method'].upper() == method.upper()) and (wildcard_delimiter in item['endpoint']):
+                # First replace all occurrences of the wildcard delimiters with regular expression
+                endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, regex_pattern)
+
+                # If the whole string matches the regular expression pattern, return a corresponding match object
+                # otherwise return None
+                if re.fullmatch(endpoint_pattern, endpoint) is not None:
                     if access_allowed(item, request):
                         return response_200
                     else:
                         return response_401
-                
-                # If it comes to this point, it means no exact static match found
-                # So we do the wildcard match next
-                if wildcard_delimiter in item['endpoint']:
-                    # Firsr replace all occurrences of the wildcard delimiters with regular expression
-                    endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, regex_pattern)
 
-                    # If the whole string matches the regular expression pattern, return a corresponding match object
-                    # otherwise return None
-                    if re.fullmatch(endpoint_pattern, endpoint) is not None:
-                        if access_allowed(item, request):
-                            return response_200
-                        else:
-                            return response_401
-
-                # If none of the above cases, we iterate to the next item
-
-        # At this point the iteration is over, and there's still no match
+        # After two passes and still no match found
         # It could be either unknown request method or unknown path
         return response_401
     else:
@@ -122,35 +118,18 @@ def api_auth():
 ## Internal Functions Used By API Auth
 ####################################################################################################
 
-# Validate the Globus auth token provided from request
-# Do this before validating the nexus group token
-# The resulting response has the form {"active": True} when the token is valid, and {"active": False} when it is not.
-def is_active_auth_token(auth_token): 
-    confidential_app_auth_client = ConfidentialAppAuthClient(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
-    result = confidential_app_auth_client.oauth2_validate_token(auth_token)
-    return result['active']
-
-# Load all endpoints from json file and cache the data
+# Load all endpoints from json file into a Python dict and cache the data
 @cached(cache)
 def load_endpoints():
     with open(app.config['API_ENDPOINTS_FILE'], "r") as file:
         data = json.load(file)
         return data
 
-# Fetch the globus group infor for a given nexus token via Globus REST API
-@cached(cache)
-def get_group_info(nexus_token):
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': 'Bearer ' + nexus_token
-    }
-    globus_geoup_api_url = 'https://nexus.api.globusonline.org/groups?fields=id,name,description,group_type,has_subgroups,identity_set_properties&for_all_identities=false&include_identaaaaay_set_properties=false&my_statuses=active'
-    response = requests.get(globus_geoup_api_url, headers = headers)
-    return response
-
 # Chceck if accessed is allowed
+# HuBMAP commons AuthHelper handles "MAuthorization" or "Authorization"
 def access_allowed(item, request):
+    pprint("===========Matched endpoint=============")
+    pprint(item)
     # AuthHelper from HuBMAP commons package
     if AuthHelper.isInitialized() == False:
         auth_helper = AuthHelper.create(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
@@ -161,21 +140,30 @@ def access_allowed(item, request):
     if item['auth'] == False:
         return True
     
-    # Otherwise, auth is required
-    # First we need to check if group access is also required
-    group_required = True if ('groups' in item) else False
+    # When auth is required, we need to check if group access is also required
+    group_required = True if 'groups' in item else False
+
     # Get user info and do further parsing
     user_info = auth_helper.getUserInfoUsingRequest(request, group_required)
-    
-    # If returns error response, auth invalid
+
+    pprint("===========user_info returned from AuthHelper=============")
+    pprint(user_info)
+
+    # If returns error response, invalid header or token
     if isinstance(user_info, Response):
         return False
 
-    # Otherwise, parse the user_info to get group info
-    pprint(user_info)
+    # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
+    # Key 'hmgroupids' presents only when group_required is True
+    if group_required:
+        for group in user_info['hmgroupids']:
+            if group in item['groups']:
+                return True
 
-    
+        # None of the assigned groups match the group ID specified in item['groups']
+        return False
 
+    # When no group access requried and user_info dict gets returned
     return True
 
 
