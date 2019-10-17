@@ -1,22 +1,27 @@
-# App name and deployment URI
-FLASK_APP_NAME = 'HuBMAP Auth'
-# Works regardless the trailing slash /
-FLASK_APP_BASE_URI = 'http://localhost:8080'
-
 # File path of API endpoints json file
 API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
-
-# Flask app session key
-SECRET_KEY = ''
 
 # Globus app client ID and secret
 GLOBUS_APP_ID = ''
 GLOBUS_APP_SECRET = ''
 
-# Cross-domain cookie
-COOKIE_DOMAIN = ''
-
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)
 CACHE_TTL = 7200
+
+##############################################################
+## Only For User UI Auth
+##############################################################
+# App name and deployment URI
+FLASK_APP_NAME = 'HuBMAP Auth'
+
+# Works regardless the trailing slash /
+FLASK_APP_BASE_URI = 'http://localhost:8080'
+
+# Cross-domain cookie
+COOKIE_DOMAIN = 'localhost'
+
+# Flask app session key
+SECRET_KEY = ''
+

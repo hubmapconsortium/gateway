@@ -18,7 +18,6 @@ GLOBUS_APP_SECRET = ''
 CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)
 CACHE_TTL = 7200
-
 ````
 
 ### uWSGI config
