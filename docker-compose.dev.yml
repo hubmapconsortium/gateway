@@ -10,6 +10,10 @@ services:
       - "8080:80" 
       # sample-api
       - "8181:81" 
+      # uuid-api
+      - "8282:82" 
+      # entity-api
+      - "8383:83" 
     volumes:
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
