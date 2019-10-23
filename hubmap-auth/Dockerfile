@@ -39,8 +39,7 @@ RUN yum update -y && \
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime. 
 # EXPOSE does not make the ports of the container accessible to the host.
-# Here 5000 is for the uwsgi socket, 80 for flask app, 81 for sample-api
-# Ports 80 and 81 will be mapped to 8080 and 8181 defiend in `docker-compose.yml` on the host
-EXPOSE 5000 80 81
+# Here 5000 is for the uwsgi socket, 80 for nginx
+EXPOSE 5000 80
 
 CMD ["./start.sh"]

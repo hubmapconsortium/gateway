@@ -1,5 +1,5 @@
 {
-  "sample-api.dev.hubmapconsortium.org": [
+  "sample-api.test.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -71,7 +71,7 @@
       ]
     }
   ],
-  "uuid-api.dev.hubmapconsortium.org": [
+  "uuid-api.test.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -107,7 +107,7 @@
       ]
     }
   ],
-  "entity-api.dev.hubmapconsortium.org": [
+  "entity-api.test.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
