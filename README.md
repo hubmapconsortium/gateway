@@ -168,3 +168,63 @@ nginx -g 'daemon off;' &
 ````
 
 We can't use the systemd commands due to the base image Centos7 disabled systemd by default.
+
+## Share containers across multiple docker compose projects
+
+With a micro-services architecture design, we probably want to share a single database container across two or more applications, so that they can access the same data. Docker and Docker Compose make this possible through the use of Docker networks, allowing containers from different compose projects to be attached to the same network.
+
+### Step 1: get the source code of each project
+
+Currently, you can run `uuid-api` and `entity-api` with the `gateway`. Git clone the source code of each project and put them under the same parent directory.
+
+### Step 2: add configuration files for each project
+
+Note: MySQL is defiend in the `docker-compose.yml` of the `uuid-api` and Neo4j gets defined in the `entity-api` project.
+
+### Step 3: build docker images
+
+In the `gateway` project:
+
+````
+#sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+````
+
+For `uuid-api` and `entity-api`, the project structure is very similar and you'll do:
+
+````
+cd docker
+./docker-setup.sh
+sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+````
+
+### Step 4: spin up the containers in each project
+
+We'll create the containers in `gateway` first since it creates the shared network `gateway_hubmap`.
+
+````
+sudo docker-compose -p gateway -f docker-compose.yml -f docker-compose.dev.yml up -d
+````
+
+Note: here we specify the docker compose project with the `-p` to avoid "WARNING: Found orphan containers ..." due to the fact that docker compose uses the directory name as the default project name.
+
+Then do spin up the containers in `uuid-api` and `entity-api` likewise.
+
+### Step 5: shell into the MySQL container to load the database table sql
+
+````
+sudo docker exec -it <mysql container ID> bash
+````
+
+Inside the MySQL container:
+
+````
+cd /usr/src/uuid-api/sql
+````
+
+Import the `hm_uuids` table into the database:
+
+````
+root@hubmap-mysql:/usr/src/uuid-api/sql# mysql -u root -p hm_uuid < uuids-dev.sql
+````
+
+Now we have all the running pieces. For production deployment, just use the `docker-compose.prod.yml` instead of `docker-compose.dev.yml`.
