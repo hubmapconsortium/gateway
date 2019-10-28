@@ -5,6 +5,7 @@ import json
 from cachetools import cached, TTLCache
 import functools
 import re
+import os
 
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
