@@ -13,8 +13,8 @@ from hubmap_commons.hm_auth import AuthHelper
 from pprint import pprint
 
 
-# Init app and use the config from instance folder
-app = Flask(__name__, instance_relative_config=True)
+# Specify the absolute path of the instance folder and use the config file relative to the instance path
+app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.curdir), 'instance'), instance_relative_config=True)
 app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
