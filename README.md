@@ -68,90 +68,22 @@ For the `gateway` project, there's an example configuration file **app.cfg.examp
 
 Note: MySQL is defiend in the `docker-compose.yml` of the `uuid-api` project and the MySQL root password as well as user information are defiend in the compose yaml file as well. The Neo4j service gets defined in the `entity-api` project and you'll need to set the password for the native `neo4j` user in the `app.cfg` file, which is explained in the `entity-api` project.
 
-### Step 3: build docker images
+### Step 3: build docker images and spin up the containers
 
 In the `gateway` project:
 
 ````
-#sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+sudo chmod +x hubmap-docker.sh
+sudo ./hubmap-docker.sh dev
 ````
 
-For `uuid-api`, `entity-api`, and `ingest-api` the project structure is very similar and you'll go to the root directory of each project and run:
+The build process will take some time before we have all the running services. 
+
+For production deployment, simply change to:
 
 ````
-cd docker
-sudo ./docker-setup.sh
-sudo docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
+sudo ./hubmap-docker.sh prod
 ````
-### Step 4: create shared docker network
-
-In order for containers from different docker compose projects to communicate with each other, we'll need a shared network.
-
-````
-sudo docker network create gateway_hubmap
-````
-
-### Step 5: spin up the containers in each project in order
-
-First, start the `uuid-api` project:
-
-````
-cd uuid-api/docker
-sudo docker-compose -p uuid-api_and_mysql -f docker-compose.yml -f docker-compose.dev.yml up -d
-````
-
-Then go to the `entity-api` project:
-
-````
-cd entity-api/docker
-sudo docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.dev.yml up -d
-````
-
-Because the `ingest-api` project uses the neo4 server, we'll do it the next:
-
-We'll create the containers in `gateway` first since it creates the shared network `gateway_hubmap`.
-
-````
-cd ingest-api/docker
-sudo docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.dev.yml up -d
-````
-
-Once all the API services are up, we'll come to the `gateway` project to spin up the gateway. Do this as the last one because the nginx uses configurations that require running instances of the `entity-api` and `uuid-api` as well as the `ingest-api` services.
-
-````
-sudo docker-compose -p gateway -f docker-compose.yml -f docker-compose.dev.yml up -d
-````
-
-Note: here we specify the docker compose project with the `-p` to avoid "WARNING: Found orphan containers ..." due to the fact that docker compose uses the directory name as the default project name.
-
-### Step 6: shell into the MySQL container to load the database table sql
-
-First list all the running containers:
-
-````
-sudo docker container ls
-````
-
-Then shell into the MySQL container:
-
-````
-sudo docker exec -it <mysql container ID> bash
-````
-
-Inside the MySQL container, just import the `hm_uuids` table into the database:
-
-````
-cd /usr/src/uuid-api/sql
-mysql -u root -p hm_uuid < uuids-dev.sql
-````
-
-Note: the MySQL root password is specified in the `docker-compose` yaml file of the `uuid-api` project.
-
-Now we have all the running pieces. 
-
-### Changes for production deployment
-
-For production deployment, just use the `docker-compose.prod.yml` instead of `docker-compose.dev.yml` in the above steps.
 
 The production changes include:
 
