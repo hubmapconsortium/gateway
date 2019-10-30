@@ -7,7 +7,7 @@ This is the HuBMAP Auth service written in Python Flask served with uWSGI applic
 The Flask application confiuration file `app.cfg` is located under `instance` folder. You can read more about [Flask Instance Folders](http://flask.pocoo.org/docs/1.0/config/#instance-folders). In this config file, you can specify the following items:
 
 ````
-# File path of API endpoints json file
+# File path of API endpoints json file, DO NOT MODIFY
 API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
 
 # Globus app client ID and secret
@@ -22,7 +22,7 @@ CACHE_TTL = 7200
 
 ### uWSGI config
 
-In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin via yum. There's also a uWSGI configuration file `src/uwsgi.ini` and it tells uWSGI the details of running this Flask app.
+In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin via yum. There's also a uWSGI configuration file `src/uwsgi.ini` and it tells uWSGI the details of running this Flask app. No need to modify.
 
 ### Nginx config
 
