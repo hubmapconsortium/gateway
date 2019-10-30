@@ -10,7 +10,7 @@ services:
     hostname: hubmap-auth
     container_name: hubmap-auth
     networks:
-      - hubmap
+      - gateway_hubmap
     volumes:
       # Make the uwsgi logging generated on container available through from host
       - "./hubmap-auth/log:/usr/src/app/log"
@@ -24,12 +24,12 @@ services:
     hostname: sample-api
     container_name: sample-api
     networks:
-      - hubmap
+      - gateway_hubmap
     volumes:
       # Make the uwsgi logging generated on container available through from host
       - "./sample-api/log:/usr/src/app/log"
 
 networks:
-  # This is creates the network named "gateway_hubmap" and we'll use this network name to enable communicaton between multiple docker-compose projects
-  hubmap:
-    driver: bridge
+  # This is the network created by gateway to enable communicaton between multiple docker-compose projects
+  gateway_hubmap:
+    external: true
