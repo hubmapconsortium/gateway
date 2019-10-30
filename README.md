@@ -63,7 +63,10 @@ Currently, you can deploy the following projects with the `gateway`. Git clone t
 
 Follow the instructions of each project to setup the configuration. All the projects should share the same Globus APP client ID and secret.
 
-Note: MySQL is defiend in the `docker-compose.yml` of the `uuid-api` and Neo4j gets defined in the `entity-api` project.
+For the `gateway` project, there's an example configuration file **app.cfg.example** which is located at `hubmap-auth/src/instance`. Copy this file and rename it to **app.cfg** with the appropriate information. The configuration is similar for all the API services mentioned above.
+
+
+Note: MySQL is defiend in the `docker-compose.yml` of the `uuid-api` project and the MySQL root password as well as user information are defiend in the compose yaml file as well. The Neo4j service gets defined in the `entity-api` project and you'll need to set the password for the native `neo4j` user in the `app.cfg` file, which is explained in the `entity-api` project.
 
 ### Step 3: build docker images
 
@@ -121,7 +124,7 @@ sudo docker-compose -p gateway -f docker-compose.yml -f docker-compose.dev.yml u
 
 Note: here we specify the docker compose project with the `-p` to avoid "WARNING: Found orphan containers ..." due to the fact that docker compose uses the directory name as the default project name.
 
-### Step 5: shell into the MySQL container to load the database table sql
+### Step 6: shell into the MySQL container to load the database table sql
 
 First list all the running containers:
 
