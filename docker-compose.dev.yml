@@ -14,6 +14,8 @@ services:
       - "8282:82" 
       # entity-api
       - "8383:83" 
+      # ingest-api
+      - "8484:84" 
     volumes:
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
