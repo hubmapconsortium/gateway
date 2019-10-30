@@ -45,7 +45,7 @@ The `log` under each project is another volume mount, this allows us to access t
 
 Note: Docker Compose requires Docker to be installed and running first.
 
-## Workflow of sharing containers across multiple HuBMAP docker compose projects
+## Workflow of setting up multiple HuBMAP docker compose projects
 
 Note: Don't confuse with the term of `service` and `container` when we talk about Docker Compose. A service only runs one image, but it codifies the way that image runs&mdash;what ports it should use, how many replicas of the container should run so the service has the capacity it needs, and so on. That's why in `docker-compose.yml` we see `services` defined.
 
@@ -138,16 +138,11 @@ Then shell into the MySQL container:
 sudo docker exec -it <mysql container ID> bash
 ````
 
-Inside the MySQL container:
+Inside the MySQL container, just import the `hm_uuids` table into the database:
 
 ````
 cd /usr/src/uuid-api/sql
-````
-
-Import the `hm_uuids` table into the database:
-
-````
-root@hubmap-mysql:/usr/src/uuid-api/sql# mysql -u root -p hm_uuid < uuids-dev.sql
+mysql -u root -p hm_uuid < uuids-dev.sql
 ````
 
 Note: the MySQL root password is specified in the `docker-compose` yaml file of the `uuid-api` project.
