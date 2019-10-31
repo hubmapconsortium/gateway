@@ -74,16 +74,28 @@ In the `gateway` project:
 
 ````
 sudo chmod +x hubmap-docker.sh
-sudo ./hubmap-docker.sh dev
+sudo ./hubmap-docker.sh dev build
 ````
 
-The build process will take some time before we have all the running services. 
+The build process will take some time before we have all the docker images created. After that, we can start all the services:
+
+````
+sudo ./hubmap-docker.sh dev start
+````
+
+And to stop the services:
+
+````
+sudo ./hubmap-docker.sh dev stop
+````
 
 For production deployment, simply change to:
 
 ````
-sudo ./hubmap-docker.sh prod
+sudo ./hubmap-docker.sh prod build
 ````
+
+Then `sudo ./hubmap-docker.sh prod start` and `sudo ./hubmap-docker.sh prod stop`
 
 The production changes include:
 
