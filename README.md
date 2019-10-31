@@ -40,7 +40,7 @@ The `log` under each project is another volume mount, this allows us to access t
 
 ## Overview of tools
 
-- [Docker v19.03.2](https://docs.docker.com/install/)
+- [Docker Engine](https://docs.docker.com/install/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
 Note: Docker Compose requires Docker to be installed and running first.
