@@ -55,9 +55,9 @@ With a micro-services architecture design, we probably want to share a single da
 
 Currently, you can deploy the following projects with the `gateway`. Git clone the source code of each project and put them under the same parent directory.
 
-- [UUID API](https://github.com/hubmapconsortium/uuid-api) (the `mysql-docker-zhou` branch)
-- [Entity API](https://github.com/hubmapconsortium/entity-api) (the `neo4j-docker-zhou` branch)
-- [Ingest API](https://github.com/hubmapconsortium/ingest-ui) (the `ingest-api-docker-zhou` branch)
+- [UUID API](https://github.com/hubmapconsortium/uuid-api) (the master branch)
+- [Entity API](https://github.com/hubmapconsortium/entity-api) (the master branch)
+- [Ingest API](https://github.com/hubmapconsortium/ingest-ui) (the master branch)
 
 ### Step 2: add configuration files for each project
 
