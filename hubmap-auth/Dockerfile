@@ -2,7 +2,7 @@
 FROM centos:7
 
 LABEL description="HuBMAP Authentication and Authorization Service" \
-	version="0.1.0"
+	version="1.0.0"
 
 WORKDIR /usr/src/app
 
