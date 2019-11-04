@@ -6,7 +6,7 @@ services:
   hubmap-auth:
     build: ./hubmap-auth
     # Build the image with name and tag
-    image: hubmap-auth:1.0.0
+    image: hubmap-auth:1.0
     hostname: hubmap-auth
     container_name: hubmap-auth
     networks:
@@ -20,7 +20,7 @@ services:
   sample-api:
     build: ./sample-api
     # Build the image with name and tag
-    image: sample-api:1.0.0
+    image: sample-api:1.0
     hostname: sample-api
     container_name: sample-api
     networks:

@@ -2,7 +2,7 @@
 FROM centos:7
 
 LABEL description="Sample API Service" \
-	version="1.0.0"
+	version="1.0"
 
 # Change to directory that contains the Dockerfile
 WORKDIR /usr/src/app
