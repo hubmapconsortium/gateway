@@ -9,7 +9,7 @@ services:
     restart: always
     # Only map port 80 or 443
     ports:
-      - "80:80" 
+      - "443:443" 
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
