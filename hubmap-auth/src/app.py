@@ -99,9 +99,11 @@ def api_auth():
                 # First replace all occurrences of the wildcard delimiters with regular expression
                 endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, regex_pattern)
 
-                # If the whole string matches the regular expression pattern, return a corresponding match object
+                # If the whole url path (not including the query string part) matches the regular expression pattern, 
+                # return a corresponding match object,
                 # otherwise return None
-                if re.fullmatch(endpoint_pattern, endpoint) is not None:
+                target_endpoint = endpoint.split("?")[0]
+                if re.fullmatch(endpoint_pattern, target_endpoint) is not None:
                     if access_allowed(item, request):
                         return response_200
                     else:
