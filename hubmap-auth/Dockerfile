@@ -1,5 +1,5 @@
 # Parent image
-FROM centos:7
+FROM hubmap/api-base-image:latest
 
 LABEL description="HuBMAP Authentication and Authorization Service" \
 	version="1.0"
@@ -27,12 +27,8 @@ enabled=1\n'\
 # 7 - Install flask app dependencies with pip (pip3 also works)
 # 8 - Make the start script executable
 # 9 - Clean all yum cache
-RUN yum update -y && \
-    yum install -y nginx git && \
+RUN yum install -y nginx && \
     rm /etc/nginx/conf.d/default.conf && \
-    yum install -y epel-release && \
-    yum install -y python36 python36-pip uwsgi uwsgi-plugin-python36.x86_64 && \
-    pip3 install --upgrade pip && \
     pip install -r src/requirements.txt && \
     chmod +x start.sh && \
     yum clean all 
