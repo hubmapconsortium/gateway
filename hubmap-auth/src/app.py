@@ -86,24 +86,28 @@ def api_auth():
     if authority is not None:
         # First pass, loop through the list to find exact static match
         for item in data[authority]:
-            # Filter by HTTP request method, and remove trailing slash for comparison
-            if (item['method'].upper() == method.upper()) and (item['endpoint'].strip('/') == endpoint.strip('/')):
-                if access_allowed(item, request):
-                    return response_200
-                else:
-                    return response_401
+            if (item['method'].upper() == method.upper()) and (wildcard_delimiter not in item['endpoint']):
+                # Ignore the query string
+                target_endpoint = endpoint.split("?")[0]
+                # Remove trailing slash for comparison
+                if item['endpoint'].strip('/') == target_endpoint.strip('/'):
+                    if access_allowed(item, request):
+                        return response_200
+                    else:
+                        return response_401
                 
         # Second pass, loop through the list to do the wildcard match
         for item in data[authority]:
             if (item['method'].upper() == method.upper()) and (wildcard_delimiter in item['endpoint']):
                 # First replace all occurrences of the wildcard delimiters with regular expression
                 endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, regex_pattern)
-
-                # If the whole url path (not including the query string part) matches the regular expression pattern, 
-                # return a corresponding match object,
-                # otherwise return None
+                # Ignore the query string
                 target_endpoint = endpoint.split("?")[0]
-                if re.fullmatch(endpoint_pattern, target_endpoint) is not None:
+                # If the full url path matches the regular expression pattern, 
+                # return a corresponding match object, otherwise return None
+                target_endpoint = endpoint.split("?")[0]
+                # Remove trailing slash for comparison
+                if re.fullmatch(endpoint_pattern.strip('/'), target_endpoint.strip('/')) is not None:
                     if access_allowed(item, request):
                         return response_200
                     else:
