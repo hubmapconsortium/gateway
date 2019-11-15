@@ -103,3 +103,18 @@ The production changes include:
 * Binding to different ports on the host
 * Run an `init` inside each container that forwards signals and reaps processes.
 * Specifying a restart policy like `restart: always` to avoid downtime
+
+## Update base image
+
+The `entity-api`, `uuid-api`, `ingest-api`, and `hubmap-auth` docker images are based on the `hubmap/api-base-image:latest` image. If you need to update the base image, go to the `api-base-image` directory and recrerate it with:
+
+````
+sudo docker build -t hubmap/api-base-image:latest
+````
+
+Then publish it to the DockerHub:
+
+````
+sudo docker login
+sudo docker push hubmap/api-base-image:latest
+````
