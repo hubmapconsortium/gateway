@@ -70,11 +70,16 @@ Note: MySQL is defiend in the `docker-compose.yml` of the `uuid-api` project and
 
 ### Step 3: build docker images and spin up the containers
 
-In the `gateway` project:
+In the `gateway` project, first make sure the `hubmap-docker.sh` script is executable, 
 
 ````
 sudo chmod +x hubmap-docker.sh
-sudo ./hubmap-docker.sh dev build
+````
+
+Before we go ahead to start building the docker images, we can do a check to see if all the required configuration files are in place:
+
+````
+sudo ./hubmap-docker.sh dev check
 ````
 
 The build process will take some time before we have all the docker images created. After that, we can start all the services:
