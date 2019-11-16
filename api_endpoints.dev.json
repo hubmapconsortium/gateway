@@ -235,6 +235,11 @@
       ]
     },
     {
+      "method": "PUT",
+      "endpoint": "/datasets/submissions/request_ingest",
+      "auth": false
+    },
+    {
       "method": "GET",
       "endpoint": "/collections",
       "auth": true,
