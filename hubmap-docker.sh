@@ -93,10 +93,14 @@ else
                 fi
             done
 
+            # The `absent_or_newer` checks if the copied src at docker/some-api/src directory exists 
+            # and if the source src directory is newer. 
+            # If both conditions are true `absent_or_newer` writes an error message 
+            # and causes hubmap-docker.sh to exit with an error code.
             absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
             absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
-            absent_or_newer ../uuid-api/docker/uuid-api/src ../uuid-api/src/uuid-api
-            absent_or_newer ../entity-api/docker/entity-api/src ../entity-api/src/entity-api
+            absent_or_newer ../uuid-api/docker/uuid-api/src ../uuid-api/src
+            absent_or_newer ../entity-api/docker/entity-api/src ../entity-api/src
 
             echo 'Checks complete'
         fi
