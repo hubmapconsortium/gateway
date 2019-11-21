@@ -37,6 +37,15 @@ else
             cd ingest-ui/docker
             ./docker-setup.sh
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+            
+            cd ../../
+            
+            cd ingest-pipeline/docker
+            ./docker-setup.sh
+            env BUILD_NUM=`cat ../build_number` \
+            	TZ=`cat /etc/timezone` \
+            	docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+
         elif [ "$2" = "start" ]; then
             # Back to parent directory
             cd ..
@@ -57,6 +66,13 @@ else
 
             cd ../../
 
+            cd ingest-pipeline/docker
+            env BUILD_NUM=`cat ../build_number` \
+            	TZ=`cat /etc/timezone` \
+	            docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml up -d
+
+            cd ../../
+
             # The last one is gateway since nginx conf files require 
             # entity-api, uuid-api, ingest-ui, and ingest-api to be running
             # before starting the gateway service
@@ -68,6 +84,13 @@ else
 
             # Back to parent dir and stop each service
             cd ..
+
+            cd ingest-pipeline/docker
+            env BUILD_NUM=`cat ../build_number` \
+            	TZ=`cat /etc/timezone` \
+            	docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml stop
+
+            cd ../../
 
             cd ingest-ui/docker
             docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml stop
