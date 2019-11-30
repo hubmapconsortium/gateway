@@ -109,6 +109,7 @@ else
                 '../uuid-api/src/instance/app.cfg' \
                 '../entity-api/src/instance/app.cfg' \
                 '../ingest-ui/src/ingest-api/instance/app.cfg' \
+                '../ingest-pipeline/src/ingest-pipeline/instance/app.cfg' \
                 '../ingest-ui/src/ingest-ui/.env'; do
                 if [ ! -e $pth ]; then
                     echo "Missing $pth"
