@@ -8,7 +8,7 @@ function absent_or_newer () {
 }
 
 if [[ "$1" != "dev" && "$1" != "prod" ]]; then
-    echo "Unknown build environment '$1', specify either 'dev' or 'prod'"
+    echo "Unknown build environment '$1', specify 'dev', 'test', or 'prod'"
 else
     if [[ "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "check" ]]; then
         echo "Unknown command '$2', specify 'build' or 'start' or 'stop' or 'check' as the second argument"
@@ -102,7 +102,7 @@ else
             absent_or_newer ../uuid-api/docker/uuid-api/src ../uuid-api/src
             absent_or_newer ../entity-api/docker/entity-api/src ../entity-api/src
 
-            echo 'Checks complete'
+            echo 'Checks complete, all good :)'
         fi
     fi
 fi

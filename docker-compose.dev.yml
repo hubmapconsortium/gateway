@@ -8,8 +8,6 @@ services:
     ports:
       # hubmap-auth
       - "8080:80" 
-      # sample-api
-      - "8181:81" 
       # uuid-api
       - "8282:82" 
       # entity-api
@@ -25,9 +23,3 @@ services:
       - "./nginx/conf.d-dev:/etc/nginx/conf.d"
       # Mount the API endpoints json file for API endpoints lookup
       - "./api_endpoints.dev.json:/usr/src/app/api_endpoints.json"
-
-  sample-api:
-    volumes:
-      # Mount the source code to container
-      - "./sample-api/src/:/usr/src/app/src"
-

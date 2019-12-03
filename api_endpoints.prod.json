@@ -1,77 +1,5 @@
 {
-  "sample-api.test.hubmapconsortium.org": [
-    {
-      "method": "GET",
-      "endpoint": "/",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/favicon.ico",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/public/<*>",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/private/<*>",
-      "auth": true
-    },
-    {
-      "method": "GET",
-      "endpoint": "/private/group",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/private/<*>/group",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/public",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/private",
-      "auth": true
-    },
-    {
-      "method": "GET",
-      "endpoint": "/invalid",
-      "auth": true,
-      "groups": [
-        "fake-group-id"
-      ]
-    },
-    {
-      "method": "POST",
-      "endpoint": "/post",
-      "auth": true,
-      "groups": [
-        "5bd084c8-edc2-11e8-802f-0e368f3075e8"
-      ]
-    },
-    {
-      "method": "PUT",
-      "endpoint": "/put",
-      "auth": true,
-      "groups": [
-        "5bd084c8-edc2-11e8-802f-0e368f3075e8"
-      ]
-    }
-  ],
-  "uuid-api.test.hubmapconsortium.org": [
+  "uuid.api.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -107,7 +35,7 @@
       ]
     }
   ],
-  "entity-api.test.hubmapconsortium.org": [
+  "entity.api.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -159,7 +87,7 @@
       ]
     }
   ],
-  "ingest-api.test.hubmapconsortium.org": [
+  "ingest.api.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
