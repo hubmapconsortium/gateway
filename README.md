@@ -44,9 +44,9 @@ Note: Docker Compose requires Docker to be installed and running first.
 
 ## Workflow of setting up multiple HuBMAP docker compose projects
 
-Note: Don't confuse with the term of `service` and `container` when we talk about Docker Compose. A service only runs one image, but it codifies the way that image runs&mdash;what ports it should use, how many replicas of the container should run so the service has the capacity it needs, and so on. That's why in `docker-compose.yml` we see `services` defined.
-
 With a micro-services architecture design, we probably want to share a single database container across two or more applications, so that they can access the same data. Docker and Docker Compose make this possible through the use of Docker networks, allowing containers from different compose projects to be attached to the same network.
+
+**Note: the following steps only describe the workflow of setting up multiple HuBMAP docker compose projects on local development environment on the same host machine.**
 
 ### Step 1: get the source code of each project
 
@@ -99,12 +99,25 @@ sudo ./hubmap-docker.sh dev stop
 
 ## Testing and Production deployment
 
-For development environment, all the docker containers are running on the same host machine. However, for testing and production deployment, the `ingest-api` will be running on a separate machine and the Neo4j as well as MySQL are also running remotely. In addition, the testing and production changes include:
+For development environment, all the docker images are built on the same host machine and all the containers are running on the same host machine as well. It also comes with a sample Neo4j container and a MySQL database for a full-stack services. However, for testing and production deployment, the `ingest-api` will be running on a separate machine (due to dataset mount) and the Neo4j and MySQL are also running remotely. Additional changes include:
 
-* Removing any volume bindings for application code, so that code stays inside the container and can’t be changed from outside
+* Removing any volume bindings for application code, so that code stays inside the container and can't be changed from outside
 * Binding to different ports on the host
 * Run an `init` inside each container that forwards signals and reaps processes.
 * Specifying a restart policy like `restart: always` to avoid downtime
+
+Take testing environment for example, when we build the docker images:
+
+````
+sudo ./hubmap-docker.sh test build
+````
+
+This won't build the images of Neo4j, MySQL (pointing to remote instances via configuration), ingest-api and ingest-ui (deployed on a separate host machine).
+
+The main differences between testing and production are:
+
+* different remote Neo4j and MySQL databases
+* different Nginx configurations for API services and UI portals (different subdomains and SSL settings)
 
 ## Update base image
 

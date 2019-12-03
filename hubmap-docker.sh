@@ -32,11 +32,15 @@ else
             ./docker-setup.sh
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 
-            cd ../../
+            # Only have ingest-api and ingest-ui on the same host machine for dev environment
+            # Testing and productiton deployment has ingest-api and ingest-ui on a separate machine
+            if [ "$1" = "dev" ]; then
+	            cd ../../
 
-            cd ingest-ui/docker
-            ./docker-setup.sh
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+	            cd ingest-ui/docker
+	            ./docker-setup.sh
+	            docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+	        fi
         elif [ "$2" = "start" ]; then
             # Back to parent directory
             cd ..
@@ -49,11 +53,15 @@ else
 
             cd entity-api/docker
             docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.$1.yml up -d
+            
+            # Only have ingest-api and ingest-ui on the same host machine for dev environment
+            # Testing and productiton deployment has ingest-api and ingest-ui on a separate machine
+            if [ "$1" = "dev" ]; then
+                cd ../../
 
-            cd ../../
-
-            cd ingest-ui/docker
-            docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml up -d
+                cd ingest-ui/docker
+                docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml up -d
+            fi
 
             cd ../../
 
@@ -69,10 +77,14 @@ else
             # Back to parent dir and stop each service
             cd ..
 
-            cd ingest-ui/docker
-            docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml stop
+            # Only have ingest-api and ingest-ui on the same host machine for dev environment
+            # Testing and productiton deployment has ingest-api and ingest-ui on a separate machine
+            if [ "$1" = "dev" ]; then
+                cd ingest-ui/docker
+                docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml stop
 
-            cd ../../
+                cd ../../
+            fi
 
             cd uuid-api/docker
             docker-compose -p uuid-api_and_mysql -f docker-compose.yml -f docker-compose.$1.yml stop
@@ -81,12 +93,23 @@ else
 
             cd entity-api/docker
             docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.$1.yml stop
-        elif [ "$2" == "check" ]; then
-            for pth in '../gateway/hubmap-auth/src/instance/app.cfg' \
-                '../uuid-api/src/instance/app.cfg' \
-                '../entity-api/src/instance/app.cfg' \
-                '../ingest-ui/src/ingest-api/instance/app.cfg' \
-                '../ingest-ui/src/ingest-ui/.env'; do
+        elif [ "$2" = "check" ]; then
+            # Bash array
+            config_paths=(
+                '../gateway/hubmap-auth/src/instance/app.cfg'
+                '../uuid-api/src/instance/app.cfg'
+                '../entity-api/src/instance/app.cfg'
+            )
+
+            # Add ingest-api and ingest-ui config files to the array for dev environment only
+            if [ "$1" = "dev" ]; then
+                config_paths+=(
+                    '../ingest-ui/src/ingest-api/instance/app.cfg'
+                    '../ingest-ui/src/ingest-ui/.env'
+                )
+            fi
+
+            for pth in "${config_paths[@]}"; do
                 if [ ! -e $pth ]; then
                     echo "Missing $pth"
                     exit -1
@@ -97,10 +120,13 @@ else
             # and if the source src directory is newer. 
             # If both conditions are true `absent_or_newer` writes an error message 
             # and causes hubmap-docker.sh to exit with an error code.
-            absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
-            absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
             absent_or_newer ../uuid-api/docker/uuid-api/src ../uuid-api/src
             absent_or_newer ../entity-api/docker/entity-api/src ../entity-api/src
+
+            if [ "$1" = "dev" ]; then
+                absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
+                absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
+            fi
 
             echo 'Checks complete, all good :)'
         fi
