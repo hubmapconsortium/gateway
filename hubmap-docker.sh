@@ -47,12 +47,12 @@ else
 
             # Spin up the containers for each project
             cd uuid-api/docker
-            docker-compose -p uuid-api_and_mysql -f docker-compose.yml -f docker-compose.$1.yml up -d
+            docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml up -d
 
             cd ../../
 
             cd entity-api/docker
-            docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.$1.yml up -d
+            docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml up -d
             
             # Only have ingest-api and ingest-ui on the same host machine for dev environment
             # Testing and productiton deployment has ingest-api and ingest-ui on a separate machine
@@ -60,7 +60,7 @@ else
                 cd ../../
 
                 cd ingest-ui/docker
-                docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml up -d
+                docker-compose -p ingest -f docker-compose.yml -f docker-compose.$1.yml up -d
             fi
 
             cd ../../
@@ -81,18 +81,18 @@ else
             # Testing and productiton deployment has ingest-api and ingest-ui on a separate machine
             if [ "$1" = "dev" ]; then
                 cd ingest-ui/docker
-                docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml stop
+                docker-compose -p ingest -f docker-compose.yml -f docker-compose.$1.yml stop
 
                 cd ../../
             fi
 
             cd uuid-api/docker
-            docker-compose -p uuid-api_and_mysql -f docker-compose.yml -f docker-compose.$1.yml stop
+            docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml stop
 
             cd ../../
 
             cd entity-api/docker
-            docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.$1.yml stop
+            docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml stop
         elif [ "$2" = "check" ]; then
             # Bash array
             config_paths=(
