@@ -131,6 +131,16 @@
       ]
     },
     {
+      "method": "POST",
+      "endpoint": "/datasets/status",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/submissions/request_ingest",
+      "auth": false
+    },
+    {
       "method": "PUT",
       "endpoint": "/datasets/<*>/validate",
       "auth": true,
