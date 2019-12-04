@@ -128,15 +128,6 @@ else
 
             cd entity-api/docker
 
-            docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.$1.yml stop
-        elif [ "$2" == "check" ]; then
-            for pth in '../gateway/hubmap-auth/src/instance/app.cfg' \
-                '../uuid-api/src/instance/app.cfg' \
-                '../entity-api/src/instance/app.cfg' \
-                '../ingest-ui/src/ingest-api/instance/app.cfg' \
-                '../ingest-pipeline/src/ingest-pipeline/instance/app.cfg' \
-                '../ingest-ui/src/ingest-ui/.env'; do
-
             docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml stop
         elif [ "$2" = "check" ]; then
             # Bash array
@@ -144,6 +135,7 @@ else
                 '../gateway/hubmap-auth/src/instance/app.cfg'
                 '../uuid-api/src/instance/app.cfg'
                 '../entity-api/src/instance/app.cfg'
+                '../ingest-pipeline/src/ingest-pipeline/instance/app.cfg' \
                 '../ingest-ui/src/ingest-ui/.env'
             )
 
