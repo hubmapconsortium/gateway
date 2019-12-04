@@ -11,7 +11,7 @@ CACHE_MAXSIZE = 128
 CACHE_TTL = 7200
 
 ##############################################################
-## Only For User UI Auth
+## Only For User UI Auth - NOT READY YET
 ##############################################################
 # App name and deployment URI
 FLASK_APP_NAME = 'HuBMAP Auth'

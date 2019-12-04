@@ -7,8 +7,8 @@ function absent_or_newer () {
     fi
 }
 
-if [[ "$1" != "dev" && "$1" != "prod" ]]; then
-    echo "Unknown build environment '$1', specify either 'dev' or 'prod'"
+if [[ "$1" != "dev" && "$1" != "test" && "$1" != "prod" ]]; then
+    echo "Unknown build environment '$1', specify 'dev', 'test', or 'prod'"
 else
     if [[ "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "check" ]]; then
         echo "Unknown command '$2', specify 'build' or 'start' or 'stop' or 'check' as the second argument"
@@ -32,12 +32,21 @@ else
             ./docker-setup.sh
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 
+            # Only have ingest-api and ingest-ui on the same host machine for dev environment
+            # Testing and productiton deployment has ingest-api on a separate machine
             cd ../../
 
             cd ingest-ui/docker
-            ./docker-setup.sh
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+
+            ./docker-setup-ingest-ui.sh
+            docker-compose -f docker-compose-ingest-ui.$1.yml build
             
+            # Also build ingest-api for dev only
+            if [ "$1" = "dev" ]; then
+	            ./docker-setup-ingest-api.$1.sh
+                docker-compose -f docker-compose-ingest-api.$1.yml build
+	        fi
+
             cd ../../
             
             cd ingest-pipeline/docker
@@ -52,17 +61,24 @@ else
 
             # Spin up the containers for each project
             cd uuid-api/docker
-            docker-compose -p uuid-api_and_mysql -f docker-compose.yml -f docker-compose.$1.yml up -d
+            docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml up -d
 
             cd ../../
 
             cd entity-api/docker
-            docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.$1.yml up -d
-
+            docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml up -d
+            
+            # Only have ingest-api and ingest-ui on the same host machine for dev environment
+            # Testing and productiton deployment has ingest-api on a separate machine
             cd ../../
 
             cd ingest-ui/docker
-            docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml up -d
+            docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml up -d
+
+            # Also start the ingest-api for dev only
+            if [ "$1" = "dev" ]; then
+                docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml up -d
+            fi
 
             cd ../../
 
@@ -92,17 +108,26 @@ else
 
             cd ../../
 
+            # Only have ingest-api and ingest-ui on the same host machine for dev environment
+            # Testing and productiton deployment has ingest-api on a separate machine
+
             cd ingest-ui/docker
-            docker-compose -p ingest-api_and_ui -f docker-compose.yml -f docker-compose.$1.yml stop
+            docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml stop
+
+            # Also stop the ingest-api container for dev only
+            if [ "$1" = "dev" ]; then
+                docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml stop
+            fi
 
             cd ../../
 
             cd uuid-api/docker
-            docker-compose -p uuid-api_and_mysql -f docker-compose.yml -f docker-compose.$1.yml stop
+            docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml stop
 
             cd ../../
 
             cd entity-api/docker
+
             docker-compose -p entity-api_and_neo4j -f docker-compose.yml -f docker-compose.$1.yml stop
         elif [ "$2" == "check" ]; then
             for pth in '../gateway/hubmap-auth/src/instance/app.cfg' \
@@ -111,6 +136,25 @@ else
                 '../ingest-ui/src/ingest-api/instance/app.cfg' \
                 '../ingest-pipeline/src/ingest-pipeline/instance/app.cfg' \
                 '../ingest-ui/src/ingest-ui/.env'; do
+
+            docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml stop
+        elif [ "$2" = "check" ]; then
+            # Bash array
+            config_paths=(
+                '../gateway/hubmap-auth/src/instance/app.cfg'
+                '../uuid-api/src/instance/app.cfg'
+                '../entity-api/src/instance/app.cfg'
+                '../ingest-ui/src/ingest-ui/.env'
+            )
+
+            # Add ingest-api config to the array for dev only
+            if [ "$1" = "dev" ]; then
+                config_paths+=(
+                    '../ingest-ui/src/ingest-api/instance/app.cfg'
+                )
+            fi
+
+            for pth in "${config_paths[@]}"; do
                 if [ ! -e $pth ]; then
                     echo "Missing $pth"
                     exit -1
@@ -121,12 +165,16 @@ else
             # and if the source src directory is newer. 
             # If both conditions are true `absent_or_newer` writes an error message 
             # and causes hubmap-docker.sh to exit with an error code.
-            absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
-            absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
             absent_or_newer ../uuid-api/docker/uuid-api/src ../uuid-api/src
             absent_or_newer ../entity-api/docker/entity-api/src ../entity-api/src
+            absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
 
-            echo 'Checks complete'
+            # Also check the ingest-api for dev only
+            if [ "$1" = "dev" ]; then
+                absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
+            fi
+
+            echo 'Checks complete, all good :)'
         fi
     fi
 fi

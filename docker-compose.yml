@@ -17,18 +17,6 @@ services:
       # favicon.ico
       - "./nginx/html:/usr/share/nginx/html"
 
-  sample-api:
-    build: ./sample-api
-    # Build the image with name and tag
-    image: sample-api:1.0
-    hostname: sample-api
-    container_name: sample-api
-    networks:
-      - gateway_hubmap
-    volumes:
-      # Make the uwsgi logging generated on container available through from host
-      - "./sample-api/log:/usr/src/app/log"
-
 networks:
   # This is the network created by gateway to enable communicaton between multiple docker-compose projects
   gateway_hubmap:
