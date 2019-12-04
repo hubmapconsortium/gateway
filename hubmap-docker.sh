@@ -39,7 +39,7 @@ else
 
 	            cd ingest-ui/docker
 	            ./docker-setup.sh
-	            docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+	            docker-compose -f docker-compose.$1.yml build
 	        fi
         elif [ "$2" = "start" ]; then
             # Back to parent directory
@@ -60,7 +60,7 @@ else
                 cd ../../
 
                 cd ingest-ui/docker
-                docker-compose -p ingest -f docker-compose.yml -f docker-compose.$1.yml up -d
+                docker-compose -p ingest -f docker-compose.$1.yml up -d
             fi
 
             cd ../../
@@ -81,7 +81,7 @@ else
             # Testing and productiton deployment has ingest-api and ingest-ui on a separate machine
             if [ "$1" = "dev" ]; then
                 cd ingest-ui/docker
-                docker-compose -p ingest -f docker-compose.yml -f docker-compose.$1.yml stop
+                docker-compose -p ingest -f docker-compose.$1.yml stop
 
                 cd ../../
             fi
