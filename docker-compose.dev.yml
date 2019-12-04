@@ -19,7 +19,7 @@ services:
       # ingest-ui
       - "8585:85"
       # ingest-pipeline airflow
-      - "8686:86"
+      - "8787:87"
     volumes:
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
