@@ -7,6 +7,8 @@ function absent_or_newer () {
     fi
 }
 
+tz_str=`timedatectl | grep "Time zone" | awk '{print $3}'`
+
 if [[ "$1" != "dev" && "$1" != "test" && "$1" != "prod" ]]; then
     echo "Unknown build environment '$1', specify 'dev', 'test', or 'prod'"
 else
@@ -52,7 +54,7 @@ else
             cd ingest-pipeline/docker
             ./docker-setup.sh
             env BUILD_NUM=`cat ../build_number` \
-            	TZ=`cat /etc/timezone` \
+            	TZ=$tz_str \
             	docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 
         elif [ "$2" = "start" ]; then
@@ -84,7 +86,7 @@ else
 
             cd ingest-pipeline/docker
             env BUILD_NUM=`cat ../build_number` \
-            	TZ=`cat /etc/timezone` \
+            	TZ=$tz_str \
 	            docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml up -d
 
             cd ../../
@@ -103,7 +105,7 @@ else
 
             cd ingest-pipeline/docker
             env BUILD_NUM=`cat ../build_number` \
-            	TZ=`cat /etc/timezone` \
+            	TZ=$tz_str \
             	docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml stop
 
             cd ../../
