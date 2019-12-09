@@ -6,6 +6,8 @@ services:
     # Mapping ports in the HOST:CONTAINER format
     # Each API has its dedicated port and needs to be mapped here
     ports:
+      # demo
+      - "999:99"
       # hubmap-auth
       - "8080:80" 
       # uuid-api
