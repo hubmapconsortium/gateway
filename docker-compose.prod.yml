@@ -7,10 +7,11 @@ services:
     init: true
     # Specifying a restart policy to avoid downtime
     restart: always
-    # Only map port 80 or 443
+    # Map host machine port 80, 443, and 8443 to container ports
     ports:
       - "80:80"
-      - "443:443" 
+      - "443:443"
+      - "8443:8443"
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
