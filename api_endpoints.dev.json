@@ -308,7 +308,7 @@
       ]
     },
     {
-      "method": "PUT",
+      "method": "GET",
       "endpoint": "/specimens/exists/<*>",
       "auth": true,
       "groups": [
@@ -316,7 +316,7 @@
       ]
     },
     {
-      "method": "PUT",
+      "method": "GET",
       "endpoint": "/specimens/<*>/siblingids",
       "auth": true,
       "groups": [
