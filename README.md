@@ -119,6 +119,25 @@ The main differences between testing and production are:
 * different remote Neo4j and MySQL databases
 * different Nginx configurations for API services and UI portals (different subdomains and SSL settings)
 
+## Reload Gateway Nginx for configuration changes
+
+To reload nginx(running on the `hubmap-auth` container) configuration changes, first shell into the `hubmap-auth` container:
+
+````
+sudo docker exec -it <hubmap-auth-container-id> bash
+````
+
+Then send a reload signal to the master process inside that container:
+
+````
+nginx -s reload
+````
+
+* Reloading keeps the server running while re-reading any configuration file updates.
+* Reloading is safer than restarting because if a syntax error is noticed in a config file, it will not proceed with the reload and your server remains running.
+* If there is a syntax error in a config file and you restart, it's possible the server will not restart correctly.
+
+
 ## Update base image
 
 The `entity-api`, `uuid-api`, `ingest-api`, and `hubmap-auth` docker images are based on the `hubmap/api-base-image:latest` image. If you need to update the base image, go to the `api-base-image` directory and recrerate it with:
