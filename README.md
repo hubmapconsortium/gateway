@@ -2,15 +2,26 @@
 
 The HuBMAP Web Gateway serves as an authentication and authorization gateway for the HuBMAP API services. All API requests will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the API endpoints. As a result of this design, the API services no longer need to handle the authentication and authorization.
 
+## Development and deployment environments
+
+We have the following 4 development and deployment environments:
+
+* local - all the containers are running on the same localhost listing on different ports, without globus data
+* dev - similar to local, but on AWS EC2 instance with domains, with globus data
+* test - ingest-api and ingest-pipeline are running on the same AWS VM (with globus data), the rest APIs on another VM
+* prod - similar to test but for production settings
+
 ## Project structure
 
 ````
 gateway
 ├── api_endpoints.dev.json
+├── api_endpoints.local.json
 ├── api_endpoints.prod.json
 ├── api_endpoints.test.json
 ├── docker-compose.yml
 ├── docker-compose.dev.yml
+├── docker-compose.local.yml
 ├── docker-compose.prod.yml
 ├── docker-compose.test.yml
 ├── hubmap-auth
@@ -20,12 +31,13 @@ gateway
 │   └── start.sh
 └── nginx
     ├── conf.d-dev
+    ├── conf.d-local
     ├── conf.d-prod
     ├── conf.d-test
     └── html
 ````
 
-* `api_endpoints.*.json` are lookup files of all the API endpoints for different environments (dev, test, and prod). Public endpoints don't need authentication, but private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. 
+* `api_endpoints.*.json` are lookup files of all the API endpoints for different environments (local, dev, test, and prod). Public endpoints don't need authentication, but private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. 
 
 * `docker-compose.yml` defines all the services and container details, as well as mounted volumes and ports mapping. `docker-compose.dev.yml` should be used for local development along with the base `docker-compose.yml`. `docker-compose.test.yml` and `docker-compose.prod.yml` should be used for testing and production respectively  along with the base `docker-compose.yml`.
 
