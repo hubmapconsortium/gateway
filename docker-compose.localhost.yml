@@ -19,7 +19,7 @@ services:
     volumes:
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
-      # Mount conf.d-dev to the nginx conf.d on container
-      - "./nginx/conf.d-dev:/etc/nginx/conf.d"
+      # Mount conf.d-localhost to the nginx conf.d on container
+      - "./nginx/conf.d-localhost:/etc/nginx/conf.d"
       # Mount the API endpoints json file for API endpoints lookup
-      - "./api_endpoints.dev.json:/usr/src/app/api_endpoints.json"
+      - "./api_endpoints.localhost.json:/usr/src/app/api_endpoints.json"

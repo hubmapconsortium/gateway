@@ -6,7 +6,7 @@ The HuBMAP Web Gateway serves as an authentication and authorization gateway for
 
 We have the following 4 development and deployment environments:
 
-* local - all the containers are running on the same localhost listing on different ports, without globus data
+* localhost - all the containers are running on the same localhost listing on different ports, without globus data
 * dev - similar to local, but on AWS EC2 instance with domains, with globus data
 * test - ingest-api and ingest-pipeline are running on the same AWS VM (with globus data), the rest APIs on another VM
 * prod - similar to test but for production settings
@@ -16,12 +16,12 @@ We have the following 4 development and deployment environments:
 ````
 gateway
 ├── api_endpoints.dev.json
-├── api_endpoints.local.json
+├── api_endpoints.localhost.json
 ├── api_endpoints.prod.json
 ├── api_endpoints.test.json
 ├── docker-compose.yml
 ├── docker-compose.dev.yml
-├── docker-compose.local.yml
+├── docker-compose.localhost.yml
 ├── docker-compose.prod.yml
 ├── docker-compose.test.yml
 ├── hubmap-auth
@@ -31,15 +31,15 @@ gateway
 │   └── start.sh
 └── nginx
     ├── conf.d-dev
-    ├── conf.d-local
+    ├── conf.d-localhost
     ├── conf.d-prod
     ├── conf.d-test
     └── html
 ````
 
-* `api_endpoints.*.json` are lookup files of all the API endpoints for different environments (local, dev, test, and prod). Public endpoints don't need authentication, but private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. 
+* `api_endpoints.*.json` are lookup files of all the API endpoints for different environments (localhost, dev, test, and prod). Public endpoints don't need authentication, but private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. 
 
-* `docker-compose.yml` defines all the services and container details, as well as mounted volumes and ports mapping. `docker-compose.dev.yml` should be used for local development along with the base `docker-compose.yml`. `docker-compose.test.yml` and `docker-compose.prod.yml` should be used for testing and production respectively  along with the base `docker-compose.yml`.
+* `docker-compose.yml` defines all the services and container details, as well as mounted volumes and ports mapping. `docker-compose.dev.yml` should be used for localhost development along with the base `docker-compose.yml`. `docker-compose.test.yml` and `docker-compose.prod.yml` should be used for testing and production respectively  along with the base `docker-compose.yml`.
 
 * `hubmap-auth` is the actual HuBMAP Web Gateway authentication and authorization service that verifies all the API requests. It basically sets up the uWSGI application server to launch the Python Flask application and Nginx to act as a front end reverse proxy.
 
