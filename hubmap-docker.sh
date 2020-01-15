@@ -44,6 +44,13 @@ else
             if [ "$1" = "localhost" || "$1" = "dev" ]; then
 	            ./docker-setup-ingest-api.$1.sh
                 docker-compose -f docker-compose-ingest-api.$1.yml build
+
+                cd ../../
+
+                # Build ingest-pipeline
+                cd ingest-pipeline/docker
+                ./docker-setup.sh
+                docker-compose -f docker-compose.$1.yml build
 	        fi
         elif [ "$2" = "start" ]; then
             # Back to parent directory
@@ -68,6 +75,12 @@ else
             # Also start the ingest-api for localhost and dev only
             if [ "$1" = "localhost" || "$1" = "dev" ]; then
                 docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml up -d
+
+                # Also start ingest-pipeline
+                cd ../../
+
+                cd ingest-pipeline/docker
+                docker-compose -p ingest-pipeline -f docker-compose.$1.yml up -d
             fi
 
             cd ../../
@@ -92,6 +105,12 @@ else
             # Also stop the ingest-api container for localhost and dev only
             if [ "$1" = "localhost" || "$1" = "dev" ]; then
                 docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml stop
+
+                # Also stop ingest-pipeline
+                cd ../../
+
+                cd ingest-pipeline/docker
+                docker-compose -p ingest-pipeline -f docker-compose.$1.yml stop
             fi
 
             cd ../../
@@ -137,6 +156,8 @@ else
             # Also check the ingest-api for localhost and dev only
             if [ "$1" = "localhost" || "$1" = "dev" ]; then
                 absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
+
+                absent_or_newer ../ingest-pipeline/docker/ingest-pipeline/src ../ingest-pipeline/src/ingest-pipeline
             fi
 
             echo 'Checks complete, all good :)'
