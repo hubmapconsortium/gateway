@@ -8,7 +8,7 @@ function absent_or_newer () {
 }
 
 if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "prod" ]]; then
-    echo "Unknown build environment '$1', specify one of the following: 'local', 'dev', 'test', or 'prod'"
+    echo "Unknown build environment '$1', specify one of the following: 'localhost', 'dev', 'test', or 'prod'"
 else
     if [[ "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "check" ]]; then
         echo "Unknown command '$2', specify 'build' or 'start' or 'stop' or 'check' as the second argument"
