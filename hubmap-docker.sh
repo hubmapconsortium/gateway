@@ -41,7 +41,7 @@ else
             docker-compose -f docker-compose-ingest-ui.$1.yml build
             
             # Also build ingest-api for localhost and dev only
-            if [ "$1" = "localhost" || "$1" = "dev" ]; then
+            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
 	            ./docker-setup-ingest-api.$1.sh
                 docker-compose -f docker-compose-ingest-api.$1.yml build
 
@@ -50,7 +50,7 @@ else
                 # Build ingest-pipeline
                 cd ingest-pipeline/docker
                 ./docker-setup.sh
-                docker-compose -f docker-compose.$1.yml build
+                docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 	        fi
         elif [ "$2" = "start" ]; then
             # Back to parent directory
@@ -73,14 +73,14 @@ else
             docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml up -d
 
             # Also start the ingest-api for localhost and dev only
-            if [ "$1" = "localhost" || "$1" = "dev" ]; then
+            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
                 docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml up -d
 
                 # Also start ingest-pipeline
                 cd ../../
 
                 cd ingest-pipeline/docker
-                docker-compose -p ingest-pipeline -f docker-compose.$1.yml up -d
+                docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml up -d
             fi
 
             cd ../../
@@ -103,14 +103,14 @@ else
             docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml stop
 
             # Also stop the ingest-api container for localhost and dev only
-            if [ "$1" = "localhost" || "$1" = "dev" ]; then
+            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
                 docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml stop
 
                 # Also stop ingest-pipeline
                 cd ../../
 
                 cd ingest-pipeline/docker
-                docker-compose -p ingest-pipeline -f docker-compose.$1.yml stop
+                docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml stop
             fi
 
             cd ../../
@@ -154,7 +154,7 @@ else
             absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
 
             # Also check the ingest-api for localhost and dev only
-            if [ "$1" = "localhost" || "$1" = "dev" ]; then
+            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
                 absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
 
                 absent_or_newer ../ingest-pipeline/docker/ingest-pipeline/src ../ingest-pipeline/src/ingest-pipeline
