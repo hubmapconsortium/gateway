@@ -128,6 +128,7 @@ else
                 '../gateway/hubmap-auth/src/instance/app.cfg'
                 '../uuid-api/src/instance/app.cfg'
                 '../entity-api/src/instance/app.cfg'
+                '../ingest-pipeline/src/ingest-pipeline/instance/app.cfg'
                 '../ingest-ui/src/ingest-ui/.env'
             )
 
@@ -152,6 +153,7 @@ else
             absent_or_newer ../uuid-api/docker/uuid-api/src ../uuid-api/src
             absent_or_newer ../entity-api/docker/entity-api/src ../entity-api/src
             absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
+            absent_or_newer ../ingest-pipeline/docker/ingest-pipeline/src ../ingest-pipeline/src/ingest-pipeline
 
             # Also check the ingest-api for localhost and dev only
             if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
