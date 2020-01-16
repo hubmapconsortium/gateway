@@ -64,9 +64,10 @@ With a micro-services architecture design, we probably want to share a single da
 
 Currently, you can deploy the following projects with the `gateway`. Git clone the source code of each project and put them under the same parent directory.
 
-- [UUID API](https://github.com/hubmapconsortium/uuid-api) (the master branch)
-- [Entity API](https://github.com/hubmapconsortium/entity-api) (the master branch)
-- [Ingest API and UI](https://github.com/hubmapconsortium/ingest-ui) (the '1.5' branch)
+- [UUID API](https://github.com/hubmapconsortium/uuid-api) (the 'deploy-zhou' branch)
+- [Entity API](https://github.com/hubmapconsortium/entity-api) (the 'deploy-zhou' branch)
+- [Ingest API and UI](https://github.com/hubmapconsortium/ingest-ui) (the 'deploy-zhou' branch)
+- [Ingest Pipeline](https://github.com/hubmapconsortium/ingest-pipeline) (the 'deploy-zhou' branch)
 
 ### Step 2: add configuration files for each project
 
@@ -88,25 +89,25 @@ sudo chmod +x hubmap-docker.sh
 Before we go ahead to start building the docker images, we can do a check to see if all the required configuration files are in place:
 
 ````
-sudo ./hubmap-docker.sh dev check
+sudo ./hubmap-docker.sh localhost check
 ````
 
 To build all the docker images:
 
 ````
-sudo ./hubmap-docker.sh dev build
+sudo ./hubmap-docker.sh localhost build
 ````
 
 The build process will take some time before we have all the docker images created. After that, we can start all the services:
 
 ````
-sudo ./hubmap-docker.sh dev start
+sudo ./hubmap-docker.sh localhost start
 ````
 
 And to stop the services:
 
 ````
-sudo ./hubmap-docker.sh dev stop
+sudo ./hubmap-docker.sh localhost stop
 ````
 
 ## Testing and Production deployment
