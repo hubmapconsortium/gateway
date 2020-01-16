@@ -132,7 +132,7 @@ else
             )
 
             # Add ingest-api config to the array for localhost and dev only
-            if [ "$1" = "localhost" || "$1" = "dev" ]; then
+            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
                 config_paths+=(
                     '../ingest-ui/src/ingest-api/instance/app.cfg'
                 )
