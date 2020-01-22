@@ -8,6 +8,8 @@ services:
     ports:
       # hubmap-auth
       - "8080:80" 
+      # assets
+      - "8181:81" 
       # uuid-api
       - "8282:82" 
       # entity-api
@@ -21,5 +23,7 @@ services:
       - "./hubmap-auth/src/:/usr/src/app/src"
       # Mount conf.d-localhost to the nginx conf.d on container
       - "./nginx/conf.d-localhost:/etc/nginx/conf.d"
+      # Mount the static files
+      - "/usr/local/src/hubmap/assets:/usr/src/assets"
       # Mount the API endpoints json file for API endpoints lookup
       - "./api_endpoints.localhost.json:/usr/src/app/api_endpoints.json"
