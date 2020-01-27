@@ -1,4 +1,11 @@
 {
+  "localhost:8181": [
+    {
+      "method": "GET",
+      "endpoint": "/<*>/umap/<*>",
+      "auth": false
+    }
+  ],
   "localhost:8282": [
     {
       "method": "GET",
