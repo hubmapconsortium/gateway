@@ -66,9 +66,6 @@ def api_auth():
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
 
-    # Load endpoints from json
-    data = load_endpoints()
-
     # In the json, we use authority as the key to differ each service section
     authority = None
     method = None
@@ -84,6 +81,9 @@ def api_auth():
 
     # method and endpoint are always not None as long as authority is not None
     if authority is not None:
+        # Load endpoints from json
+        data = load_endpoints()
+
         # First pass, loop through the list to find exact static match
         for item in data[authority]:
             if (item['method'].upper() == method.upper()) and (wildcard_delimiter not in item['endpoint']):
@@ -135,9 +135,6 @@ def file_auth():
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
 
-    # Load the list of UUIDs for secured datasets
-    data = load_secured_datasets()
-
     # The file path in URL is the same as file system path
     endpoint = None
 
@@ -151,6 +148,9 @@ def file_auth():
     # File access only via http GET
     if method.upper() == 'GET':
         if endpoint is not None:
+            # Load the list of UUIDs for secured datasets
+            data = load_secured_datasets()
+
             # Parse the path to get the dataset UUID
             # Remove the leading slash before split
             path_list = endpoint.strip("/").split("/")
