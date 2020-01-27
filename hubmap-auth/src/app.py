@@ -169,7 +169,7 @@ def file_auth():
 
 
 ####################################################################################################
-## Internal Functions Used By API Auth
+## Internal Functions Used By API Auth and File Auth
 ####################################################################################################
 
 # Load all endpoints from json file into a Python dict and cache the data
@@ -186,9 +186,9 @@ def load_secured_datasets():
         data = json.load(file)
         return data
 
-# Initialize AuthHelper
+# Initialize AuthHelper (AuthHelper from HuBMAP commons package)
+# HuBMAP commons AuthHelper handles "MAuthorization" or "Authorization"
 def init_auth_helper():
-    # AuthHelper from HuBMAP commons package
     if AuthHelper.isInitialized() == False:
         auth_helper = AuthHelper.create(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
     else:
@@ -196,11 +196,15 @@ def init_auth_helper():
     
     return auth_helper
 
+# Get user infomation dict based on the http request(headers)
+# `group_required` is a boolean, when True, 'hmgroupids' is in the output
 def get_user_info_for_access_check(request, group_required):
     auth_helper = init_auth_helper()
     return auth_helper.getUserInfoUsingRequest(request, group_required)
 
 # Check if a given dataset requries globus group access
+# For dataset UUIDs that are listed in the secured_datasets.json, also check
+# if the globus token associated user is a member of the specified group assocaited with the UUID
 def file_access_allowed(dataset_uuid, json_data, request):
     if dataset_uuid in json_data.keys():
         user_info = get_user_info_for_access_check(request, True)
@@ -221,8 +225,8 @@ def file_access_allowed(dataset_uuid, json_data, request):
     # When no group access requried for this dataset
     return True
 
-# Chceck if accessed is allowed
-# HuBMAP commons AuthHelper handles "MAuthorization" or "Authorization"
+# Chceck if access to the given endpoint item is allowed
+# Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
 def api_access_allowed(item, request):
     pprint("===========Matched endpoint=============")
     pprint(item)
