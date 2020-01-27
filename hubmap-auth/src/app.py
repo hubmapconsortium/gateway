@@ -196,11 +196,14 @@ def init_auth_helper():
     
     return auth_helper
 
-# Check if a given dataset requries token access
+def get_user_info_for_access_check(request, group_required):
+    auth_helper = init_auth_helper()
+    return auth_helper.getUserInfoUsingRequest(request, group_required)
+
+# Check if a given dataset requries globus group access
 def file_access_allowed(dataset_uuid, json_data, request):
     if dataset_uuid in json_data.keys():
-        auth_helper = init_auth_helper()
-        user_info = auth_helper.getUserInfoUsingRequest(request, True)
+        user_info = get_user_info_for_access_check(request, True)
 
         # If returns error response, invalid header or token
         if isinstance(user_info, Response):
@@ -224,8 +227,6 @@ def api_access_allowed(item, request):
     pprint("===========Matched endpoint=============")
     pprint(item)
 
-    auth_helper = init_auth_helper()
-
     # Check if auth is required for this endpoint
     if item['auth'] == False:
         return True
@@ -234,10 +235,7 @@ def api_access_allowed(item, request):
     group_required = True if 'groups' in item else False
 
     # Get user info and do further parsing
-    user_info = auth_helper.getUserInfoUsingRequest(request, group_required)
-
-    pprint("===========user_info returned from AuthHelper=============")
-    pprint(user_info)
+    user_info = get_user_info_for_access_check(request, group_required)
 
     # If returns error response, invalid header or token
     if isinstance(user_info, Response):
