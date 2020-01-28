@@ -23,3 +23,5 @@ services:
       - "/etc/letsencrypt:/etc/letsencrypt"
       # Mount the API endpoints json file for API endpoints lookup
       - "./api_endpoints.test.json:/usr/src/app/api_endpoints.json"
+      # Mount the secured_datasets json file for dataset files lookup
+      - "./secured_datasets.json:/usr/src/app/secured_datasets.json"

@@ -66,9 +66,6 @@ def api_auth():
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
 
-    # Load endpoints from json
-    data = load_endpoints()
-
     # In the json, we use authority as the key to differ each service section
     authority = None
     method = None
@@ -84,6 +81,9 @@ def api_auth():
 
     # method and endpoint are always not None as long as authority is not None
     if authority is not None:
+        # Load endpoints from json
+        data = load_endpoints()
+
         # First pass, loop through the list to find exact static match
         for item in data[authority]:
             if (item['method'].upper() == method.upper()) and (wildcard_delimiter not in item['endpoint']):
@@ -91,7 +91,7 @@ def api_auth():
                 target_endpoint = endpoint.split("?")[0]
                 # Remove trailing slash for comparison
                 if item['endpoint'].strip('/') == target_endpoint.strip('/'):
-                    if access_allowed(item, request):
+                    if api_access_allowed(item, request):
                         return response_200
                     else:
                         return response_401
@@ -108,7 +108,7 @@ def api_auth():
                 target_endpoint = endpoint.split("?")[0]
                 # Remove trailing slash for comparison
                 if re.fullmatch(endpoint_pattern.strip('/'), target_endpoint.strip('/')) is not None:
-                    if access_allowed(item, request):
+                    if api_access_allowed(item, request):
                         return response_200
                     else:
                         return response_401
@@ -121,8 +121,55 @@ def api_auth():
         return response_401
 
 
+# Auth for file service
+# Nginx auth_request module won't be able to display the JSON message for 401 response
+@app.route('/file_auth')
+def file_auth():
+    # Debugging
+    pprint("===========request.headers=============")
+    pprint(request.headers)
+
+    # Nginx auth_request only cares about the response status code
+    # it ignores the response body
+    # We use body here only for direct visit to this endpoint
+    response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
+    response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
+
+    # The file path in URL is the same as file system path
+    endpoint = None
+
+    # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
+    # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
+    # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
+    if ("X-Original-Request-Method" in request.headers) and ("X-Original-URI" in request.headers):
+        method = request.headers.get("X-Original-Request-Method")
+        endpoint = request.headers.get("X-Original-URI")
+
+    # File access only via http GET
+    if method.upper() == 'GET':
+        if endpoint is not None:
+            # Load the list of UUIDs for secured datasets
+            data = load_secured_datasets()
+
+            # Parse the path to get the dataset UUID
+            # Remove the leading slash before split
+            path_list = endpoint.strip("/").split("/")
+            dataset_uuid = path_list[0]
+            # Check if the globus token is valid for accessing this secured dataset
+            if file_access_allowed(dataset_uuid, data, request):
+                return response_200
+            else:
+                return response_401
+        else: 
+            # Missing dataset UUID in path
+            return response_401
+    else:
+        # Wrong http method
+        return response_401
+
+
 ####################################################################################################
-## Internal Functions Used By API Auth
+## Internal Functions Used By API Auth and File Auth
 ####################################################################################################
 
 # Load all endpoints from json file into a Python dict and cache the data
@@ -132,16 +179,57 @@ def load_endpoints():
         data = json.load(file)
         return data
 
-# Chceck if accessed is allowed
+# Load the josn for secured datasets - a list of UUIDs
+@cached(cache)
+def load_secured_datasets():
+    with open(app.config['SECURED_DATASETS_FILE'], "r") as file:
+        data = json.load(file)
+        return data
+
+# Initialize AuthHelper (AuthHelper from HuBMAP commons package)
 # HuBMAP commons AuthHelper handles "MAuthorization" or "Authorization"
-def access_allowed(item, request):
-    pprint("===========Matched endpoint=============")
-    pprint(item)
-    # AuthHelper from HuBMAP commons package
+def init_auth_helper():
     if AuthHelper.isInitialized() == False:
         auth_helper = AuthHelper.create(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
     else:
         auth_helper = AuthHelper.instance()
+    
+    return auth_helper
+
+# Get user infomation dict based on the http request(headers)
+# `group_required` is a boolean, when True, 'hmgroupids' is in the output
+def get_user_info_for_access_check(request, group_required):
+    auth_helper = init_auth_helper()
+    return auth_helper.getUserInfoUsingRequest(request, group_required)
+
+# Check if a given dataset requries globus group access
+# For dataset UUIDs that are listed in the secured_datasets.json, also check
+# if the globus token associated user is a member of the specified group assocaited with the UUID
+def file_access_allowed(dataset_uuid, json_data, request):
+    if dataset_uuid in json_data.keys():
+        user_info = get_user_info_for_access_check(request, True)
+
+        # If returns error response, invalid header or token
+        if isinstance(user_info, Response):
+            return False
+
+        # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
+        # Key 'hmgroupids' presents only when group_required is True
+        for group in user_info['hmgroupids']:
+            if group in json_data[dataset_uuid]:
+                return True
+
+        # None of the assigned groups match the group ID
+        return False
+
+    # When no group access requried for this dataset
+    return True
+
+# Chceck if access to the given endpoint item is allowed
+# Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
+def api_access_allowed(item, request):
+    pprint("===========Matched endpoint=============")
+    pprint(item)
 
     # Check if auth is required for this endpoint
     if item['auth'] == False:
@@ -151,10 +239,7 @@ def access_allowed(item, request):
     group_required = True if 'groups' in item else False
 
     # Get user info and do further parsing
-    user_info = auth_helper.getUserInfoUsingRequest(request, group_required)
-
-    pprint("===========user_info returned from AuthHelper=============")
-    pprint(user_info)
+    user_info = get_user_info_for_access_check(request, group_required)
 
     # If returns error response, invalid header or token
     if isinstance(user_info, Response):
