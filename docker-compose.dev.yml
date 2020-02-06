@@ -8,6 +8,8 @@ services:
     ports:
       # hubmap-auth
       - "8080:80" 
+      # assets
+      - "8181:81"
       # uuid-api
       - "8282:82" 
       # entity-api
@@ -23,3 +25,5 @@ services:
       - "./nginx/conf.d-dev:/etc/nginx/conf.d"
       # Mount the API endpoints json file for API endpoints lookup
       - "./api_endpoints.dev.json:/usr/src/app/api_endpoints.json"
+      # Mount the secured_datasets json file for dataset files lookup
+      - "./secured_datasets.json:/usr/src/app/secured_datasets.json"
