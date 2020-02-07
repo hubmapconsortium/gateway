@@ -13,8 +13,8 @@ services:
       - "443:443"
       - "8443:8443" 
     volumes:
-      # Mount the app config to container in order to keep it outside of the image
-      - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
+      # Mount the source code to container
+      - "./hubmap-auth/src/:/usr/src/app/src"
       # Mount conf.d-test to the nginx conf.d on container
       - "./nginx/conf.d-test:/etc/nginx/conf.d"
       # Mount the static files

@@ -82,7 +82,7 @@ def api_auth():
     # method and endpoint are always not None as long as authority is not None
     if authority is not None:
         # Load endpoints from json
-        data = load_endpoints()
+        data = load_file(app.config['API_ENDPOINTS_FILE'])
 
         if authority in data.keys():
             # First pass, loop through the list to find exact static match
@@ -153,7 +153,7 @@ def file_auth():
     if method.upper() == 'GET':
         if endpoint is not None:
             # Load the list of UUIDs for secured datasets
-            data = load_secured_datasets()
+            data = load_file(app.config['SECURED_DATASETS_FILE'])
 
             # Parse the path to get the dataset UUID
             # Remove the leading slash before split
@@ -176,18 +176,10 @@ def file_auth():
 ## Internal Functions Used By API Auth and File Auth
 ####################################################################################################
 
-# Load all endpoints from json file into a Python dict and cache the data
 @cached(cache)
-def load_endpoints():
-    with open(app.config['API_ENDPOINTS_FILE'], "r") as file:
-        data = json.load(file)
-        return data
-
-# Load the josn for secured datasets - a list of UUIDs
-@cached(cache)
-def load_secured_datasets():
-    with open(app.config['SECURED_DATASETS_FILE'], "r") as file:
-        data = json.load(file)
+def load_file(file):
+    with open(file, "r") as f:
+        data = json.load(f)
         return data
 
 # Initialize AuthHelper (AuthHelper from HuBMAP commons package)
