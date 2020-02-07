@@ -31,7 +31,7 @@ cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'
 ## Default route
 ####################################################################################################
 
-@app.route('/')
+@app.route('/', methods = ['GET'])
 def home():
     return "This is HuBMAP Web Gateway :)"
 
@@ -40,7 +40,7 @@ def home():
 ## API Auth, no UI
 ####################################################################################################
 
-@app.route('/cache_clear')
+@app.route('/cache_clear', methods = ['GET'])
 def cache_clear():
     cache.clear()
     return "All function cache cleared."
@@ -50,7 +50,7 @@ def cache_clear():
 # All endpoints access need to be authenticated
 # Direct access will see the JSON message
 # Nginx auth_request module won't be able to display the JSON message for 401 response
-@app.route('/api_auth')
+@app.route('/api_auth', methods = ['GET'])
 def api_auth():
     wildcard_delimiter = "<*>"
     # The regular expression pattern takes any alphabetical and numerical characters, also other characters permitted in the URI
@@ -65,9 +65,6 @@ def api_auth():
     # We use body here only for direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
-    
-    # Load endpoints from json
-    data = load_endpoints()
     
     # In the json, we use authority as the key to differ each service section
     authority = None
@@ -84,6 +81,9 @@ def api_auth():
 
     # method and endpoint are always not None as long as authority is not None
     if authority is not None:
+        # Load endpoints from json
+        data = load_endpoints()
+
         # First pass, loop through the list to find exact static match
         for item in data[authority]:
             if (item['method'].upper() == method.upper()) and (wildcard_delimiter not in item['endpoint']):
@@ -123,7 +123,7 @@ def api_auth():
 
 # Auth for file service
 # Nginx auth_request module won't be able to display the JSON message for 401 response
-@app.route('/file_auth')
+@app.route('/file_auth', methods = ['GET'])
 def file_auth():
     # Debugging
     pprint("===========request.headers=============")
@@ -134,10 +134,7 @@ def file_auth():
     # We use body here only for direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
-
-    # Load the list of UUIDs for secured datasets
-    data = load_secured_datasets()
-        
+  
     # The file path in URL is the same as file system path
     endpoint = None
 
@@ -151,6 +148,9 @@ def file_auth():
     # File access only via http GET
     if method.upper() == 'GET':
         if endpoint is not None:
+            # Load the list of UUIDs for secured datasets
+            data = load_secured_datasets()
+
             # Parse the path to get the dataset UUID
             # Remove the leading slash before split
             path_list = endpoint.strip("/").split("/")
@@ -267,7 +267,7 @@ def api_access_allowed(item, request):
 # All endpoints access need to be authenticated
 # Direct access will see the login form
 # Nginx auth_request module won't be able to display the login form for 401 response
-@app.route('/user_auth')
+@app.route('/user_auth', methods = ['GET'])
 def user_auth():
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
@@ -289,7 +289,7 @@ def user_auth():
         return response_401
 
 
-@app.route('/login_form')
+@app.route('/login_form', methods = ['GET'])
 def login_form():
     resp = make_response(render_template('login.html'))
 
@@ -307,7 +307,7 @@ def login_form():
         return resp
 
 # Redirect users from react app login page to Globus auth login widget then redirect back
-@app.route('/login')
+@app.route('/login', methods = ['GET'])
 def login():
     redirect_uri = url_for('login', _external=True)
     confidential_app_auth_client = ConfidentialAppAuthClient(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
@@ -361,7 +361,7 @@ def login():
 # Revoke the tokens with Globus Auth
 # Expire all cookie data
 # Redirect the user to the Globus Auth logout page
-@app.route('/logout')
+@app.route('/logout', methods = ['GET'])
 def logout():
     confidential_app_auth_client = ConfidentialAppAuthClient(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
 
