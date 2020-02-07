@@ -84,6 +84,7 @@ def api_auth():
         # Load endpoints from json
         data = load_endpoints()
 
+        # No need to handle the cases when authority not in data.keys() 
         if authority in data.keys():
             # First pass, loop through the list to find exact static match
             for item in data[authority]:
@@ -114,9 +115,9 @@ def api_auth():
                         else:
                             return response_401
 
-        # After two passes and still no match found
-        # It could be either unknown request method or unknown path
-        return response_401
+            # After two passes and still no match found
+            # It could be either unknown request method or unknown path
+            return response_401
     else:
         # Missing lookup_key
         return response_401
