@@ -84,34 +84,35 @@ def api_auth():
         # Load endpoints from json
         data = load_endpoints()
 
-        # First pass, loop through the list to find exact static match
-        for item in data[authority]:
-            if (item['method'].upper() == method.upper()) and (wildcard_delimiter not in item['endpoint']):
-                # Ignore the query string
-                target_endpoint = endpoint.split("?")[0]
-                # Remove trailing slash for comparison
-                if item['endpoint'].strip('/') == target_endpoint.strip('/'):
-                    if api_access_allowed(item, request):
-                        return response_200
-                    else:
-                        return response_401
-                
-        # Second pass, loop through the list to do the wildcard match
-        for item in data[authority]:
-            if (item['method'].upper() == method.upper()) and (wildcard_delimiter in item['endpoint']):
-                # First replace all occurrences of the wildcard delimiters with regular expression
-                endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, regex_pattern)
-                # Ignore the query string
-                target_endpoint = endpoint.split("?")[0]
-                # If the full url path matches the regular expression pattern, 
-                # return a corresponding match object, otherwise return None
-                target_endpoint = endpoint.split("?")[0]
-                # Remove trailing slash for comparison
-                if re.fullmatch(endpoint_pattern.strip('/'), target_endpoint.strip('/')) is not None:
-                    if api_access_allowed(item, request):
-                        return response_200
-                    else:
-                        return response_401
+        if authority in data.keys():
+            # First pass, loop through the list to find exact static match
+            for item in data[authority]:
+                if (item['method'].upper() == method.upper()) and (wildcard_delimiter not in item['endpoint']):
+                    # Ignore the query string
+                    target_endpoint = endpoint.split("?")[0]
+                    # Remove trailing slash for comparison
+                    if item['endpoint'].strip('/') == target_endpoint.strip('/'):
+                        if api_access_allowed(item, request):
+                            return response_200
+                        else:
+                            return response_401
+                    
+            # Second pass, loop through the list to do the wildcard match
+            for item in data[authority]:
+                if (item['method'].upper() == method.upper()) and (wildcard_delimiter in item['endpoint']):
+                    # First replace all occurrences of the wildcard delimiters with regular expression
+                    endpoint_pattern = item['endpoint'].replace(wildcard_delimiter, regex_pattern)
+                    # Ignore the query string
+                    target_endpoint = endpoint.split("?")[0]
+                    # If the full url path matches the regular expression pattern, 
+                    # return a corresponding match object, otherwise return None
+                    target_endpoint = endpoint.split("?")[0]
+                    # Remove trailing slash for comparison
+                    if re.fullmatch(endpoint_pattern.strip('/'), target_endpoint.strip('/')) is not None:
+                        if api_access_allowed(item, request):
+                            return response_200
+                        else:
+                            return response_401
 
         # After two passes and still no match found
         # It could be either unknown request method or unknown path
