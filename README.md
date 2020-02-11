@@ -143,7 +143,7 @@ nginx -s reload
 The `entity-api`, `uuid-api`, `ingest-api`, and `hubmap-auth` docker images are based on the `hubmap/api-base-image:latest` image. If you need to update the base image, go to the `api-base-image` directory and recrerate it with:
 
 ````
-sudo docker build -t hubmap/api-base-image:latest
+sudo docker build -t hubmap/api-base-image:latest .
 ````
 
 Then publish it to the DockerHub:
