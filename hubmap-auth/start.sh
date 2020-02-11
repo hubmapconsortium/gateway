@@ -2,7 +2,7 @@
 
 # Start nginx in background
 # 'daemon off;' is nginx configuration directive
-sudo nginx -g 'daemon off;' &
+nginx -g 'daemon off;' &
 
 # Start uwsgi and keep it running in foreground
-sudo uwsgi --ini /home/hubmap/src/uwsgi.ini
+uwsgi --ini /usr/src/app/src/uwsgi.ini

@@ -9,8 +9,8 @@ services:
     restart: always
     # Map host machine port 80, 443, and 8443 to container ports
     ports:
-      - "80:80"
-      - "443:443"
+      - "80:8080"
+      - "443:9443"
       - "8443:8443"
     volumes:
       # Mount the app config to container in order to keep it outside of the image

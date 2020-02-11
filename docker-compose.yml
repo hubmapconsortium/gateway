@@ -9,15 +9,15 @@ services:
     image: hubmap-auth:1.1
     hostname: hubmap-auth
     container_name: hubmap-auth
+    environment:
+      - HOST_UID=1000
     networks:
       - gateway_hubmap
     volumes:
       # Make the uwsgi/nginx log files generated on container available through from host
-      - "./logs:/home/hubmap/logs"
+      - "./hubmap-auth/log:/usr/src/app/log"
       # favicon.ico
       - "./nginx/html:/usr/share/nginx/html"
-      # Example data volume mount
-      - "./data:/home/hubmap/data"
 
 networks:
   # This is the network created by gateway to enable communicaton between multiple docker-compose projects

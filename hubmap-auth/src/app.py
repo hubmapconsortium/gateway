@@ -7,6 +7,9 @@ import functools
 import re
 import os
 
+# For testing mkdir
+import pathlib
+
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
 
@@ -33,8 +36,6 @@ cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'
 
 @app.route('/', methods = ['GET'])
 def home():
-    os.makedirs('/home/hubmap/data/test')
-    os.mknod("/home/hubmap/data/test/test.txt")
     return "This is HuBMAP Web Gateway :)"
 
 
