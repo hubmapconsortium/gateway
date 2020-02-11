@@ -5,4 +5,4 @@
 sudo nginx -g 'daemon off;' &
 
 # Start uwsgi and keep it running in foreground
-uwsgi --ini /home/hubmap/src/uwsgi.ini
+sudo uwsgi --ini /home/hubmap/src/uwsgi.ini

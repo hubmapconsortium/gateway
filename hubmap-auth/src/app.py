@@ -33,8 +33,8 @@ cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'
 
 @app.route('/', methods = ['GET'])
 def home():
-    os.makedirs('/home/hubmap/test_dir/44')
-    os.mknod("/home/hubmap/test_dir/newfile.txt")
+    os.makedirs('/home/hubmap/data/test')
+    os.mknod("/home/hubmap/data/test/test.txt")
     return "This is HuBMAP Web Gateway :)"
 
 
