@@ -10,6 +10,9 @@ The Flask application confiuration file `app.cfg` is located under `instance` fo
 # File path of API endpoints json file, DO NOT MODIFY
 API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
 
+# File path of the secured datasets
+SECURED_DATASETS_FILE = '/usr/src/app/secured_datasets.json'
+
 # Globus app client ID and secret
 GLOBUS_APP_ID = ''
 GLOBUS_APP_SECRET = ''

@@ -8,9 +8,12 @@ services:
     # Specifying a restart policy to avoid downtime
     restart: always
     # Map host machine port 80, 443, and 8443 to container ports
+    # Only root can listen on ports below 1024, we use higher-numbered ports
+    # since nginx is running under non-root user hubmap
     ports:
       - "80:8080"
-      - "443:9443"
+      - "443:4430"
+      # 8443 is used by ingest-api running on another machine
       - "8443:8443"
     volumes:
       # Mount the app config to container in order to keep it outside of the image
