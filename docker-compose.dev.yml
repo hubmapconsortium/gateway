@@ -5,19 +5,21 @@ services:
   hubmap-auth:
     # Mapping ports in the HOST:CONTAINER format
     # Each API has its dedicated port and needs to be mapped here
+    # Only root can listen on ports below 1024, we use higher-numbered ports
+    # since nginx is running under non-root user hubmap
     ports:
       # hubmap-auth
-      - "8080:80" 
+      - "8080:8080" 
       # assets
-      - "8181:81"
+      - "8181:8181"
       # uuid-api
-      - "8282:82" 
+      - "8282:8282" 
       # entity-api
-      - "8383:83" 
+      - "8383:8383" 
       # ingest-api
-      - "8484:84" 
+      - "8484:8484" 
       # ingest-ui
-      - "8585:85" 
+      - "8585:8585" 
     volumes:
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"

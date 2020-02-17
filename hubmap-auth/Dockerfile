@@ -1,8 +1,7 @@
 # Parent image
 FROM hubmap/api-base-image:latest
 
-LABEL description="HuBMAP Authentication and Authorization Service" \
-	version="1.0"
+LABEL description="HuBMAP Authentication and Authorization Service"
 
 WORKDIR /usr/src/app
 
@@ -18,17 +17,15 @@ enabled=1\n'\
 >> /etc/yum.repos.d/nginx.repo
 
 # Reduce the number of layers in image by minimizing the number of separate RUN commands
-# 1 - Update the package listings
-# 2 - Install nginx (using the custom yum repo specified earlier) and git (for pip installing HuBMAP commons from github)
-# 3 - Remove the default nginx config file
-# 4 - Install Extra Packages for Enterprise Linux (EPEL) 
-# 5 - Use the EPEL repo for installing python, pip, uwsgi, uwsgi python plugin
-# 6 - Upgrade pip, after upgrading, both pip and pip3 are the same version
-# 7 - Install flask app dependencies with pip (pip3 also works)
-# 8 - Make the start script executable
-# 9 - Clean all yum cache
+# 1 - Install nginx (using the custom yum repo specified earlier) and git (for pip installing HuBMAP commons from github)
+# 2 - Remove the default nginx config file
+# 3 - Overwrite the nginx.conf with ours to run nginx as non-root
+# 4 - Install flask app dependencies with pip (pip3 also works)
+# 5 - Make the start script executable
+# 6 - Clean all yum cache
 RUN yum install -y nginx && \
     rm /etc/nginx/conf.d/default.conf && \
+    mv nginx.conf /etc/nginx/nginx.conf && \
     pip install -r src/requirements.txt && \
     chmod +x start.sh && \
     yum clean all 
@@ -37,5 +34,11 @@ RUN yum install -y nginx && \
 # EXPOSE does not make the ports of the container accessible to the host.
 # Here 5000 is for the uwsgi socket, 80 for nginx
 EXPOSE 5000 80
+
+# Set an entrypoint
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["./start.sh"]

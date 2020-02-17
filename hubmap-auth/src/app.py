@@ -7,6 +7,9 @@ import functools
 import re
 import os
 
+# For testing mkdir
+import pathlib
+
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
 
