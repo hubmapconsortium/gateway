@@ -26,7 +26,7 @@ services:
       # Mount conf.d-dev to the nginx conf.d on container
       - "./nginx/conf.d-dev:/etc/nginx/conf.d"
       # Mount the static files
-      - "/usr/local/src/hubmap/assets:/usr/src/assets"
+      - "/hubmap/assets:/usr/src/assets"
       # Mount the API endpoints json file for API endpoints lookup
       - "./api_endpoints.dev.json:/usr/src/app/api_endpoints.json"
       # Mount the secured_datasets json file for dataset files lookup

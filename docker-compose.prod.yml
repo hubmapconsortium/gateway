@@ -20,6 +20,8 @@ services:
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
       # Mount conf.d-prod to the nginx conf.d on container
       - "./nginx/conf.d-prod:/etc/nginx/conf.d"
+      # Mount the static files
+      - "/hubmap/assets:/usr/src/assets"
       # Mount ssl certificates from host to container
       - "/etc/letsencrypt:/etc/letsencrypt"
       # Mount the API endpoints json file for API endpoints lookup
