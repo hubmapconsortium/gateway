@@ -42,9 +42,9 @@ else
             
             # Also build ingest-api for localhost only
             if [ "$1" = "localhost" ]; then
-	            ./docker-setup-ingest-api.$1.sh
+                ./docker-setup-ingest-api.$1.sh
                 docker-compose -f docker-compose-ingest-api.$1.yml build
-	        fi
+            fi
         elif [ "$2" = "start" ]; then
             # Back to parent directory
             cd ..
@@ -113,7 +113,7 @@ else
             )
 
             # Add ingest-api config to the array for localhost and dev only
-            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
+            if [ "$1" = "localhost" ]; then
                 config_paths+=(
                     '../ingest-ui/src/ingest-api/instance/app.cfg'
                 )
@@ -135,7 +135,7 @@ else
             absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
 
             # Also check the ingest-api for localhost and dev only
-            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
+            if [ "$1" = "localhost" ]; then
                 absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
             fi
 
