@@ -67,7 +67,6 @@ Currently, you can deploy the following projects with the `gateway`. Git clone t
 - [UUID API](https://github.com/hubmapconsortium/uuid-api) (the master branch)
 - [Entity API](https://github.com/hubmapconsortium/entity-api) (the master branch)
 - [Ingest API and UI](https://github.com/hubmapconsortium/ingest-ui) (the master branch)
-- [Ingest Pipeline](https://github.com/hubmapconsortium/ingest-pipeline) (the master branch)
 
 ### Step 2: add configuration files for each project
 
@@ -83,14 +82,16 @@ Note: MySQL is defiend in the `docker-compose.yml` of the `uuid-api` project and
 In the `gateway` project, first make sure the `hubmap-docker.sh` script is executable, 
 
 ````
-sudo chmod +x hubmap-docker.sh
+chmod +x hubmap-docker.sh
 ````
 
 Before we go ahead to start building the docker images, we can do a check to see if all the required configuration files are in place:
 
 ````
-sudo ./hubmap-docker.sh localhost check
+./hubmap-docker.sh localhost check
 ````
+
+Building the docker images and starting/stopping the contianers require to use docker daemon, you'll probably need to use `sudo` in the following steps. 
 
 To build all the docker images:
 
