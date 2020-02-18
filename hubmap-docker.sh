@@ -32,16 +32,16 @@ else
             ./docker-setup.sh
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 
-            # Only have ingest-api and ingest-ui on the same host machine for dev environment
-            # Testing and productiton deployment has ingest-api on a separate machine
+            # Only have ingest-api and ingest-ui on the same host machine for localhost environment
+            # dev, test, or prod deployment has ingest-api on a separate machine
             cd ../../
 
             cd ingest-ui/docker
             ./docker-setup-ingest-ui.sh
             docker-compose -f docker-compose-ingest-ui.$1.yml build
             
-            # Also build ingest-api for localhost and dev only
-            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
+            # Also build ingest-api for localhost only
+            if [ "$1" = "localhost" ]; then
 	            ./docker-setup-ingest-api.$1.sh
                 docker-compose -f docker-compose-ingest-api.$1.yml build
 	        fi
@@ -58,15 +58,15 @@ else
             cd entity-api/docker
             docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml up -d
             
-            # Only have ingest-api and ingest-ui on the same host machine for dev environment
-            # Testing and productiton deployment has ingest-api on a separate machine
+            # Only have ingest-api and ingest-ui on the same host machine for localhost environment
+            # dev, test, or prod deployment has ingest-api on a separate machine
             cd ../../
 
             cd ingest-ui/docker
             docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml up -d
 
-            # Also start the ingest-api for localhost and dev only
-            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
+            # Also start the ingest-api for localhost only
+            if [ "$1" = "localhost" ]; then
                 docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml up -d
             fi
 
@@ -84,13 +84,13 @@ else
             # Back to parent dir and stop each service
             cd ..
 
-            # Only have ingest-api and ingest-ui on the same host machine for dev environment
-            # Testing and productiton deployment has ingest-api on a separate machine
+            # Only have ingest-api and ingest-ui on the same host machine for localhost environment
+            # dev, test, or prod deployment has ingest-api on a separate machine
             cd ingest-ui/docker
             docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml stop
 
-            # Also stop the ingest-api container for localhost and dev only
-            if [[ "$1" = "localhost" || "$1" = "dev" ]]; then
+            # Also stop the ingest-api container for localhost only
+            if [ "$1" = "localhost" ]; then
                 docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml stop
             fi
 
