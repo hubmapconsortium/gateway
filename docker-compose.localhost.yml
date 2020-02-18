@@ -3,27 +3,30 @@ version: "3.7"
 services:
   
   hubmap-auth:
-    # Avoid accidentally creating zombie processes
-    init: true
-    # Specifying a restart policy to avoid downtime
-    restart: always
-    # Map host machine port 80, 443, and 8443 to container ports
+    # Mapping ports in the HOST:CONTAINER format
+    # Each API has its dedicated port and needs to be mapped here
     # Only root can listen on ports below 1024, we use higher-numbered ports
     # since nginx is running under non-root user hubmap
     ports:
-      - "80:8080"
-      - "443:4430"
-      # 8443 is used by ingest-api running on another machine
-      - "8443:8443" 
+      # hubmap-auth
+      - "8080:8080" 
+      # assets
+      - "8181:8181"
+      # uuid-api
+      - "8282:8282" 
+      # entity-api
+      - "8383:8383" 
+      # ingest-api
+      - "8484:8484" 
+      # ingest-ui
+      - "8585:8585" 
     volumes:
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
-      # Mount conf.d-test to the nginx conf.d on container
+      # Mount conf.d-dev to the nginx conf.d on container
       - "./nginx/conf.d-dev:/etc/nginx/conf.d"
       # Mount the static files
       - "/hubmap/assets:/usr/src/assets"
-      # Mount ssl certificates from host to container
-      - "/etc/letsencrypt:/etc/letsencrypt"
       # Mount the API endpoints json file for API endpoints lookup
       - "./api_endpoints.dev.json:/usr/src/app/api_endpoints.json"
       # Mount the secured_datasets json file for dataset files lookup

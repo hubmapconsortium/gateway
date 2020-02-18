@@ -1,5 +1,5 @@
 {
-  "uuid-api.dev.hubmapconsortium.org": [
+  "localhost:8282": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -35,7 +35,7 @@
       ]
     }
   ],
-  "entity-api.dev.hubmapconsortium.org": [
+  "localhost:8383": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -87,7 +87,7 @@
       ]
     }
   ],
-  "ingest-api.dev.hubmapconsortium.org": [
+  "localhost:8484": [
     {
       "method": "GET",
       "endpoint": "/",
