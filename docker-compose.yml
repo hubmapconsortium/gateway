@@ -9,9 +9,6 @@ services:
     image: hubmap-auth:1.1
     hostname: hubmap-auth
     container_name: hubmap-auth
-    environment:
-      - HOST_GID=1000
-      - HOST_UID=1000
     networks:
       - gateway_hubmap
     volumes:

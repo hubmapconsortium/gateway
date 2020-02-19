@@ -2,32 +2,44 @@
 
 The HuBMAP Web Gateway serves as an authentication and authorization gateway for the HuBMAP API services. All API requests will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the API endpoints. As a result of this design, the API services no longer need to handle the authentication and authorization.
 
+## Development and deployment environments
+
+We have the following 4 development and deployment environments:
+
+* localhost - all the services will be deployed with docker containers including sample Neo4j and sample MySQL are running on the same localhost listing on different ports, without globus data
+* dev - all services except ingest-api will be running on AWS EC2 with SSL certificates, Neo4j and MySQL are dev versions on AWS, and ingest-api(and another nginx) will be running on PSC with domain and globus data
+* test - similar to dev but for production-like settings with Neo4j and MySQL test versions of database
+* prod - similar to test but for production settings with production versions of Neo4j and MySQL
+
 ## Project structure
 
 ````
 gateway
 ├── api_endpoints.dev.json
+├── api_endpoints.localhost.json
 ├── api_endpoints.prod.json
 ├── api_endpoints.test.json
 ├── docker-compose.yml
 ├── docker-compose.dev.yml
+├── docker-compose.localhost.yml
 ├── docker-compose.prod.yml
 ├── docker-compose.test.yml
 ├── hubmap-auth
-│   ├── Dockerfile
-│   ├── log
-│   ├── src
-│   └── start.sh
+│   ├── Dockerfile
+│   ├── log
+│   ├── src
+│   └── start.sh
 └── nginx
     ├── conf.d-dev
+    ├── conf.d-localhost
     ├── conf.d-prod
     ├── conf.d-test
     └── html
 ````
 
-* `api_endpoints.*.json` are lookup files of all the API endpoints for different environments (dev, test, and prod). Public endpoints don't need authentication, but private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. 
+* `api_endpoints.*.json` are lookup files of all the API endpoints for different environments (localhost, dev, test, and prod). Public endpoints don't need authentication, but private endpoints will require the globus `auth_token` in the custom `MAuthorization` HTTP header. 
 
-* `docker-compose.yml` defines all the services and container details, as well as mounted volumes and ports mapping. `docker-compose.dev.yml` should be used for local development along with the base `docker-compose.yml`. `docker-compose.test.yml` and `docker-compose.prod.yml` should be used for testing and production respectively  along with the base `docker-compose.yml`.
+* `docker-compose.yml` defines all the services and container details, as well as mounted volumes and ports mapping. `docker-compose.dev.yml` should be used for localhost development along with the base `docker-compose.yml`. `docker-compose.test.yml` and `docker-compose.prod.yml` should be used for testing and production respectively  along with the base `docker-compose.yml`.
 
 * `hubmap-auth` is the actual HuBMAP Web Gateway authentication and authorization service that verifies all the API requests. It basically sets up the uWSGI application server to launch the Python Flask application and Nginx to act as a front end reverse proxy.
 
@@ -70,31 +82,33 @@ Note: MySQL is defiend in the `docker-compose.yml` of the `uuid-api` project and
 In the `gateway` project, first make sure the `hubmap-docker.sh` script is executable, 
 
 ````
-sudo chmod +x hubmap-docker.sh
+chmod +x hubmap-docker.sh
 ````
 
 Before we go ahead to start building the docker images, we can do a check to see if all the required configuration files are in place:
 
 ````
-sudo ./hubmap-docker.sh dev check
+./hubmap-docker.sh localhost check
 ````
+
+Building the docker images and starting/stopping the contianers require to use docker daemon, you'll probably need to use `sudo` in the following steps. 
 
 To build all the docker images:
 
 ````
-sudo ./hubmap-docker.sh dev build
+sudo ./hubmap-docker.sh localhost build
 ````
 
 The build process will take some time before we have all the docker images created. After that, we can start all the services:
 
 ````
-sudo ./hubmap-docker.sh dev start
+sudo ./hubmap-docker.sh localhost start
 ````
 
 And to stop the services:
 
 ````
-sudo ./hubmap-docker.sh dev stop
+sudo ./hubmap-docker.sh localhost stop
 ````
 
 ## Testing and Production deployment
@@ -140,10 +154,10 @@ nginx -s reload
 
 ## Update base image
 
-The `entity-api`, `uuid-api`, `ingest-api`, `ingest-ui`, and `hubmap-auth` docker images are based on the `hubmap/api-base-image:latest` image. If you need to update the base image, go to the `api-base-image` directory and recrerate it with:
+The `entity-api`, `uuid-api`, `ingest-api`, and `hubmap-auth` docker images are based on the `hubmap/api-base-image:latest` image. If you need to update the base image, go to the `api-base-image` directory and recrerate it with:
 
 ````
-sudo docker build -t hubmap/api-base-image:latest .
+sudo docker build -t hubmap/api-base-image:latest
 ````
 
 Then publish it to the DockerHub:
