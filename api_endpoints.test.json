@@ -131,7 +131,7 @@
       ]
     },
     {
-      "method": "POST",
+      "method": "PUT",
       "endpoint": "/datasets/status",
       "auth": false
     },
