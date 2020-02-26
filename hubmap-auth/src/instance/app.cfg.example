@@ -12,7 +12,7 @@ GLOBUS_HUBMAP_READ_GROUP_UUID = '5777527e-ec11-11e8-ab41-0af86edb4424'
 # URL base to entity-api for getting metadata information of a given dataset UUID
 # Default value works for docker localhost
 # Works regardless the trailing slash /
-ENTITY_API_URL = 'http://hubmap-auth:3333/entities'
+ENTITY_API_URL = 'http://localhost:3333/entities'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
