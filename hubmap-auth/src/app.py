@@ -20,6 +20,7 @@ app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
 app.config['FLASK_APP_BASE_URI'] = app.config['FLASK_APP_BASE_URI'].strip('/')
+app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -216,12 +217,15 @@ def get_file_access(dataset_uuid, request):
 
     # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
     # Key 'hmgroupids' presents only when group_required is True
-    hubmap_read_group = '5777527e-ec11-11e8-ab41-0af86edb4424'
     for group in user_info['hmgroupids']:
-        if group == hubmap_read_group:
+        if group == app.config['GLOBUS_HUBMAP_READ_GROUP_UUID']:
             # Further check if the dataset contains gene sequence information
             # sending get request and saving the response as response object 
-            response = requests.get(url = "http://hubmap-auth:3333/entities/" + dataset_uuid, headers={"AUTHORIZATION": request.headers.get("AUTHORIZATION")}) 
+            entity_api_full_url = url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
+            request_headers = {
+                'AUTHORIZATION': request.headers.get('AUTHORIZATION')
+            }
+            response = requests.get(url = entity_api_full_url, headers = request_headers) 
             if response.status_code == 200:
                 metadata = response.json()
                 pprint(metadata)
