@@ -24,8 +24,6 @@ services:
       - "./hubmap-auth/src/:/usr/src/app/src"
       # Mount conf.d-test to the nginx conf.d on container
       - "./nginx/conf.d-test:/etc/nginx/conf.d"
-      # Mount the static files
-      - "/hubmap/assets:/usr/src/assets"
       # Mount ssl certificates from host to container
       - "/etc/letsencrypt:/etc/letsencrypt"
       # Mount the API endpoints json file for API endpoints lookup
