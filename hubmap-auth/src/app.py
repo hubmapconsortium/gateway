@@ -141,7 +141,7 @@ def file_auth():
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
   
-    # The file path in URL is the same as file system path
+    method = None
     endpoint = None
 
     # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
