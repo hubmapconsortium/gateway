@@ -58,7 +58,7 @@ def api_auth():
     regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
     # Debugging
-    pprint("===========request.headers=============")
+    pprint("===========api_auth request.headers=============")
     pprint(request.headers)
 
     # Nginx auth_request only cares about the response status code
@@ -131,7 +131,7 @@ def api_auth():
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
     # Debugging
-    pprint("===========request.headers=============")
+    pprint("===========file_auth request.headers=============")
     pprint(request.headers)
 
     # Nginx auth_request only cares about the response status code
