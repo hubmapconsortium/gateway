@@ -152,27 +152,30 @@ def file_auth():
         endpoint = request.headers.get("X-Original-URI")
 
     # File access only via http GET
-    if method.upper() == 'GET':
-        if endpoint is not None:
-            # Parse the path to get the dataset UUID
-            # Remove the leading slash before split
-            path_list = endpoint.strip("/").split("/")
-            dataset_uuid = path_list[0]
-            # Check if the globus token is valid for accessing this secured dataset
-            code = get_file_access(dataset_uuid, request)
+    if method is not None:
+        if method.upper() == 'GET':
+            if endpoint is not None:
+                # Parse the path to get the dataset UUID
+                # Remove the leading slash before split
+                path_list = endpoint.strip("/").split("/")
+                dataset_uuid = path_list[0]
+                # Check if the globus token is valid for accessing this secured dataset
+                code = get_file_access(dataset_uuid, request)
 
-            if code == 200:
-                return response_200
-            elif code == 401:
+                if code == 200:
+                    return response_200
+                elif code == 401:
+                    return response_401
+                elif code == 403:
+                    return response_403
+            else: 
+                # Missing dataset UUID in path
                 return response_401
-            elif code == 403:
-                return response_403
-        else: 
-            # Missing dataset UUID in path
+        else:
+            # Wrong http method
             return response_401
-    else:
-        # Wrong http method
-        return response_401
+    # Not a valid http request
+    return response_401
 
 
 ####################################################################################################
