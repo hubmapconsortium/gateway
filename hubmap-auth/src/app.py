@@ -161,7 +161,8 @@ def file_auth():
                 dataset_uuid = path_list[0]
                 # Check if the globus token is valid for accessing this secured dataset
                 code = get_file_access(dataset_uuid, request)
-
+                pprint("==========get_file_access==============")
+                pprint(code)
                 if code == 200:
                     return response_200
                 elif code == 401:
@@ -225,6 +226,7 @@ def get_file_access(dataset_uuid, request):
             # Further check if the dataset contains gene sequence information
             # sending get request and saving the response as response object 
             entity_api_full_url = url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
+            # Will need support MAuthorization header later
             request_headers = {
                 'AUTHORIZATION': request.headers.get('AUTHORIZATION')
             }
@@ -232,11 +234,15 @@ def get_file_access(dataset_uuid, request):
             if response.status_code == 200:
                 metadata = response.json()
                 pprint(metadata)
+                entity_node = metadata['entity_node']
                 # No access to datasets that contain gene sequence
-                if 'phi' in metadata and metadata['phi'] == "yes":
-                    return authorization_required
-                else:
-                    return allowed        
+                if 'phi' in entity_node:
+                    if entity_node['phi'] == "yes":
+                        return authorization_required
+                    else:
+                        return allowed 
+                # Will phi property be always present?
+                return allowed        
 
             return authentication_required
 
