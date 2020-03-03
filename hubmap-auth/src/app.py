@@ -225,7 +225,7 @@ def get_file_access(dataset_uuid, request):
         if group == app.config['GLOBUS_HUBMAP_READ_GROUP_UUID']:
             # Further check if the dataset contains gene sequence information
             # sending get request and saving the response as response object 
-            entity_api_full_url = url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
+            entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
             # Will need support MAuthorization header later
             request_headers = {
                 'AUTHORIZATION': request.headers.get('AUTHORIZATION')
