@@ -66,6 +66,7 @@ Currently, you can deploy the following projects with the `gateway`. Git clone t
 
 - [UUID API](https://github.com/hubmapconsortium/uuid-api) (the master branch)
 - [Entity API](https://github.com/hubmapconsortium/entity-api) (the master branch)
+- [Search API](https://github.com/hubmapconsortium/search-api) (the master branch)
 - [Ingest API and UI](https://github.com/hubmapconsortium/ingest-ui) (the master branch)
 
 ### Step 2: add configuration files for each project
