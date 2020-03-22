@@ -67,7 +67,7 @@ else
             cd ../../
 
             cd search-api/docker
-            docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml up -d
+            docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml up -d
             
             # Only have ingest-api and ingest-ui on the same host machine for localhost environment
             # dev, test, or prod deployment has ingest-api on a separate machine
@@ -118,7 +118,7 @@ else
             cd ../../
 
             cd search-api/docker
-            docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml stop
+            docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml stop
         elif [ "$2" = "check" ]; then
             # Bash array
             config_paths=(
