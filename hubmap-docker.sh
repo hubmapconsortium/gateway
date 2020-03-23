@@ -1,5 +1,17 @@
 #!/bin/bash
 
+function get_dir_of_this_script () {
+    # This function sets DIR to the directory in which this script itself is found.
+    # Thank you https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself
+    SCRIPT_SOURCE="${BASH_SOURCE[0]}"
+    while [ -h "$SCRIPT_SOURCE" ]; do # resolve $SCRIPT_SOURCE until the file is no longer a symlink
+	DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
+	SCRIPT_SOURCE="$(readlink "$SCRIPT_SOURCE")"
+	[[ $SCRIPT_SOURCE != /* ]] && SCRIPT_SOURCE="$DIR/$SCRIPT_SOURCE" # if $SCRIPT_SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+    done
+    DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
+    }
+
 function absent_or_newer () {
     if  [ \( -e $1 \) -a \( $2 -nt $1 \) ]; then
         echo "$1 is out of date"
@@ -13,38 +25,45 @@ else
     if [[ "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "check" ]]; then
         echo "Unknown command '$2', specify 'build' or 'start' or 'stop' or 'check' as the second argument"
     else
-        if [ "$2" = "build" ]; then
+	# set DIR to be the directory of the current script
+	get_dir_of_this_script
+	echo 'DIR is ' $DIR
+
+	if [ "$2" = "build" ]; then
             # First create the shared docker network
+	    cd $DIR
             docker network create gateway_hubmap
 
             # Build images for gateway since this is the current dir
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 
-            cd ..
-
-            cd uuid-api/docker
+            cd $DIR/../uuid-api/docker
             ./docker-setup.sh
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 
-            cd ../../
-
-            cd entity-api/docker
+            cd $DIR/../entity-api/docker
             ./docker-setup.sh
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 
             # Only have ingest-api and ingest-ui on the same host machine for localhost environment
             # dev, test, or prod deployment has ingest-api on a separate machine
-            cd ../../
-
-            cd ingest-ui/docker
+            cd $DIR/../ingest-ui/docker
             ./docker-setup-ingest-ui.sh
             docker-compose -f docker-compose-ingest-ui.$1.yml build
             
             # Also build ingest-api for localhost only
             if [ "$1" = "localhost" ]; then
+		cd $DIR/../ingest-ui/docker
                 ./docker-setup-ingest-api.$1.sh
                 docker-compose -f docker-compose-ingest-api.$1.yml build
             fi
+
+	    # Only have ingest-pipeline on this host for localhost environment
+	    if [ "$1" = "localhost" ]; then
+		cd $DIR/../ingest-pipeline/docker
+		./docker-setup-ingest-pipeline.$1.sh
+		docker-compose -f docker-compose-ingest-pipeline.$1.yml build
+	    fi
         elif [ "$2" = "start" ]; then
             # Back to parent directory
             cd ..
