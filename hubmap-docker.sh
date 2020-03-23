@@ -45,6 +45,12 @@ else
             ./docker-setup.sh
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
 
+            cd ../../
+
+            cd search-api/docker
+            ./docker-setup.sh
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+
             # Only have ingest-api and ingest-ui on the same host machine for localhost environment
             # dev, test, or prod deployment has ingest-api on a separate machine
             cd $DIR/../ingest-ui/docker
@@ -76,6 +82,11 @@ else
 
             cd entity-api/docker
             docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml up -d
+
+            cd ../../
+
+            cd search-api/docker
+            docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml up -d
             
             # Only have ingest-api and ingest-ui on the same host machine for localhost environment
             # dev, test, or prod deployment has ingest-api on a separate machine
@@ -122,12 +133,18 @@ else
 
             cd entity-api/docker
             docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml stop
+
+            cd ../../
+
+            cd search-api/docker
+            docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml stop
         elif [ "$2" = "check" ]; then
             # Bash array
             config_paths=(
                 '../gateway/hubmap-auth/src/instance/app.cfg'
                 '../uuid-api/src/instance/app.cfg'
                 '../entity-api/src/instance/app.cfg'
+                '../search-api/src/instance/app.cfg'
                 '../ingest-ui/src/ingest-ui/.env'
             )
 
@@ -151,6 +168,7 @@ else
             # and causes hubmap-docker.sh to exit with an error code.
             absent_or_newer ../uuid-api/docker/uuid-api/src ../uuid-api/src
             absent_or_newer ../entity-api/docker/entity-api/src ../entity-api/src
+            absent_or_newer ../search-api/docker/search-api/src ../search-api/src
             absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
 
             # Also check the ingest-api for localhost and dev only
