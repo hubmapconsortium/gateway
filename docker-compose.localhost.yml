@@ -24,6 +24,8 @@ services:
       - "8484:8484" 
       # ingest-ui
       - "8585:8585" 
+      # search-api
+      - "8686:8686"
     volumes:
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
