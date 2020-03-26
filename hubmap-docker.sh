@@ -75,6 +75,9 @@ if [ -n "$VERBOSE" ] ; then
 fi
 
 # set some environment variables which may be used by the docker-compose scripts
+if [ -e $DIR/../ingest-pipeline/build_number ] ; then
+	export INGEST_PIPELINE_BUILD_NUM=`cat $DIR/../ingest-pipeline/build_number`
+fi
 if [ "$1" = "localhost" ]; then
     if [ -z "$HOST_UID" ] ; then
 	export HOST_UID=`id -u`
@@ -84,6 +87,7 @@ if [ "$1" = "localhost" ]; then
     fi
 fi
 if [ -n "$VERBOSE" ] ; then
+    echo 'INGEST_PIPELINE_BUILD_NUM is ' $INGEST_PIPELINE_BUILD_NUM
     echo 'HOST_UID is ' $HOST_UID
     echo 'HOST_GID is ' $HOST_GID
 fi
