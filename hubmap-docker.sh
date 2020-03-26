@@ -19,12 +19,17 @@ function absent_or_newer () {
     fi
 }
 
+function echo_help () {
+	echo "Usage: $0 [localhost|dev|test|prod] [build|start|stop|check|config] [-vh][--no-cache]"
+}
+
 # Command line parsing.  See for ex. https://sookocheff.com/post/bash/parsing-bash-script-arguments-with-shopts/
 BUILD_OPTS=
 VERBOSE=
-options=$(getopt -o v --long no-cache -- "$@")
+options=$(getopt -o vh --long no-cache -- "$@")
 [ $? -eq 0 ] || {
     echo "Incorrect option provided"
+    echo_help
     exit 1
 }
 eval set -- "$options"
@@ -36,10 +41,14 @@ while true; do
 	-v)
 	    VERBOSE=1
 	    ;;
-        --)
-            shift
-            break
-            ;;
+	-h)
+	    echo_help
+	    exit 0
+	    ;;
+    --)
+        shift
+        break
+        ;;
     esac
     shift
 done
@@ -54,8 +63,8 @@ if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "prod" ]
     exit 255
 fi
 
-if [[ "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "check" ]]; then
-    echo "Unknown command '$2', specify 'build' or 'start' or 'stop' or 'check' as the second argument"
+if [[ "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "check" && "$2" != "config" ]]; then
+    echo "Unknown command '$2', specify 'build' or 'start' or 'stop' or 'check' or 'config' as the second argument"
     exit 255
 fi
 
@@ -176,6 +185,41 @@ elif [ "$2" = "stop" ]; then
 
     cd $DIR/../search-api/docker
     docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml stop
+elif [ "$2" = "config" ]; then
+    # Stop the gateway first
+    cd $DIR
+    echo '###### GATEWAY ########'
+    docker-compose -p gateway -f docker-compose.yml -f docker-compose.$1.yml config
+
+    # Stop each service
+
+    # Only have ingest-api and ingest-ui on the same host machine for localhost environment
+    # dev, test, or prod deployment has ingest-api on a separate machine
+    cd $DIR/../ingest-ui/docker
+    echo '###### INGEST-UI ########'
+    docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml config
+
+    # Also stop the ingest-api and ingest-pipeline containers for localhost only
+    if [ "$1" = "localhost" ]; then
+	cd $DIR/../ingest-ui/docker
+    echo '###### INGEST-API ########'
+    docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml config
+	cd $DIR/../ingest-pipeline/docker
+    echo '###### INGEST-PIPELINE ########'
+	docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml config
+    fi
+
+    cd $DIR/../uuid-api/docker
+    echo '###### UUID_API ########'
+    docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml config
+
+    cd $DIR/../entity-api/docker
+    echo '###### ENTITY-API ########'
+    docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml config
+
+    cd $DIR/../search-api/docker
+    echo '###### SEARCH-API ########'
+    docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml config
 elif [ "$2" = "check" ]; then
     # Bash array
     config_paths=(
