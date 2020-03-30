@@ -9,8 +9,8 @@ services:
     restart: always
     environment:
       - DEPLOY_MODE=prod
-      - HOST_GID=1000
-      - HOST_UID=1000
+      - HOST_GID=${HOST_GID:-1000}
+      - HOST_UID=${HOST_UID:-1000}
     # Map host machine port 80, 443, and 8443 to container ports
     # Only root can listen on ports below 1024, we use higher-numbered ports
     # since nginx is running under non-root user hubmap
