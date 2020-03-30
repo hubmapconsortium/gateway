@@ -80,10 +80,12 @@ if [ -e $DIR/../ingest-pipeline/build_number ] ; then
 fi
 if [ "$1" = "localhost" ]; then
     if [ -z "$HOST_UID" ] ; then
-	export HOST_UID=`id -u`
+    log_name=`logname`
+	export HOST_UID=`id -u $log_name`
     fi
     if [ -z "$HOST_GID" ] ; then
-	export HOST_GID=`id -g`
+    log_name=`logname`
+	export HOST_GID=`id -g $log_name`
     fi
 fi
 if [ -n "$VERBOSE" ] ; then
