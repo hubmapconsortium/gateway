@@ -92,19 +92,29 @@ Before we go ahead to start building the docker images, we can do a check to see
 ./hubmap-docker.sh localhost check
 ````
 
+We can also validate and view the details of corresponding compose files:
+
+````
+./hubmap-docker.sh localhost config
+````
+
 Building the docker images and starting/stopping the contianers require to use docker daemon, you'll probably need to use `sudo` in the following steps. 
 
 To build all the docker images:
 
 ````
-sudo ./hubmap-docker.sh localhost build
+sudo ./hubmap-docker.sh localhost build --no-cache
 ````
 
-The build process will take some time before we have all the docker images created. After that, we can start all the services:
+The build process will take some time before we have all the docker images created. And the optional `--no-cache` option is to ensure not to use the cache when building the images.
+
+After that, we can start all the services:
 
 ````
 sudo ./hubmap-docker.sh localhost start
 ````
+
+This command starts up all the containers and runs the processes inside each container (except the `hubmap-neo4j`, `hubmap-mysql`, `hubmap-elasticsearch`, `hubmap-kibana`, and `ingest-pipeline`) with the user `hubmap` who has the same UID and GID based on the user on the host.
 
 And to stop the services:
 
