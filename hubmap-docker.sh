@@ -216,7 +216,7 @@ elif [ "$2" = "config" ]; then
     fi
 
     cd $DIR/../uuid-api/docker
-    echo '###### UUID_API ########'
+    echo '###### UUID-API ########'
     docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml config
 
     cd $DIR/../entity-api/docker
