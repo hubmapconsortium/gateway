@@ -87,7 +87,13 @@ In the `gateway` project, first make sure the `hubmap-docker.sh` script is execu
 chmod +x hubmap-docker.sh
 ````
 
-The usage of this script:
+To see the usage of this script:
+
+````
+./hubmap-docker.sh -h
+````
+
+It outputs:
 
 ````
 ./hubmap-docker.sh [localhost|dev|test|prod] [build|start|stop|check|config] [-vh][--no-cache]
