@@ -54,6 +54,18 @@ The `log` under `hubmap-auth` is another volume mount, this allows us to access 
 
 Note: Docker Compose requires Docker to be installed and running first.
 
+### Post-installation configurations
+
+The Docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root and other users can only access it using sudo. The Docker daemon always runs as the root user. If you don’t want to preface the docker command with sudo, add users to the `docker` group:
+
+````
+sudo usermod -aG docker $USER
+````
+
+The log out and log back in so that your group membership is re-evaluated. If testing on a virtual machine, it may be necessary to restart the virtual machine for changes to take effect.
+
+Note: the following instructions with docker commands are based on managing Docker as a non-root user.
+
 ## Workflow of setting up multiple HuBMAP docker compose projects
 
 With a micro-services architecture design, we probably want to share a single database container across two or more applications, so that they can access the same data. Docker and Docker Compose make this possible through the use of Docker networks, allowing containers from different compose projects to be attached to the same network.
@@ -118,7 +130,7 @@ Building the docker images and starting/stopping the contianers require to use d
 To build all the docker images:
 
 ````
-sudo ./hubmap-docker.sh localhost build --no-cache
+./hubmap-docker.sh localhost build --no-cache
 ````
 
 The build process will take some time before we have all the docker images created. And the optional `--no-cache` option is to ensure not to use the cache when building the images.
@@ -126,7 +138,7 @@ The build process will take some time before we have all the docker images creat
 After that, we can start all the services:
 
 ````
-sudo ./hubmap-docker.sh localhost start
+./hubmap-docker.sh localhost start
 ````
 
 This command starts up all the containers and runs the processes inside each container (except the `hubmap-neo4j`, `hubmap-mysql`, `hubmap-elasticsearch`, `hubmap-kibana`, and `ingest-pipeline`) with the user `hubmap` who has the same UID and GID based on the user on the host.
@@ -134,7 +146,7 @@ This command starts up all the containers and runs the processes inside each con
 And to stop the services:
 
 ````
-sudo ./hubmap-docker.sh localhost stop
+./hubmap-docker.sh localhost stop
 ````
 
 ## Testing and Production deployment
@@ -149,7 +161,7 @@ For development environment, all the docker images are built on the same host ma
 Take testing environment for example, when we build the docker images:
 
 ````
-sudo ./hubmap-docker.sh test build
+./hubmap-docker.sh test build
 ````
 
 This won't build the images of Neo4j, MySQL (pointing to remote instances via configuration), ingest-api and ingest-ui (deployed on a separate host machine).
@@ -164,7 +176,7 @@ The main differences between testing and production are:
 To reload nginx(running on the `hubmap-auth` container) configuration changes, first shell into the `hubmap-auth` container:
 
 ````
-sudo docker exec -it <hubmap-auth-container-id> bash
+docker exec -it <hubmap-auth-container-id> bash
 ````
 
 Then send a reload signal to the master process inside that container:
@@ -183,12 +195,12 @@ nginx -s reload
 The `entity-api`, `uuid-api`, `ingest-api`, and `hubmap-auth` docker images are based on the `hubmap/api-base-image:latest` image. If you need to update the base image, go to the `api-base-image` directory and recrerate it with:
 
 ````
-sudo docker build -t hubmap/api-base-image:latest
+docker build -t hubmap/api-base-image:latest
 ````
 
 Then publish it to the DockerHub:
 
 ````
-sudo docker login
-sudo docker push hubmap/api-base-image:latest
+docker login
+docker push hubmap/api-base-image:latest
 ````
