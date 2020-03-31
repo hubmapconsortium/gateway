@@ -22,7 +22,6 @@ services:
       - "8383:8383" 
       # ingest-api
       - "8484:8484" 
-      - "4444:4444"
       # ingest-ui
       - "8585:8585" 
       # search-api
