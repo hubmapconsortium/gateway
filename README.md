@@ -64,10 +64,11 @@ With a micro-services architecture design, we probably want to share a single da
 
 Currently, you can deploy the following projects with the `gateway`. Git clone the source code of each project and put them under the same parent directory.
 
-- [UUID API](https://github.com/hubmapconsortium/uuid-api) (the master branch)
-- [Entity API](https://github.com/hubmapconsortium/entity-api) (the master branch)
-- [Search API](https://github.com/hubmapconsortium/search-api) (the master branch)
-- [Ingest API and UI](https://github.com/hubmapconsortium/ingest-ui) (the master branch)
+- [UUID API](https://github.com/hubmapconsortium/uuid-api)
+- [Entity API](https://github.com/hubmapconsortium/entity-api)
+- [Search API](https://github.com/hubmapconsortium/search-api)
+- [Ingest API and UI](https://github.com/hubmapconsortium/ingest-ui)
+- [Ingest Pipeline](https://github.com/hubmapconsortium/ingest-pipeline) (used for localhost build)
 
 ### Step 2: add configuration files for each project
 
@@ -85,6 +86,14 @@ In the `gateway` project, first make sure the `hubmap-docker.sh` script is execu
 ````
 chmod +x hubmap-docker.sh
 ````
+
+The usage of this script:
+
+````
+./hubmap-docker.sh [localhost|dev|test|prod] [build|start|stop|check|config] [-vh][--no-cache]
+````
+
+The `hubmap-docker.sh` basically takes two arguments: deployment environment (localhost|dev|test|prod) and the option (build|start|stop|check|config). In addition, you can also use `-v` to see the verbose output and `-h` for the usage help tip. The `--no-cache` is used with `build` to avoid the docker cache when creating images.
 
 Before we go ahead to start building the docker images, we can do a check to see if all the required configuration files are in place:
 
