@@ -268,4 +268,3 @@ elif [ "$2" = "check" ]; then
 
     echo 'Checks complete, all good :)'
 fi
-
