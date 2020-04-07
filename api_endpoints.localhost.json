@@ -370,6 +370,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/search",
+      "auth": false
+    },
+    {
       "method": "POST",
       "endpoint": "/search",
       "auth": false
