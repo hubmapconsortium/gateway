@@ -375,6 +375,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/search",
+      "auth": false
+    },
+    {
       "method": "POST",
       "endpoint": "/search",
       "auth": false
@@ -382,7 +387,10 @@
     {
       "method": "PUT",
       "endpoint": "/reindex/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     }
   ]
 }

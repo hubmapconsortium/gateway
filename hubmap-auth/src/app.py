@@ -20,6 +20,7 @@ app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
 app.config['FLASK_APP_BASE_URI'] = app.config['FLASK_APP_BASE_URI'].strip('/')
+app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -57,7 +58,7 @@ def api_auth():
     regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
     # Debugging
-    pprint("===========request.headers=============")
+    pprint("===========api_auth request.headers=============")
     pprint(request.headers)
 
     # Nginx auth_request only cares about the response status code
@@ -130,7 +131,7 @@ def api_auth():
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
     # Debugging
-    pprint("===========request.headers=============")
+    pprint("===========file_auth request.headers=============")
     pprint(request.headers)
 
     # Nginx auth_request only cares about the response status code
@@ -138,8 +139,9 @@ def file_auth():
     # We use body here only for direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
+    response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
   
-    # The file path in URL is the same as file system path
+    method = None
     endpoint = None
 
     # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
@@ -150,26 +152,31 @@ def file_auth():
         endpoint = request.headers.get("X-Original-URI")
 
     # File access only via http GET
-    if method.upper() == 'GET':
-        if endpoint is not None:
-            # Load the list of UUIDs for secured datasets
-            data = load_file(app.config['SECURED_DATASETS_FILE'])
-
-            # Parse the path to get the dataset UUID
-            # Remove the leading slash before split
-            path_list = endpoint.strip("/").split("/")
-            dataset_uuid = path_list[0]
-            # Check if the globus token is valid for accessing this secured dataset
-            if file_access_allowed(dataset_uuid, data, request):
-                return response_200
-            else:
+    if method is not None:
+        if method.upper() == 'GET':
+            if endpoint is not None:
+                # Parse the path to get the dataset UUID
+                # Remove the leading slash before split
+                path_list = endpoint.strip("/").split("/")
+                dataset_uuid = path_list[0]
+                # Check if the globus token is valid for accessing this secured dataset
+                code = get_file_access(dataset_uuid, request)
+                pprint("==========get_file_access==============")
+                pprint(code)
+                if code == 200:
+                    return response_200
+                elif code == 401:
+                    return response_401
+                elif code == 403:
+                    return response_403
+            else: 
+                # Missing dataset UUID in path
                 return response_401
-        else: 
-            # Missing dataset UUID in path
+        else:
+            # Wrong http method
             return response_401
-    else:
-        # Wrong http method
-        return response_401
+    # Not a valid http request
+    return response_401
 
 
 ####################################################################################################
@@ -201,25 +208,47 @@ def get_user_info_for_access_check(request, group_required):
 # Check if a given dataset requries globus group access
 # For dataset UUIDs that are listed in the secured_datasets.json, also check
 # if the globus token associated user is a member of the specified group assocaited with the UUID
-def file_access_allowed(dataset_uuid, json_data, request):
-    if dataset_uuid in json_data.keys():
-        user_info = get_user_info_for_access_check(request, True)
+def get_file_access(dataset_uuid, request):
+    allowed = 200
+    authentication_required = 401
+    authorization_required = 403
 
-        # If returns error response, invalid header or token
-        if isinstance(user_info, Response):
-            return False
+    user_info = get_user_info_for_access_check(request, True)
 
-        # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
-        # Key 'hmgroupids' presents only when group_required is True
-        for group in user_info['hmgroupids']:
-            if group in json_data[dataset_uuid]:
-                return True
+    # If returns error response, invalid header or token
+    if isinstance(user_info, Response):
+        return authentication_required
 
-        # None of the assigned groups match the group ID
-        return False
+    # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
+    # Key 'hmgroupids' presents only when group_required is True
+    for group in user_info['hmgroupids']:
+        if group == app.config['GLOBUS_HUBMAP_READ_GROUP_UUID']:
+            # Further check if the dataset contains gene sequence information
+            # sending get request and saving the response as response object 
+            entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
+            # Will need support MAuthorization header later
+            request_headers = {
+                'AUTHORIZATION': request.headers.get('AUTHORIZATION')
+            }
+            response = requests.get(url = entity_api_full_url, headers = request_headers) 
+            if response.status_code == 200:
+                metadata = response.json()
+                pprint(metadata)
+                entity_node = metadata['entity_node']
+                # No access to datasets that contain gene sequence
+                if 'phi' in entity_node:
+                    if entity_node['phi'] == "yes":
+                        return authorization_required
+                    else:
+                        return allowed 
+                # Will phi property be always present?
+                return allowed        
 
-    # When no group access requried for this dataset
-    return True
+            return authentication_required
+
+    # None of the assigned groups match the group ID
+    return authentication_required
+
 
 # Chceck if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
