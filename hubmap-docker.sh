@@ -20,13 +20,29 @@ function absent_or_newer () {
 }
 
 function echo_help () {
-	echo "Usage: $0 [localhost|dev|test|prod] [build|start|stop|check|config] [-vh][--no-cache]"
+    echo "Usage: $0 [-vhN] [localhost|dev|test|prod] [build|start|stop|check|config]"
+    echo "       -v verbose"
+    echo "       -h help"
+    echo "       -N use --no-cache for build"
 }
 
 # Command line parsing.  See for ex. https://sookocheff.com/post/bash/parsing-bash-script-arguments-with-shopts/
+# and https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     machine=Linux;;
+    Darwin*)    machine=Mac;;
+    CYGWIN*)    machine=Cygwin;;
+    MINGW*)     machine=MinGw;;
+    *)          machine="UNKNOWN:${unameOut}"
+esac
 BUILD_OPTS=
 VERBOSE=
-options=$(getopt -o vh --long no-cache -- "$@")
+if [ "$machine" = 'Mac' ] ; then
+    options=$(getopt vhN "$@")
+else
+    options=$(getopt -o vhN -- "$@")
+fi
 [ $? -eq 0 ] || {
     echo "Incorrect option provided"
     echo_help
@@ -35,7 +51,7 @@ options=$(getopt -o vh --long no-cache -- "$@")
 eval set -- "$options"
 while true; do
     case "$1" in
-        --no-cache)
+        -N|--no-cache)
             BUILD_OPTS+="--no-cache"
             ;;
 	-v)
@@ -80,12 +96,12 @@ if [ -e $DIR/../ingest-pipeline/build_number ] ; then
 fi
 if [ "$1" = "localhost" ]; then
     if [ -z "$HOST_UID" ] ; then
-    log_name=`logname`
-	export HOST_UID=`id -u $log_name`
+        log_name=`logname`
+        export HOST_UID=`id -u $log_name`
     fi
     if [ -z "$HOST_GID" ] ; then
-    log_name=`logname`
-	export HOST_GID=`id -g $log_name`
+        log_name=`logname`
+        export HOST_GID=`id -g $log_name`
     fi
 fi
 if [ -n "$VERBOSE" ] ; then
