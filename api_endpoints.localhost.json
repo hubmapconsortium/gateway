@@ -1,5 +1,5 @@
 {
-  "uuid.api.hubmapconsortium.org": [
+  "localhost:8282": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -35,7 +35,7 @@
       ]
     }
   ],
-  "entity.api.hubmapconsortium.org": [
+  "localhost:8383": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -95,7 +95,7 @@
       ]
     }
   ],
-  "ingest.api.hubmapconsortium.org": [
+  "localhost:8484": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -189,11 +189,6 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },
-    {
-      "method": "POST",
-      "endpoint": "/datasets/submissions/request_ingest",
-      "auth": false
     },
     {
       "method": "GET",
@@ -363,7 +358,7 @@
       ]
     }
   ],
-  "search.api.hubmapconsortium.org": [
+  "localhost:8686": [
     {
       "method": "GET",
       "endpoint": "/",

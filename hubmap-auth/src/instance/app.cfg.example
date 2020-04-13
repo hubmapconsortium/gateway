@@ -5,6 +5,15 @@ API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
 GLOBUS_APP_ID = ''
 GLOBUS_APP_SECRET = ''
 
+# Globus Hubmap-Read group UUID
+# Used for file service
+GLOBUS_HUBMAP_READ_GROUP_UUID = '5777527e-ec11-11e8-ab41-0af86edb4424'
+
+# URL base to entity-api for getting metadata information of a given dataset UUID
+# Default value works for docker localhost
+# Works regardless the trailing slash /
+ENTITY_API_URL = 'http://localhost:3333/entities'
+
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)

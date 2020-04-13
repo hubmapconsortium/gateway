@@ -1,5 +1,5 @@
 {
-  "localhost:8282": [
+  "uuid-api.dev.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -35,7 +35,7 @@
       ]
     }
   ],
-  "localhost:8383": [
+  "entity-api.dev.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -85,9 +85,17 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/uuid/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     }
   ],
-  "localhost:8484": [
+  "ingest-api.dev.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -131,8 +139,18 @@
       ]
     },
     {
-      "method": "POST",
+      "method": "PUT",
       "endpoint": "/datasets/status",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/derived",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/status/<*>",
       "auth": false
     },
     {
@@ -222,10 +240,7 @@
     {
       "method": "GET",
       "endpoint": "/metadata/usergroups",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
@@ -301,6 +316,14 @@
     },
     {
       "method": "PUT",
+      "endpoint": "/specimens",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
       "endpoint": "/specimens/<*>",
       "auth": true,
       "groups": [
@@ -308,7 +331,7 @@
       ]
     },
     {
-      "method": "PUT",
+      "method": "GET",
       "endpoint": "/specimens/exists/<*>",
       "auth": true,
       "groups": [
@@ -316,7 +339,7 @@
       ]
     },
     {
-      "method": "PUT",
+      "method": "GET",
       "endpoint": "/specimens/<*>/siblingids",
       "auth": true,
       "groups": [
@@ -334,6 +357,36 @@
     {
       "method": "GET",
       "endpoint": "/specimens/search",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    }
+  ],
+  "search-api.dev.hubmapconsortium.org": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/search",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/search",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reindex/<*>",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"

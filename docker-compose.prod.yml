@@ -7,10 +7,18 @@ services:
     init: true
     # Specifying a restart policy to avoid downtime
     restart: always
-    # Only map port 80 or 443
+    environment:
+      - DEPLOY_MODE=prod
+      - HOST_GID=${HOST_GID:-1000}
+      - HOST_UID=${HOST_UID:-1000}
+    # Map host machine port 80, 443, and 8443 to container ports
+    # Only root can listen on ports below 1024, we use higher-numbered ports
+    # since nginx is running under non-root user hubmap
     ports:
-      - "80:80"
-      - "443:443" 
+      - "80:8080"
+      - "443:4430"
+      # 8443 is used by ingest-api running on another machine
+      - "8443:8443"
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
