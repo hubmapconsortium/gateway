@@ -108,7 +108,10 @@ To see the usage of this script:
 It outputs:
 
 ````
-./hubmap-docker.sh [localhost|dev|test|prod] [build|start|stop|check|config] [-vh][--no-cache]
+Usage: ./hubmap-docker.sh [-vhN] [localhost|dev|test|prod] [build|start|stop|check|config]
+       -v verbose
+       -h help
+       -N use --no-cache for build
 ````
 
 The `hubmap-docker.sh` basically takes two arguments: deployment environment (localhost|dev|test|prod) and the option (build|start|stop|check|config). In addition, you can also use `-v` to see the verbose output and `-h` for the usage help tip. The `--no-cache` is used with `build` to avoid the docker cache when creating images.
