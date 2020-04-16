@@ -22,6 +22,8 @@ services:
       - "./nginx/conf.d-dev:/etc/nginx/conf.d"
       # Mount ssl certificates from host to container
       - "/etc/letsencrypt:/etc/letsencrypt"
+      # Airflow static files
+      - "/home/airflow/.pyenv/versions/3.6.3/lib/python3.6/site-packages/airflow/www:/airflow-www"
       # Mount the API endpoints json file for API endpoints lookup
       - "./api_endpoints.dev.json:/usr/src/app/api_endpoints.json"
       
