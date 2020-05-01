@@ -138,6 +138,7 @@ def file_auth():
     # it ignores the response body
     # We use body here only for direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
+    response_400 = make_response(jsonify({"message": "ERROR: Bad Request"}), 400)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
   
@@ -165,6 +166,8 @@ def file_auth():
                 pprint(code)
                 if code == 200:
                     return response_200
+                elif code == 400:
+                    return response_400
                 elif code == 401:
                     return response_401
                 elif code == 403:
@@ -210,8 +213,25 @@ def get_user_info_for_access_check(request, group_required):
 # if the globus token associated user is a member of the specified group assocaited with the UUID
 def get_file_access(dataset_uuid, request):
     allowed = 200
+    bad_request = 400
     authentication_required = 401
     authorization_required = 403
+
+    # Get the globus token from URL query string 
+    if request.args.get('token'):
+        # Remove spaces at the beginning and at the end of the string
+        token = request.args.get('token').strip()
+        
+        # Check if the token value string is empty
+        if not token:
+            # Overwrite the 'Authorization' header is request.headers
+            request.headers['Authorization'] = token
+        else:
+            # Missing token value
+            return authentication_required
+    else:
+        # Bad request if no 'token' parameter in URL
+        return bad_request
 
     user_info = get_user_info_for_access_check(request, True)
 
