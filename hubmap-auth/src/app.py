@@ -229,25 +229,36 @@ def get_file_access(dataset_uuid, token_from_query, request):
     authentication_required = 401
     authorization_required = 403
 
-    print(type(request.headers))
-    # NOTE: request.headers is type 'EnvironHeaders', and it's immutable(read only version of the headers from a WSGI environment)
-    
+    final_request = None
+
     # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
     # Use the globus token from URL query string if present and set as the value of 'Authorization' header
     # If not found, default to the 'Authorization' header
     # Because get_user_info_for_access_check() checks against the 'Authorization' header
     if token_from_query is not None:
-        # Set as the 'Authorization' header in request.headers
+        # NOTE: request.headers is type 'EnvironHeaders', 
+        # and it's immutable(read only version of the headers from a WSGI environment)
+        # So we can't modify the request.headers
+        # Instead, we use a custom request object and set as the 'Authorization' header 
         pprint("=======set Authorization header as query string token value")
-        # TO-DO
+        custom_headers = {
+            "Authorization": "Bearer " + token_from_query
+        }
+        final_request = Custom_Request(custom_headers)
+    else:
+        # request.headers may or may not contain the 'Authorization' header
+        final_request = request
 
     # By now, request.headers may or may not contain the 'Authorization' header
-    pprint("===========file_auth Final request.headers=============")
-    pprint(request.headers)
+    pprint("===========file_auth final_request.headers=============")
+    pprint(final_request.headers)
 
     # If it does, it could be either the orignal request comes with this 'Authorization' header but no token in URL query string
     # or token is specified in the URL query string (the 'Authorization' header gets set regardless if it was present or not)
-    user_info = get_user_info_for_access_check(request, True)
+    user_info = get_user_info_for_access_check(final_request, True)
+
+    pprint("======user_info======")
+    pprint(user_info)
 
     # If returns error response, invalid header or token
     if isinstance(user_info, Response):
@@ -455,4 +466,8 @@ def get_globus_user_info(token):
     auth_client = AuthClient(authorizer=AccessTokenAuthorizer(token))
     return auth_client.oauth2_userinfo()
 
-
+# Due to Flask's EnvironHeaders is immutable
+# We create a new class with the headers to pass to AuthHelper
+class Custom_Request:
+  def __init__(self, headers):
+    self.headers = headers
