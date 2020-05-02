@@ -127,7 +127,8 @@ def api_auth():
 
 
 # Auth for file service
-# Nginx auth_request module won't be able to display the JSON message for 401 response
+# URL pattern: https://assets.dev.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>[?token=<globus-token>]
+# The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
     # Debugging
@@ -138,7 +139,6 @@ def file_auth():
     # it ignores the response body
     # We use body here only for direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
-    response_400 = make_response(jsonify({"message": "ERROR: Bad Request"}), 400)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
   
@@ -166,8 +166,6 @@ def file_auth():
                 pprint(code)
                 if code == 200:
                     return response_200
-                elif code == 400:
-                    return response_400
                 elif code == 401:
                     return response_401
                 elif code == 403:
@@ -213,26 +211,25 @@ def get_user_info_for_access_check(request, group_required):
 # if the globus token associated user is a member of the specified group assocaited with the UUID
 def get_file_access(dataset_uuid, request):
     allowed = 200
-    bad_request = 400
     authentication_required = 401
     authorization_required = 403
 
-    # Get the globus token from URL query string 
+    # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
+    # Use the globus token from URL query string if present and set as the value of 'Authorization' header
+    # If not found, default to the 'Authorization' header
+    # Because get_user_info_for_access_check() checks against the 'Authorization' header
     if request.args.get('token'):
         # Remove spaces at the beginning and at the end of the string
         token = request.args.get('token').strip()
         
         # Check if the token value string is empty
         if not token:
-            # Overwrite the 'Authorization' header is request.headers
+            # Set as the 'Authorization' header in request.headers
             request.headers['Authorization'] = token
-        else:
-            # Missing token value
-            return authentication_required
-    else:
-        # Bad request if no 'token' parameter in URL
-        return bad_request
 
+    # By now, request.headers may or may not contain the 'Authorization' header
+    # If it does, it could be either the orignal request comes with this 'Authorization' header but no token in URL query string
+    # or token is specified in the URL query string (the 'Authorization' header gets set regardless if it was present or not)
     user_info = get_user_info_for_access_check(request, True)
 
     # If returns error response, invalid header or token
