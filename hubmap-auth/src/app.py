@@ -128,6 +128,10 @@ def api_auth():
         return response_401
 
 
+####################################################################################################
+## File Auth, no UI
+####################################################################################################
+
 # Auth for file service
 # URL pattern: https://assets.dev.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>[?token=<globus-token>]
 # The query string with token is optional, but will be used by the portal-ui

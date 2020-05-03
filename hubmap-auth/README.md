@@ -1,6 +1,6 @@
-## HuBMAP Auth Container
+## HuBMAP Auth
 
-This is the HuBMAP Auth service written in Python Flask served with uWSGI application server in conjunction with Nginx (as reverse proxy) in a docker container. All HuBMAP API services requests that require authentication and authorization will come to this gateway first.
+This is the HuBMAP Auth service written in Python Flask served with uWSGI application server in conjunction with Nginx (as reverse proxy) in a docker container. All requests of HuBMAP API services and File service that require authentication and authorization will come to this gateway first.
 
 ### Flask config
 
@@ -32,7 +32,7 @@ In the `hubmap-auth/Dockerfile`, we installed uWSGI and the uWSGI Python plugin 
 Nginx serves as the reverse proxy and passes the requests to the uWSGI server. The nginx configuration file for this service is located at `nginx/conf.d-dev/hubmap-auth.conf` or `nginx/conf.d-prod/hubmap-auth.conf` under the root project. This file defines how the `hubmap-auth` container handles the API requests via nginx using the `auth_request` module.
 
 
-### API Endpoints Lookup and Caching
+### API endpoints lookup and caching
 
 For API auth of the Web Gateway, we'll need a json file named `api_endpoints.json` defined in the `instance/app.cfg` that specifies all the details for matching endpoints. Public endpoints don't require any authentication. However, the private endpoints will require the globus token in the `Authorization` header or the custom `MAuthorization` HTTP header. Certain endpoints that require certain group access will also require the globus group access token. 
 
@@ -66,3 +66,9 @@ When the data source of the `endpoints.json` gets updated, we'll need to clear t
 ````
 GET http://localhost:8080/cache_clear
 ````
+
+### File service
+
+URI pattern: `https://assets.dev.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>?token=<globus-token>`
+
+The file auth supports both token from the above query string or the HTTP `Authorization` header field. When both are provided, the token from query string will be the winner.
