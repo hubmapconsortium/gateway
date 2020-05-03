@@ -10,6 +10,7 @@ from urllib.parse import urlparse, parse_qs
 
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
+from hubmap_commons.hubmap_const import HubmapConst
 
 # For debugging
 from pprint import pprint
@@ -229,7 +230,11 @@ def get_file_access(dataset_uuid, token_from_query, request):
     authentication_required = 401
     authorization_required = 403
 
-    final_request = None
+    auth_header_name = 'Authorization'
+    auth_scheme = 'Bearer'
+
+    # request.headers may or may not contain the 'Authorization' header
+    final_request = request
 
     # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
     # Use the globus token from URL query string if present and set as the value of 'Authorization' header
@@ -241,13 +246,16 @@ def get_file_access(dataset_uuid, token_from_query, request):
         # So we can't modify the request.headers
         # Instead, we use a custom request object and set as the 'Authorization' header 
         pprint("=======set Authorization header as query string token value")
-        custom_headers = {
-            "Authorization": "Bearer " + token_from_query
+
+        custom_headers_dict = {
+            # Don't forget the space between scheme and the token value
+            auth_header_name: auth_scheme + ' ' + token_from_query
         }
-        final_request = Custom_Request(custom_headers)
-    else:
-        # request.headers may or may not contain the 'Authorization' header
-        final_request = request
+
+        # Overwrite the default final_request
+        # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
+        # So as long as headers from CustomRequest instance can be accessed with the dot notation
+        final_request = CustomRequest(custom_headers_dict)
 
     # By now, request.headers may or may not contain the 'Authorization' header
     pprint("===========file_auth final_request.headers=============")
@@ -272,17 +280,26 @@ def get_file_access(dataset_uuid, token_from_query, request):
             # sending get request and saving the response as response object 
             entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
             # Will need support MAuthorization header later
+            # When final_request is request, user final_request.headers.get(key)
+            # When final_request is an instance of CustomRequest, use final_request.headers[key]
+            auth_header_value = final_request.headers.get(auth_header_name)
+            if isinstance(final_request, CustomRequest):
+                auth_header_value = final_request.headers[auth_header_name]
+
             request_headers = {
-                'Authorization': request.headers.get('Authorization')
+                auth_header_name: auth_header_value
             }
             response = requests.get(url = entity_api_full_url, headers = request_headers) 
+            pprint("===Response status code from call to entity-api for given dataset uuid===")
+            pprint(response.status_code)
+
             if response.status_code == 200:
                 metadata = response.json()
                 pprint(metadata)
                 entity_node = metadata['entity_node']
                 # No access to datasets that contain gene sequence
-                if 'phi' in entity_node:
-                    if entity_node['phi'] == "yes":
+                if HubmapConst.HAS_PHI_ATTRIBUTE in entity_node:
+                    if entity_node[HubmapConst.HAS_PHI_ATTRIBUTE] == "yes":
                         return authorization_required
                     else:
                         return allowed 
@@ -467,7 +484,9 @@ def get_globus_user_info(token):
     return auth_client.oauth2_userinfo()
 
 # Due to Flask's EnvironHeaders is immutable
-# We create a new class with the headers to pass to AuthHelper
-class Custom_Request:
-  def __init__(self, headers):
-    self.headers = headers
+# We create a new class with the headers property 
+# so AuthHelper can access it using the dot notation req.headers
+class CustomRequest:
+    # Constructor
+    def __init__(self, headers):
+        self.headers = headers
