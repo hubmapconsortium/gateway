@@ -101,6 +101,38 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/ancestors/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/descendants/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/parents/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/children/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     }
   ],
   "ingest.api.hubmapconsortium.org": [
