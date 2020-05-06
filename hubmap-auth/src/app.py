@@ -162,6 +162,7 @@ def file_auth():
         if method.upper() == 'GET':
             if orig_uri is not None:
                 parsed_uri = urlparse(orig_uri)
+                
                 app.logger.debug("======parsed_uri======")
                 app.logger.debug(parsed_uri)
 
@@ -297,12 +298,16 @@ def get_file_access(dataset_uuid, token_from_query, request):
                 auth_header_name: auth_header_value
             }
             response = requests.get(url = entity_api_full_url, headers = request_headers) 
+
             app.logger.debug("======Response status code from call to entity-api for given dataset uuid======")
             app.logger.debug(response.status_code)
 
             if response.status_code == 200:
                 metadata = response.json()
-                pprint(metadata)
+
+                app.logger.debug("======metadata returned by entity-api for given dataset uuid======")
+                app.logger.debug(metadata)
+
                 entity_node = metadata['entity_node']
                 # No access to datasets that contain gene sequence
                 if HubmapConst.HAS_PHI_ATTRIBUTE in entity_node:
