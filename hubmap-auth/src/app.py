@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, make_response, Response, render_templ
 from globus_sdk import AuthClient, AccessTokenAuthorizer, ConfidentialAppAuthClient
 import requests
 import json
+import logging
 from cachetools import cached, TTLCache
 import functools
 import re
@@ -12,10 +13,6 @@ from urllib.parse import urlparse, parse_qs
 from hubmap_commons.hm_auth import AuthHelper
 from hubmap_commons.hubmap_const import HubmapConst
 
-# For debugging
-from pprint import pprint
-
-
 # Specify the absolute path of the instance folder and use the config file relative to the instance path
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
 app.config.from_pyfile('app.cfg')
@@ -23,6 +20,9 @@ app.config.from_pyfile('app.cfg')
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
 app.config['FLASK_APP_BASE_URI'] = app.config['FLASK_APP_BASE_URI'].strip('/')
 app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
+
+# Set logging level (default is warning)
+logging.basicConfig(level=logging.DEBUG)
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -46,6 +46,7 @@ def home():
 @app.route('/cache_clear', methods = ['GET'])
 def cache_clear():
     cache.clear()
+    app.logger.info("All gatewat API Auth function cache cleared.")
     return "All function cache cleared."
 
 
@@ -59,9 +60,8 @@ def api_auth():
     # The regular expression pattern takes any alphabetical and numerical characters, also other characters permitted in the URI
     regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
-    # Debugging
-    pprint("===========api_auth request.headers=============")
-    pprint(request.headers)
+    app.logger.info("======api_auth request.headers======")
+    app.logger.info(request.headers)
 
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
@@ -137,9 +137,8 @@ def api_auth():
 # The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
-    # Debugging
-    pprint("===========file_auth Orginal request.headers=============")
-    pprint(request.headers)
+    app.logger.info("======file_auth Orginal request.headers======")
+    app.logger.info(request.headers)
 
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
@@ -163,7 +162,8 @@ def file_auth():
         if method.upper() == 'GET':
             if orig_uri is not None:
                 parsed_uri = urlparse(orig_uri)
-                pprint(parsed_uri)
+                app.logger.debug("======parsed_uri======")
+                app.logger.debug(parsed_uri)
 
                 # Parse the path to get the dataset UUID
                 # Remove the leading slash before split
@@ -174,16 +174,19 @@ def file_auth():
                 # query is a dict, keys are the unique query variable names and the values are lists of values for each name
                 token_from_query = None
                 query = parse_qs(parsed_uri.query)
-                pprint(query)
+
                 if "token" in query:
                     token_from_query = query["token"][0]
-                pprint("===token_from_query===")
-                pprint(token_from_query)
+                
+                app.logger.debug("======token_from_query======")
+                app.logger.debug(token_from_query)
 
                 # Check if the globus token is valid for accessing this secured dataset
                 code = get_file_access(dataset_uuid, token_from_query, request)
-                pprint("==========get_file_access() result code==============")
-                pprint(code)
+
+                app.logger.debug("======get_file_access() result code======")
+                app.logger.debug(code)
+
                 if code == 200:
                     return response_200
                 elif code == 401:
@@ -249,7 +252,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
         # and it's immutable(read only version of the headers from a WSGI environment)
         # So we can't modify the request.headers
         # Instead, we use a custom request object and set as the 'Authorization' header 
-        pprint("=======set Authorization header as query string token value")
+        app.logger.debug("======set Authorization header as query string token value======")
 
         custom_headers_dict = {
             # Don't forget the space between scheme and the token value
@@ -262,15 +265,15 @@ def get_file_access(dataset_uuid, token_from_query, request):
         final_request = CustomRequest(custom_headers_dict)
 
     # By now, request.headers may or may not contain the 'Authorization' header
-    pprint("===========file_auth final_request.headers=============")
-    pprint(final_request.headers)
+    app.logger.debug("======file_auth final_request.headers======")
+    app.logger.debug(final_request.headers)
 
     # If it does, it could be either the orignal request comes with this 'Authorization' header but no token in URL query string
     # or token is specified in the URL query string (the 'Authorization' header gets set regardless if it was present or not)
     user_info = get_user_info_for_access_check(final_request, True)
 
-    pprint("======user_info======")
-    pprint(user_info)
+    app.logger.info("======user_info======")
+    app.logger.info(user_info)
 
     # If returns error response, invalid header or token
     if isinstance(user_info, Response):
@@ -294,8 +297,8 @@ def get_file_access(dataset_uuid, token_from_query, request):
                 auth_header_name: auth_header_value
             }
             response = requests.get(url = entity_api_full_url, headers = request_headers) 
-            pprint("===Response status code from call to entity-api for given dataset uuid===")
-            pprint(response.status_code)
+            app.logger.debug("======Response status code from call to entity-api for given dataset uuid======")
+            app.logger.debug(response.status_code)
 
             if response.status_code == 200:
                 metadata = response.json()
@@ -319,8 +322,8 @@ def get_file_access(dataset_uuid, token_from_query, request):
 # Chceck if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
 def api_access_allowed(item, request):
-    pprint("===========Matched endpoint=============")
-    pprint(item)
+    app.logger.info("======Matched endpoint======")
+    app.logger.info(item)
 
     # Check if auth is required for this endpoint
     if item['auth'] == False:
