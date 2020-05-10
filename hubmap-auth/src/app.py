@@ -2,17 +2,16 @@ from flask import Flask, request, jsonify, make_response, Response, render_templ
 from globus_sdk import AuthClient, AccessTokenAuthorizer, ConfidentialAppAuthClient
 import requests
 import json
+import logging
 from cachetools import cached, TTLCache
 import functools
 import re
 import os
+from urllib.parse import urlparse, parse_qs
 
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
-
-# For debugging
-from pprint import pprint
-
+from hubmap_commons.hubmap_const import HubmapConst
 
 # Specify the absolute path of the instance folder and use the config file relative to the instance path
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
@@ -21,6 +20,9 @@ app.config.from_pyfile('app.cfg')
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
 app.config['FLASK_APP_BASE_URI'] = app.config['FLASK_APP_BASE_URI'].strip('/')
 app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
+
+# Set logging level (default is warning)
+logging.basicConfig(level=logging.DEBUG)
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -44,6 +46,7 @@ def home():
 @app.route('/cache_clear', methods = ['GET'])
 def cache_clear():
     cache.clear()
+    app.logger.info("All gatewat API Auth function cache cleared.")
     return "All function cache cleared."
 
 
@@ -57,9 +60,8 @@ def api_auth():
     # The regular expression pattern takes any alphabetical and numerical characters, also other characters permitted in the URI
     regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
-    # Debugging
-    pprint("===========api_auth request.headers=============")
-    pprint(request.headers)
+    app.logger.info("======api_auth request.headers======")
+    app.logger.info(request.headers)
 
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
@@ -126,13 +128,17 @@ def api_auth():
         return response_401
 
 
+####################################################################################################
+## File Auth, no UI
+####################################################################################################
+
 # Auth for file service
-# Nginx auth_request module won't be able to display the JSON message for 401 response
+# URL pattern: https://assets.dev.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>[?token=<globus-token>]
+# The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
-    # Debugging
-    pprint("===========file_auth request.headers=============")
-    pprint(request.headers)
+    app.logger.info("======file_auth Orginal request.headers======")
+    app.logger.info(request.headers)
 
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
@@ -142,27 +148,46 @@ def file_auth():
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
   
     method = None
-    endpoint = None
+    orig_uri = None
 
     # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
     # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
     # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
     if ("X-Original-Request-Method" in request.headers) and ("X-Original-URI" in request.headers):
         method = request.headers.get("X-Original-Request-Method")
-        endpoint = request.headers.get("X-Original-URI")
+        orig_uri = request.headers.get("X-Original-URI")
 
     # File access only via http GET
     if method is not None:
         if method.upper() == 'GET':
-            if endpoint is not None:
+            if orig_uri is not None:
+                parsed_uri = urlparse(orig_uri)
+                
+                app.logger.debug("======parsed_uri======")
+                app.logger.debug(parsed_uri)
+
                 # Parse the path to get the dataset UUID
                 # Remove the leading slash before split
-                path_list = endpoint.strip("/").split("/")
+                path_list = parsed_uri.path.strip("/").split("/")
                 dataset_uuid = path_list[0]
+
+                # Also get the "token" parameter from query string
+                # query is a dict, keys are the unique query variable names and the values are lists of values for each name
+                token_from_query = None
+                query = parse_qs(parsed_uri.query)
+
+                if "token" in query:
+                    token_from_query = query["token"][0]
+                
+                app.logger.debug("======token_from_query======")
+                app.logger.debug(token_from_query)
+
                 # Check if the globus token is valid for accessing this secured dataset
-                code = get_file_access(dataset_uuid, request)
-                pprint("==========get_file_access==============")
-                pprint(code)
+                code = get_file_access(dataset_uuid, token_from_query, request)
+
+                app.logger.debug("======get_file_access() result code======")
+                app.logger.debug(code)
+
                 if code == 200:
                     return response_200
                 elif code == 401:
@@ -208,12 +233,48 @@ def get_user_info_for_access_check(request, group_required):
 # Check if a given dataset requries globus group access
 # For dataset UUIDs that are listed in the secured_datasets.json, also check
 # if the globus token associated user is a member of the specified group assocaited with the UUID
-def get_file_access(dataset_uuid, request):
+def get_file_access(dataset_uuid, token_from_query, request):
     allowed = 200
     authentication_required = 401
     authorization_required = 403
 
-    user_info = get_user_info_for_access_check(request, True)
+    auth_header_name = 'Authorization'
+    auth_scheme = 'Bearer'
+
+    # request.headers may or may not contain the 'Authorization' header
+    final_request = request
+
+    # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
+    # Use the globus token from URL query string if present and set as the value of 'Authorization' header
+    # If not found, default to the 'Authorization' header
+    # Because get_user_info_for_access_check() checks against the 'Authorization' header
+    if token_from_query is not None:
+        # NOTE: request.headers is type 'EnvironHeaders', 
+        # and it's immutable(read only version of the headers from a WSGI environment)
+        # So we can't modify the request.headers
+        # Instead, we use a custom request object and set as the 'Authorization' header 
+        app.logger.debug("======set Authorization header as query string token value======")
+
+        custom_headers_dict = {
+            # Don't forget the space between scheme and the token value
+            auth_header_name: auth_scheme + ' ' + token_from_query
+        }
+
+        # Overwrite the default final_request
+        # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
+        # So as long as headers from CustomRequest instance can be accessed with the dot notation
+        final_request = CustomRequest(custom_headers_dict)
+
+    # By now, request.headers may or may not contain the 'Authorization' header
+    app.logger.debug("======file_auth final_request.headers======")
+    app.logger.debug(final_request.headers)
+
+    # If it does, it could be either the orignal request comes with this 'Authorization' header but no token in URL query string
+    # or token is specified in the URL query string (the 'Authorization' header gets set regardless if it was present or not)
+    user_info = get_user_info_for_access_check(final_request, True)
+
+    app.logger.info("======user_info======")
+    app.logger.info(user_info)
 
     # If returns error response, invalid header or token
     if isinstance(user_info, Response):
@@ -227,17 +288,30 @@ def get_file_access(dataset_uuid, request):
             # sending get request and saving the response as response object 
             entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
             # Will need support MAuthorization header later
+            # When final_request is request, user final_request.headers.get(key)
+            # When final_request is an instance of CustomRequest, use final_request.headers[key]
+            auth_header_value = final_request.headers.get(auth_header_name)
+            if isinstance(final_request, CustomRequest):
+                auth_header_value = final_request.headers[auth_header_name]
+
             request_headers = {
-                'AUTHORIZATION': request.headers.get('AUTHORIZATION')
+                auth_header_name: auth_header_value
             }
             response = requests.get(url = entity_api_full_url, headers = request_headers) 
+
+            app.logger.debug("======Response status code from call to entity-api for given dataset uuid======")
+            app.logger.debug(response.status_code)
+
             if response.status_code == 200:
                 metadata = response.json()
-                pprint(metadata)
+
+                app.logger.debug("======metadata returned by entity-api for given dataset uuid======")
+                app.logger.debug(metadata)
+
                 entity_node = metadata['entity_node']
                 # No access to datasets that contain gene sequence
-                if 'phi' in entity_node:
-                    if entity_node['phi'] == "yes":
+                if HubmapConst.HAS_PHI_ATTRIBUTE in entity_node:
+                    if entity_node[HubmapConst.HAS_PHI_ATTRIBUTE] == "yes":
                         return authorization_required
                     else:
                         return allowed 
@@ -253,8 +327,8 @@ def get_file_access(dataset_uuid, request):
 # Chceck if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
 def api_access_allowed(item, request):
-    pprint("===========Matched endpoint=============")
-    pprint(item)
+    app.logger.info("======Matched endpoint======")
+    app.logger.info(item)
 
     # Check if auth is required for this endpoint
     if item['auth'] == False:
@@ -421,4 +495,10 @@ def get_globus_user_info(token):
     auth_client = AuthClient(authorizer=AccessTokenAuthorizer(token))
     return auth_client.oauth2_userinfo()
 
-
+# Due to Flask's EnvironHeaders is immutable
+# We create a new class with the headers property 
+# so AuthHelper can access it using the dot notation req.headers
+class CustomRequest:
+    # Constructor
+    def __init__(self, headers):
+        self.headers = headers
