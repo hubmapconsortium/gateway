@@ -460,6 +460,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/indices",
+      "auth": false
+    },
+    {
       "method": "PUT",
       "endpoint": "/reindex/<*>",
       "auth": true,
