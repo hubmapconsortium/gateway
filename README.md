@@ -8,7 +8,8 @@ We have the following 4 development and deployment environments:
 
 * localhost - all the services will be deployed with docker containers including sample Neo4j and sample MySQL are running on the same localhost listing on different ports, without globus data
 * dev - all services except ingest-api will be running on AWS EC2 with SSL certificates, Neo4j and MySQL are dev versions on AWS, and ingest-api(and another nginx) will be running on PSC with domain and globus data
-* test - similar to dev but for production-like settings with Neo4j and MySQL test versions of database
+* test - similar to dev with a focus on testing and connects to Neo4j and MySQL test versions of database
+* stage - as similar to the production environment as it can be.
 * prod - similar to test but for production settings with production versions of Neo4j and MySQL
 
 ## Project structure
@@ -18,11 +19,13 @@ gateway
 ├── api_endpoints.dev.json
 ├── api_endpoints.localhost.json
 ├── api_endpoints.prod.json
+├── api_endpoints.stage.json
 ├── api_endpoints.test.json
 ├── docker-compose.yml
 ├── docker-compose.dev.yml
 ├── docker-compose.localhost.yml
 ├── docker-compose.prod.yml
+├── docker-compose.stage.yml
 ├── docker-compose.test.yml
 ├── hubmap-auth
 │   ├── Dockerfile
@@ -33,6 +36,7 @@ gateway
     ├── conf.d-dev
     ├── conf.d-localhost
     ├── conf.d-prod
+    ├── conf.d-stage
     ├── conf.d-test
     └── html
 ````
@@ -108,13 +112,13 @@ To see the usage of this script:
 It outputs:
 
 ````
-Usage: ./hubmap-docker.sh [-vhN] [localhost|dev|test|prod] [build|start|stop|check|config]
+Usage: ./hubmap-docker.sh [-vhN] [localhost|dev|test|stage|prod] [build|start|stop|check|config]
        -v verbose
        -h help
        -N use --no-cache for build
 ````
 
-The `hubmap-docker.sh` basically takes two arguments: deployment environment (localhost|dev|test|prod) and the option (build|start|stop|check|config). In addition, you can also use `-v` to see the verbose output and `-h` for the usage help tip. The `--no-cache` is used with `build` to avoid the docker cache when creating images.
+The `hubmap-docker.sh` basically takes two arguments: deployment environment (localhost|dev|test|stage|prod) and the option (build|start|stop|check|config). In addition, you can also use `-v` to see the verbose output and `-h` for the usage help tip. The `--no-cache` is used with `build` to avoid the docker cache when creating images.
 
 Before we go ahead to start building the docker images, we can do a check to see if all the required configuration files are in place:
 
