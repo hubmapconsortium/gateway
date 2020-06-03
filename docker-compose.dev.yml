@@ -3,6 +3,10 @@ version: "3.7"
 services:
   
   hubmap-auth:
+    # Avoid accidentally creating zombie processes
+    init: true
+    # Specifying a restart policy to avoid downtime
+    restart: always
     environment:
       - DEPLOY_MODE=dev
       - HOST_GID=${HOST_GID:-1000}
