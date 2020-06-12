@@ -1,0 +1,486 @@
+{
+  "uuid-api.stage.hubmapconsortium.org": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/hmuuid",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/hmuuid/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/hmuuid/<*>/exists",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    }
+  ],
+  "entity-api.stage.hubmapconsortium.org": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/types/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/types",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/provenance",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/uuid/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/ancestors/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/descendants/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/parents/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/children/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collections/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/entities/donor/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/entities/sample/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/entities/dataset/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    }
+  ],
+  "ingest-api.stage.hubmapconsortium.org": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/hello",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/status",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/derived",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/status/<*>",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/ingest",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/submissions/request_ingest",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/validate",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/publish",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/unpublish",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collections",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/collections",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/collections/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collections/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/new-collection",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/login",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/logout",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/usergroups",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/userroles",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/usercanedit/type",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/usercanedit/type/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/usercanedit/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/groups/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/source/type/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/source/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/specimens",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/specimens",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/specimens/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/specimens/exists/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/specimens/<*>/siblingids",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/specimens/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/specimens/search",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    }
+  ],
+  "search-api.stage.hubmapconsortium.org": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/search",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/search",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/search",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>/search",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/indices",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reindex/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    }
+  ]
+}

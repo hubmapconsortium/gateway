@@ -74,8 +74,8 @@ if [ -n "$VERBOSE" ] ; then
     echo '$2' $2
 fi
 
-if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "prod" ]]; then
-    echo "Unknown build environment '$1', specify one of the following: 'localhost', 'dev', 'test', or 'prod'"
+if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" ]]; then
+    echo "Unknown build environment '$1', specify one of the following: 'localhost', 'dev', 'test', 'stage', or 'prod'"
     exit 255
 fi
 
