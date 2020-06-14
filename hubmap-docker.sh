@@ -20,7 +20,7 @@ function absent_or_newer () {
 }
 
 function echo_help () {
-    echo "Usage: $0 [-vhN] [localhost|dev|test|prod] [build|start|stop|check|config]"
+    echo "Usage: $0 [-vhN] [localhost|dev|test|stage|prod] [build|start|stop|check|config]"
     echo "       -v verbose"
     echo "       -h help"
     echo "       -N use --no-cache for build"
