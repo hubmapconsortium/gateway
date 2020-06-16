@@ -244,83 +244,83 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
 
-    # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
-    # Use the globus token from URL query string if present and set as the value of 'Authorization' header
-    # If not found, default to the 'Authorization' header
-    # Because get_user_info_for_access_check() checks against the 'Authorization' header
-    if token_from_query is not None:
-        # NOTE: request.headers is type 'EnvironHeaders', 
-        # and it's immutable(read only version of the headers from a WSGI environment)
-        # So we can't modify the request.headers
-        # Instead, we use a custom request object and set as the 'Authorization' header 
-        app.logger.debug("======set Authorization header as query string token value======")
 
-        custom_headers_dict = {
-            # Don't forget the space between scheme and the token value
-            auth_header_name: auth_scheme + ' ' + token_from_query
-        }
+    # First check the dataset access level based on the uuid
+    ingest_api_full_url = app.config['INGEST_API_URL'] + '/' + dataset_uuid
+            
+    request_headers = {
+        # TO-DO:
+        # May need to strip some characters from the secret
+        # will use a method in the auth helper from commons
+        auth_header_name: app.config['GLOBUS_APP_SECRET']
+    }
+    response = requests.get(url = ingest_api_full_url, headers = request_headers) 
 
-        # Overwrite the default final_request
-        # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
-        # So as long as headers from CustomRequest instance can be accessed with the dot notation
-        final_request = CustomRequest(custom_headers_dict)
+    if response.status_code == 200:
+        dataset_info = response.json()
 
-    # By now, request.headers may or may not contain the 'Authorization' header
-    app.logger.debug("======file_auth final_request.headers======")
-    app.logger.debug(final_request.headers)
+        app.logger.debug("======dataset_info returned by ingest-api for given dataset uuid======")
+        app.logger.debug(dataset_info)
 
-    # If it does, it could be either the orignal request comes with this 'Authorization' header but no token in URL query string
-    # or token is specified in the URL query string (the 'Authorization' header gets set regardless if it was present or not)
-    user_info = get_user_info_for_access_check(final_request, True)
+        data_access_level = dataset_info['data_access_level']
+        
+        # The 3 possibilities: public, protected, and consortium
+        # public: No further token check
+        # protected:
+        # consortium:
+        if data_access_level == "public":
+            return allowed
+        elif data_access_level == "protected":
+            # To-DO
+        elif data_access_level == "consortium":
+            # To-DO
+            # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
+            # Use the globus token from URL query string if present and set as the value of 'Authorization' header
+            # If not found, default to the 'Authorization' header
+            # Because get_user_info_for_access_check() checks against the 'Authorization' header
+            if token_from_query is not None:
+                # NOTE: request.headers is type 'EnvironHeaders', 
+                # and it's immutable(read only version of the headers from a WSGI environment)
+                # So we can't modify the request.headers
+                # Instead, we use a custom request object and set as the 'Authorization' header 
+                app.logger.debug("======set Authorization header as query string token value======")
 
-    app.logger.info("======user_info======")
-    app.logger.info(user_info)
+                custom_headers_dict = {
+                    # Don't forget the space between scheme and the token value
+                    auth_header_name: auth_scheme + ' ' + token_from_query
+                }
 
-    # If returns error response, invalid header or token
-    if isinstance(user_info, Response):
-        return authentication_required
+                # Overwrite the default final_request
+                # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
+                # So as long as headers from CustomRequest instance can be accessed with the dot notation
+                final_request = CustomRequest(custom_headers_dict)
 
-    # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
-    # Key 'hmgroupids' presents only when group_required is True
-    for group in user_info['hmgroupids']:
-        if group == app.config['GLOBUS_HUBMAP_READ_GROUP_UUID']:
-            # Further check if the dataset contains gene sequence information
-            # sending get request and saving the response as response object 
-            entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
-            # Will need support MAuthorization header later
-            # When final_request is request, user final_request.headers.get(key)
-            # When final_request is an instance of CustomRequest, use final_request.headers[key]
-            auth_header_value = final_request.headers.get(auth_header_name)
-            if isinstance(final_request, CustomRequest):
-                auth_header_value = final_request.headers[auth_header_name]
+            # By now, request.headers may or may not contain the 'Authorization' header
+            app.logger.debug("======file_auth final_request.headers======")
+            app.logger.debug(final_request.headers)
 
-            request_headers = {
-                auth_header_name: auth_header_value
-            }
-            response = requests.get(url = entity_api_full_url, headers = request_headers) 
+            # If it does, it could be either the orignal request comes with this 'Authorization' header but no token in URL query string
+            # or token is specified in the URL query string (the 'Authorization' header gets set regardless if it was present or not)
+            user_info = get_user_info_for_access_check(final_request, True)
 
-            app.logger.debug("======Response status code from call to entity-api for given dataset uuid======")
-            app.logger.debug(response.status_code)
+            app.logger.info("======user_info======")
+            app.logger.info(user_info)
 
-            if response.status_code == 200:
-                metadata = response.json()
+            # If returns error response, invalid header or token
+            if isinstance(user_info, Response):
+                return authentication_required
 
-                app.logger.debug("======metadata returned by entity-api for given dataset uuid======")
-                app.logger.debug(metadata)
+            # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
+            # Key 'hmgroupids' presents only when group_required is True
+            for group in user_info['hmgroupids']:
+                if group == app.config['GLOBUS_HUBMAP_READ_GROUP_UUID']:
+                    return allowed
+                # None of the assigned groups match the group ID
+                return authentication_required
+        else: 
+            # Unknown access level value
+            # To-DO
 
-                entity_node = metadata['entity_node']
-                # No access to datasets that contain gene sequence
-                if HubmapConst.HAS_PHI_ATTRIBUTE in entity_node:
-                    if entity_node[HubmapConst.HAS_PHI_ATTRIBUTE] == "yes":
-                        return authorization_required
-                    else:
-                        return allowed 
-                # Will phi property be always present?
-                return allowed        
-
-            return authentication_required
-
-    # None of the assigned groups match the group ID
     return authentication_required
 
 
