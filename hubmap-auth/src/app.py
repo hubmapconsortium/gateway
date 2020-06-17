@@ -30,6 +30,21 @@ logging.basicConfig(level=logging.DEBUG)
 # Here we use two hours, 7200 seconds for ttl
 cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'])
 
+# Error handler for 500 Internal Server Error with custom error message
+@app.errorhandler(500)
+def http_internal_server_error(e):
+    return jsonify(error=str(e)), 500
+
+# Error handler for 401 Unauthorized with custom error message
+@app.errorhandler(401)
+def http_unauthorized(e):
+    return jsonify(error=str(e)), 401
+
+# Error handler for 403 Forbidden with custom error message
+@app.errorhandler(403)
+def http_forbidden(e):
+    return jsonify(error=str(e)), 403
+
 ####################################################################################################
 ## Default route
 ####################################################################################################
@@ -208,6 +223,18 @@ def file_auth():
 ## Internal Functions Used By API Auth and File Auth
 ####################################################################################################
 
+# Throws error for 500 Internal Server Error with message
+def internal_server_error(err_msg):
+    abort(500, description = err_msg)
+
+# Throws error for 401 Unauthorized with message
+def unauthorized_error(err_msg):
+    abort(401, description = err_msg)
+
+# Throws error for 403 Forbidden with message
+def forbidden_error(err_msg):
+    abort(403, description = err_msg)
+
 @cached(cache)
 def load_file(file):
     with open(file, "r") as f:
@@ -230,6 +257,14 @@ def get_user_info_for_access_check(request, group_required):
     auth_helper = init_auth_helper()
     return auth_helper.getUserInfoUsingRequest(request, group_required)
 
+# Due to Flask's EnvironHeaders is immutable
+# We create a new class with the headers property 
+# so AuthHelper can access it using the dot notation req.headers
+class CustomRequest:
+    # Constructor
+    def __init__(self, headers):
+        self.headers = headers
+
 # Check if a given dataset requries globus group access
 # For dataset UUIDs that are listed in the secured_datasets.json, also check
 # if the globus token associated user is a member of the specified group assocaited with the UUID
@@ -240,6 +275,9 @@ def get_file_access(dataset_uuid, token_from_query, request):
 
     auth_header_name = 'Authorization'
     auth_scheme = 'Bearer'
+
+    data_access_level_public == 'public'
+    data_access_level_consortium == 'consortium'
 
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
@@ -255,6 +293,8 @@ def get_file_access(dataset_uuid, token_from_query, request):
     }
     response = requests.get(url = ingest_api_full_url, headers = request_headers) 
 
+    # Using the secret as token should always return 200
+    # If not, must be technical issue 500 rather than 401 (we can't tell the user 401 when token not used?)
     if response.status_code == 200:
         dataset_info = response.json()
 
@@ -265,14 +305,10 @@ def get_file_access(dataset_uuid, token_from_query, request):
         
         # The 3 possibilities: public, protected, and consortium
         # public: No further token check
-        # protected:
-        # consortium:
-        if data_access_level == "public":
+        # consortium: Access is via the existing HuBMAP-Read group, token with group access is required
+        if data_access_level == data_access_level_public:
             return allowed
-        elif data_access_level == "protected":
-            # To-DO
-        elif data_access_level == "consortium":
-            # To-DO
+        elif data_access_level == data_access_level_consortium:
             # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
             # Use the globus token from URL query string if present and set as the value of 'Authorization' header
             # If not found, default to the 'Authorization' header
@@ -314,14 +350,18 @@ def get_file_access(dataset_uuid, token_from_query, request):
             for group in user_info['hmgroupids']:
                 if group == app.config['GLOBUS_HUBMAP_READ_GROUP_UUID']:
                     return allowed
-                # None of the assigned groups match the group ID
-                return authentication_required
+            
+            # None of the assigned groups match the group ID
+            return authentication_required
         else: 
             # Unknown access level value
-            # To-DO
-
-    return authentication_required
-
+            internal_server_error("The 'data_access_level' value defined for this dataset " + dataset_uuid + " prevented the server from fulfilling the request")
+    elif response.status_code == 401:
+    	# Something wrong with fullfilling the request with secret as token     
+    	unauthorized_error("The internal token used for querying the 'data_access_level' of this dataset " + dataset_uuid + " is invalid")
+    else:  
+        # E.g., ingest-api server down?
+        internal_server_error("The server encountered an unexpected condition that prevented it from fulfilling the request")
 
 # Chceck if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
@@ -494,10 +534,3 @@ def get_globus_user_info(token):
     auth_client = AuthClient(authorizer=AccessTokenAuthorizer(token))
     return auth_client.oauth2_userinfo()
 
-# Due to Flask's EnvironHeaders is immutable
-# We create a new class with the headers property 
-# so AuthHelper can access it using the dot notation req.headers
-class CustomRequest:
-    # Constructor
-    def __init__(self, headers):
-        self.headers = headers
