@@ -9,16 +9,10 @@ GLOBUS_APP_SECRET = ''
 # Used for file service
 GLOBUS_HUBMAP_READ_GROUP_UUID = '5777527e-ec11-11e8-ab41-0af86edb4424'
 
-# URL base to entity-api for getting metadata information of a given dataset UUID
-# Default value works for docker localhost
-# Works regardless the trailing slash /
-ENTITY_API_URL = 'http://localhost:3333/entities'
-
 # URL base to ingest-api for getting file access level of a given dataset UUID
 # Default value works for docker localhost
 # Works regardless the trailing slash /
 INGEST_API_URL = 'http://localhost:4444/datasets'
-
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128

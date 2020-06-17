@@ -19,7 +19,7 @@ app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
 app.config['FLASK_APP_BASE_URI'] = app.config['FLASK_APP_BASE_URI'].strip('/')
-app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
+app.config['INGEST_API_URL'] = app.config['INGEST_API_URL'].strip('/')
 
 # Set logging level (default is warning)
 logging.basicConfig(level=logging.DEBUG)
@@ -243,7 +243,6 @@ def get_file_access(dataset_uuid, token_from_query, request):
 
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
-
 
     # First check the dataset access level based on the uuid
     ingest_api_full_url = app.config['INGEST_API_URL'] + '/' + dataset_uuid
