@@ -19,7 +19,7 @@ app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
 app.config['FLASK_APP_BASE_URI'] = app.config['FLASK_APP_BASE_URI'].strip('/')
-app.config['INGEST_API_URL'] = app.config['INGEST_API_URL'].strip('/')
+app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
 # Set logging level (default is warning)
 logging.basicConfig(level=logging.DEBUG)
@@ -280,7 +280,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     final_request = request
 
     # First check the dataset access level based on the uuid
-    ingest_api_full_url = app.config['INGEST_API_URL'] + '/' + dataset_uuid
+    entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
             
     auth_helper = init_auth_helper()
 
@@ -288,14 +288,14 @@ def get_file_access(dataset_uuid, token_from_query, request):
         # Use modified version of secrect as the token
         auth_header_name: auth_scheme + ' ' + auth_helper.getProcessSecret()
     }
-    response = requests.get(url = ingest_api_full_url, headers = request_headers) 
+    response = requests.get(url = entity_api_full_url, headers = request_headers) 
 
     # Using the secret as token should always return 200
     # If not, must be technical issue 500 rather than 401 (we can't tell the user 401 when token not used?)
     if response.status_code == 200:
         dataset_info = response.json()
 
-        app.logger.debug("======dataset_info returned by ingest-api for given dataset uuid======")
+        app.logger.debug("======dataset_info returned by entity-api for given dataset uuid======")
         app.logger.debug(dataset_info)
 
         data_access_level = dataset_info['data_access_level']
