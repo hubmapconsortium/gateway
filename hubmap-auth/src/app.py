@@ -279,7 +279,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
 
-    # First check the dataset access level based on the uuid
+    # First check the dataset access level based on the uuid without considering the token
     entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
             
     auth_helper = init_auth_helper()
@@ -291,24 +291,22 @@ def get_file_access(dataset_uuid, token_from_query, request):
     response = requests.get(url = entity_api_full_url, headers = request_headers) 
 
     # Using the secret as token should always return 200
-    # If not, must be technical issue 500 rather than 401 (we can't tell the user 401 when token not used?)
+    # If not, either technical issue 500 or 401 (even if the user doesn't provide a token, since we use the internal secret as token)
     if response.status_code == 200:
-        dataset_info = response.json()
+        data_access_level = response.content
 
-        app.logger.debug("======dataset_info returned by entity-api for given dataset uuid======")
-        app.logger.debug(dataset_info)
-
-        data_access_level = dataset_info['data_access_level']
+        app.logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
+        app.logger.debug(data_access_level)
 
         # Unknown access level value
         if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC or data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM or data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED
-            internal_server_error("The 'data_access_level' value defined for this dataset " + dataset_uuid + " prevented the server from fulfilling the request")
+            internal_server_error("The 'data_access_level' value assigned for this dataset " + dataset_uuid + " is invalid")
 
-        # Get the user access level
+        # Get the user access level based on token
         # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
         # Use the globus token from URL query string if present and set as the value of 'Authorization' header
         # If not found, default to the 'Authorization' header
-        # Because get_user_info_for_access_check() checks against the 'Authorization' header
+        # Because auth_helper.getUserDataAccessLevel() checks against the 'Authorization' or 'Mauthorization' header
         if token_from_query is not None:
             # NOTE: request.headers is type 'EnvironHeaders', 
             # and it's immutable(read only version of the headers from a WSGI environment)
@@ -330,38 +328,52 @@ def get_file_access(dataset_uuid, token_from_query, request):
         app.logger.debug("======file_auth final_request.headers======")
         app.logger.debug(final_request.headers)
 
-        # The user_info contains access level of the user based on the token
-        user_info = auth_helper.getUserDataAccessLevel(final_request)
+        try:
+            # The user_info contains access level of the user based on the token
+            user_info = auth_helper.getUserDataAccessLevel(final_request)
 
-        app.logger.info("======user_info======")
-        app.logger.info(user_info)
+            app.logger.info("======user_info======")
+            app.logger.info(user_info)
+        # If returns HTTPException with a 401, invalid header or token
+        except HTTPException as e:
+            msg = "HTTPException from calling auth_helper.getUserDataAccessLevel() HTTP code: " + str(e.get_status_code()) + " " + e.get_description() 
 
-        # If returns error response, invalid header or token
-        if isinstance(user_info, Response):
+            app.logger.warning(msg)
+
             return authentication_required
 
         # Supposely each user should have an assigned data access level
         if not 'data_access_level' in user_info:
             internal_server_error("Unexpected error, data access level could not be found for user trying to access dataset uuid: " + dataset_uuid) 
 
+        # Parse the user data access level if everything goes well so far
         user_access_level = user_info['data_access_level']
 
-        # Validation
-        if user_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC and data_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC:
+        # Unknown access level value
+        if user_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC or user_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM or user_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED
+            internal_server_error("The 'data_access_level' value assigned to this user is invalid")
+
+
+        # Allow file access is data is public
+        if data_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC:
             return allowed
-        elif (user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM and (data_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM or data_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC)):
-            return allowed
-        elif user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
-            return allowed
-        else
-            # Unknown user access level value
-            internal_server_error("The 'data_access_level' value defined for this user prevented the server from fulfilling the request")
+        elif data_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM:
+            if user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED or user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM:
+                return allowed
+            elif user_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC:
+                return authorization_required
+        elif data_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
+            if user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
+                return allowed
+            elif user_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC or user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM:
+                return authorization_required
+
     elif response.status_code == 401:
         # Something wrong with fullfilling the request with secret as token     
         unauthorized_error("The internal token used for querying the 'data_access_level' of this dataset " + dataset_uuid + " is invalid")
     else:  
-        # E.g., ingest-api server down?
-        internal_server_error("The server encountered an unexpected condition that prevented it from fulfilling the request")
+        # E.g., entity-api server down?
+        internal_server_error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
 
 # Chceck if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
