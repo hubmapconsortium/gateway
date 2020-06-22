@@ -276,20 +276,17 @@ def get_file_access(dataset_uuid, token_from_query, request):
     auth_header_name = 'Authorization'
     auth_scheme = 'Bearer'
 
-    data_access_level_public == 'public'
-    data_access_level_consortium == 'consortium'
-
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
 
     # First check the dataset access level based on the uuid
     ingest_api_full_url = app.config['INGEST_API_URL'] + '/' + dataset_uuid
             
+    auth_helper = init_auth_helper()
+
     request_headers = {
-        # TO-DO:
-        # May need to strip some characters from the secret
-        # will use a method in the auth helper from commons
-        auth_header_name: app.config['GLOBUS_APP_SECRET']
+        # Use modified version of secrect as the token
+        auth_header_name: auth_scheme + ' ' + auth_helper.getProcessSecret()
     }
     response = requests.get(url = ingest_api_full_url, headers = request_headers) 
 
@@ -302,63 +299,66 @@ def get_file_access(dataset_uuid, token_from_query, request):
         app.logger.debug(dataset_info)
 
         data_access_level = dataset_info['data_access_level']
-        
-        # The 3 possibilities: public, protected, and consortium
-        # public: No further token check
-        # consortium: Access is via the existing HuBMAP-Read group, token with group access is required
-        if data_access_level == data_access_level_public:
-            return allowed
-        elif data_access_level == data_access_level_consortium:
-            # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
-            # Use the globus token from URL query string if present and set as the value of 'Authorization' header
-            # If not found, default to the 'Authorization' header
-            # Because get_user_info_for_access_check() checks against the 'Authorization' header
-            if token_from_query is not None:
-                # NOTE: request.headers is type 'EnvironHeaders', 
-                # and it's immutable(read only version of the headers from a WSGI environment)
-                # So we can't modify the request.headers
-                # Instead, we use a custom request object and set as the 'Authorization' header 
-                app.logger.debug("======set Authorization header as query string token value======")
 
-                custom_headers_dict = {
-                    # Don't forget the space between scheme and the token value
-                    auth_header_name: auth_scheme + ' ' + token_from_query
-                }
-
-                # Overwrite the default final_request
-                # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
-                # So as long as headers from CustomRequest instance can be accessed with the dot notation
-                final_request = CustomRequest(custom_headers_dict)
-
-            # By now, request.headers may or may not contain the 'Authorization' header
-            app.logger.debug("======file_auth final_request.headers======")
-            app.logger.debug(final_request.headers)
-
-            # If it does, it could be either the orignal request comes with this 'Authorization' header but no token in URL query string
-            # or token is specified in the URL query string (the 'Authorization' header gets set regardless if it was present or not)
-            user_info = get_user_info_for_access_check(final_request, True)
-
-            app.logger.info("======user_info======")
-            app.logger.info(user_info)
-
-            # If returns error response, invalid header or token
-            if isinstance(user_info, Response):
-                return authentication_required
-
-            # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
-            # Key 'hmgroupids' presents only when group_required is True
-            for group in user_info['hmgroupids']:
-                if group == app.config['GLOBUS_HUBMAP_READ_GROUP_UUID']:
-                    return allowed
-            
-            # None of the assigned groups match the group ID
-            return authentication_required
-        else: 
-            # Unknown access level value
+        # Unknown access level value
+        if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC or data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM or data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED
             internal_server_error("The 'data_access_level' value defined for this dataset " + dataset_uuid + " prevented the server from fulfilling the request")
+
+        # Get the user access level
+        # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
+        # Use the globus token from URL query string if present and set as the value of 'Authorization' header
+        # If not found, default to the 'Authorization' header
+        # Because get_user_info_for_access_check() checks against the 'Authorization' header
+        if token_from_query is not None:
+            # NOTE: request.headers is type 'EnvironHeaders', 
+            # and it's immutable(read only version of the headers from a WSGI environment)
+            # So we can't modify the request.headers
+            # Instead, we use a custom request object and set as the 'Authorization' header 
+            app.logger.debug("======set Authorization header as query string token value======")
+
+            custom_headers_dict = {
+                # Don't forget the space between scheme and the token value
+                auth_header_name: auth_scheme + ' ' + token_from_query
+            }
+
+            # Overwrite the default final_request
+            # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
+            # So as long as headers from CustomRequest instance can be accessed with the dot notation
+            final_request = CustomRequest(custom_headers_dict)
+
+        # By now, request.headers may or may not contain the 'Authorization' header
+        app.logger.debug("======file_auth final_request.headers======")
+        app.logger.debug(final_request.headers)
+
+        # The user_info contains access level of the user based on the token
+        user_info = auth_helper.getUserDataAccessLevel(final_request)
+
+        app.logger.info("======user_info======")
+        app.logger.info(user_info)
+
+        # If returns error response, invalid header or token
+        if isinstance(user_info, Response):
+            return authentication_required
+
+        # Supposely each user should have an assigned data access level
+        if not 'data_access_level' in user_info:
+            internal_server_error("Unexpected error, data access level could not be found for user trying to access dataset uuid: " + dataset_uuid) 
+
+        user_access_level = user_info['data_access_level']
+
+        # Validation
+        if user_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC and data_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC:
+            return allowed
+        elif (user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM and (data_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM or data_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC)):
+            return allowed
+        elif user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
+            return allowed
+        else
+            # Unknown user access level value
+            internal_server_error("The 'data_access_level' value defined for this user prevented the server from fulfilling the request")
     elif response.status_code == 401:
-    	# Something wrong with fullfilling the request with secret as token     
-    	unauthorized_error("The internal token used for querying the 'data_access_level' of this dataset " + dataset_uuid + " is invalid")
+        # Something wrong with fullfilling the request with secret as token     
+        unauthorized_error("The internal token used for querying the 'data_access_level' of this dataset " + dataset_uuid + " is invalid")
     else:  
         # E.g., ingest-api server down?
         internal_server_error("The server encountered an unexpected condition that prevented it from fulfilling the request")
