@@ -372,6 +372,19 @@ def get_file_access(dataset_uuid, token_from_query, request):
         app.logger.error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
         return internal_error
 
+# Always pass through the requests with using modified version of the globus app secret as internal token
+def is_secrect_token(request):
+    auth_helper = init_auth_helper()
+    internal_token = auth_helper.getProcessSecret()
+
+    auth_header = request.headers.get('Authorization')
+    parsed_token = auth_header[6:].strip()
+
+    if internal_token == parsed_token:
+        return True
+
+    return False
+
 # Chceck if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
 def api_access_allowed(item, request):
@@ -380,6 +393,10 @@ def api_access_allowed(item, request):
 
     # Check if auth is required for this endpoint
     if item['auth'] == False:
+        return True
+
+    # Check if using modified version of the globus app secret as internal token
+    if is_secrect_token(request):
         return True
     
     # When auth is required, we need to check if group access is also required
