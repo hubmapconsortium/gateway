@@ -12,6 +12,7 @@ from urllib.parse import urlparse, parse_qs
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
 from hubmap_commons.hubmap_const import HubmapConst
+from hubmap_commons.exceptions import HTTPException
 
 # Specify the absolute path of the instance folder and use the config file relative to the instance path
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
