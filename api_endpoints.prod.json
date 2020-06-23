@@ -185,6 +185,11 @@
       "method": "GET",
       "endpoint": "/entities/dataset/globus-url/<*>",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entity-access-level/<*>",
+      "auth": false
     }
   ],
   "ingest.api.hubmapconsortium.org": [
