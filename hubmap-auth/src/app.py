@@ -265,44 +265,50 @@ class CustomRequest:
     def __init__(self, headers):
         self.headers = headers
 
-# Check if a given dataset requries globus group access
-# For dataset UUIDs that are listed in the secured_datasets.json, also check
-# if the globus token associated user is a member of the specified group assocaited with the UUID
+# Create a dict with HTTP Authorization header with Bearer token
+def create_request_headers_for_auth(token):
+    auth_header_name = 'Authorization'
+    auth_scheme = 'Bearer'
+
+    headers_dict = {
+        # Don't forget the space between scheme and the token value
+        auth_header_name: auth_scheme + ' ' + token
+    }
+
+    return headers_dict
+
+# Check if a given dataset is accessible based on token and access level assigned to the dataset
 def get_file_access(dataset_uuid, token_from_query, request):
     allowed = 200
     authentication_required = 401
     authorization_required = 403
 
-    auth_header_name = 'Authorization'
-    auth_scheme = 'Bearer'
+    auth_helper = init_auth_helper()
 
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
 
-    # First check the dataset access level based on the uuid without considering the token
+    # First check the dataset access level based on the uuid without taking the token into consideration
     entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
-            
-    auth_helper = init_auth_helper()
+    # Use modified version of globus app secrect from configuration as the internal token
+    request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
 
-    request_headers = {
-        # Use modified version of secrect as the token
-        auth_header_name: auth_scheme + ' ' + auth_helper.getProcessSecret()
-    }
     response = requests.get(url = entity_api_full_url, headers = request_headers) 
 
-    # Using the secret as token should always return 200
-    # If not, either technical issue 500 or 401 (even if the user doesn't provide a token, since we use the internal secret as token)
+    # Using the globus app secret as internal token should always return 200 supposely
+    # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
     if response.status_code == 200:
+        # The call to entity-api returns string directly
         data_access_level = response.content
 
         app.logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
         app.logger.debug(data_access_level)
 
-        # Unknown access level value
-        if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC or data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM or data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED
+        # Throw error 500 if invalid access level value assigned to the dataset metadata node
+        if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC or data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM or data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED:
             internal_server_error("The 'data_access_level' value assigned for this dataset " + dataset_uuid + " is invalid")
 
-        # Get the user access level based on token
+        # Get the user access level based on token (optional) from HTTP header or query string
         # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
         # Use the globus token from URL query string if present and set as the value of 'Authorization' header
         # If not found, default to the 'Authorization' header
@@ -312,12 +318,9 @@ def get_file_access(dataset_uuid, token_from_query, request):
             # and it's immutable(read only version of the headers from a WSGI environment)
             # So we can't modify the request.headers
             # Instead, we use a custom request object and set as the 'Authorization' header 
-            app.logger.debug("======set Authorization header as query string token value======")
+            app.logger.debug("======set Authorization header with query string token value======")
 
-            custom_headers_dict = {
-                # Don't forget the space between scheme and the token value
-                auth_header_name: auth_scheme + ' ' + token_from_query
-            }
+            custom_headers_dict = create_request_headers_for_auth(token_from_query)
 
             # Overwrite the default final_request
             # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
@@ -328,51 +331,64 @@ def get_file_access(dataset_uuid, token_from_query, request):
         app.logger.debug("======file_auth final_request.headers======")
         app.logger.debug(final_request.headers)
 
+        # When Authorization is not present, return value is based on the data_access_level of the given dataset
+        # In this case we can't call auth_helper.getUserDataAccessLevel() because it returns HTTPException when Authorization header is missing
+        if 'Authorization' not in final_request.headers:
+            # Return 401 if the data access level is consortium or protected since they's require token but Authorization header missing
+            if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC:
+                return authentication_required
+            # Only return 200 since public dataset doesn't require token
+            return allowed
+
+        # By now the Authorization is present and it's either provided directly from the request headers or query string (overwriting)
+        # Then we can call auth_helper.getUserDataAccessLevel() to find out the user's assigned access level
         try:
-            # The user_info contains access level of the user based on the token
+            # The user_info contains HIGHEST access level of the user based on the token
+            # Default to HubmapConst.ACCESS_LEVEL_PUBLIC if none of the Authorization/Mauthorization header presents
+            # This call raises an HTTPException with a 401 if any auth issues are found
             user_info = auth_helper.getUserDataAccessLevel(final_request)
 
             app.logger.info("======user_info======")
             app.logger.info(user_info)
-        # If returns HTTPException with a 401, invalid header or token
+        # If returns HTTPException with a 401, invalid header format or expired/invalid token
         except HTTPException as e:
             msg = "HTTPException from calling auth_helper.getUserDataAccessLevel() HTTP code: " + str(e.get_status_code()) + " " + e.get_description() 
 
             app.logger.warning(msg)
 
+            # In the case of requested dataset is public but provided globus token is invalid/expired,
+            # we'll return 401 so the end user knows something wrong with the token rather than allowing file access
             return authentication_required
 
-        # Supposely each user should have an assigned data access level
-        if not 'data_access_level' in user_info:
-            internal_server_error("Unexpected error, data access level could not be found for user trying to access dataset uuid: " + dataset_uuid) 
-
-        # Parse the user data access level if everything goes well so far
+        # By now the user_info is returned and based on the logic of auth_helper.getUserDataAccessLevel(), 
+        # 'data_access_level' should always be found user_info and its value is always one of the 
+        # HubmapConst.ACCESS_LEVEL_PUBLIC, HubmapConst.ACCESS_LEVEL_CONSORTIUM, or HubmapConst.ACCESS_LEVEL_PROTECTED
+        # So no need to check unknown value
         user_access_level = user_info['data_access_level']
 
-        # Unknown access level value
-        if user_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC or user_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM or user_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED
-            internal_server_error("The 'data_access_level' value assigned to this user is invalid")
-
-
-        # Allow file access is data is public
+        # By now we have both data_access_level and the user_access_level obtained with one of the valid values
+        # Allow file access as long as data_access_level is public, no need to care about the user_access_level (since Authorization header presents with valid token)
         if data_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC:
             return allowed
-        elif data_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM:
-            if user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED or user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM:
-                return allowed
-            elif user_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC:
-                return authorization_required
-        elif data_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
-            if user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
-                return allowed
-            elif user_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC or user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM:
-                return authorization_required
-
-    elif response.status_code == 401:
-        # Something wrong with fullfilling the request with secret as token     
-        unauthorized_error("The internal token used for querying the 'data_access_level' of this dataset " + dataset_uuid + " is invalid")
+        
+        # When data_access_level is comsortium, allow access only when the user_access_level (remember this is the highest level) is consortium or protected
+        if (data_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM and
+            (user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED or user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM)):
+            return allowed
+        
+        # When data_access_level is protected, allow access only when user_access_level is also protected
+        if data_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED and user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
+            return allowed
+            
+        # All other cases
+        return authorization_required
+    # Something wrong with fullfilling the request with secret as token
+    # E.g., for some reason the gateway returns 401
+    elif response.status_code == 401:    
+        unauthorized_error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
+    # All other cases with 500 response
+    # E.g., entity-api server down?
     else:  
-        # E.g., entity-api server down?
         internal_server_error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
 
 # Chceck if access to the given endpoint item is allowed

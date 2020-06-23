@@ -18,6 +18,11 @@ GLOBUS_APP_SECRET = ''
 # Used for file service
 GLOBUS_HUBMAP_READ_GROUP_UUID = ''
 
+# URL base to entity-api for getting file access level of a given dataset UUID
+# Default value works for docker localhost
+# Works regardless the trailing slash /
+ENTITY_API_URL = 'http://localhost:3333/entity-access-level/'
+
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)
@@ -46,12 +51,6 @@ Authorization: Bearer u8kr4P3XwePdWgoJ2N7Q9MDMNQK5MDgMNWYe2on5xQEVyQPlxpIqCOjYoX
 ````
 
 Note this token needs to be a group access token (nexus token) if the requested endpoint requires group access, otherwise a regular auth token works.
-
-And if the API client uses the custom `MAuthorization` header instead of `Authorization` header, follow the format:
-
-````
-MAuthorization: MBearer {"auth_token": "u8kr4P3XwePdWgoJ2N7Q9MDMNQK5MDgMNWYe2on5xQEVyQPlxpIqCOjYoX41qXyYEdQzVN9np2jQMniPpDJ74c7LXztq9mYc10GQU6d0x", "nexus_token": "dexYbd9jMOqkN9JGBYK49lPzgM5JQxxnm2YkXvd2Q8lYJgKDqas8CkrwXzBrMMoW9DowKzEYQeEgdmCqPv0NJKQwd8", "transfer_token": "AghvlgEPx7gDg9YKwnQBgYvBKoBXqjdYProGavWOK76Oj0p4E3cgCKNMV2adlxwBWw7150E3Bk594rTKDd4joUplYg"}
-````
 
 To make the lookup of a given endpoint more efficent, we enabled caching. The caching settings can be found in the `instance/app.cfg` file:
 
