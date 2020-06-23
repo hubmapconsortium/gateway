@@ -30,21 +30,6 @@ logging.basicConfig(level=logging.DEBUG)
 # Here we use two hours, 7200 seconds for ttl
 cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'])
 
-# Error handler for 500 Internal Server Error with custom error message
-@app.errorhandler(500)
-def http_internal_server_error(e):
-    return jsonify(error=str(e)), 500
-
-# Error handler for 401 Unauthorized with custom error message
-@app.errorhandler(401)
-def http_unauthorized(e):
-    return jsonify(error=str(e)), 401
-
-# Error handler for 403 Forbidden with custom error message
-@app.errorhandler(403)
-def http_forbidden(e):
-    return jsonify(error=str(e)), 403
-
 ####################################################################################################
 ## Default route
 ####################################################################################################
@@ -161,6 +146,7 @@ def file_auth():
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
+    response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
   
     method = None
     orig_uri = None
@@ -209,6 +195,8 @@ def file_auth():
                     return response_401
                 elif code == 403:
                     return response_403
+                elif code == 500:
+                    return response_500
             else: 
                 # Missing dataset UUID in path
                 return response_401
@@ -222,18 +210,6 @@ def file_auth():
 ####################################################################################################
 ## Internal Functions Used By API Auth and File Auth
 ####################################################################################################
-
-# Throws error for 500 Internal Server Error with message
-def internal_server_error(err_msg):
-    abort(500, description = err_msg)
-
-# Throws error for 401 Unauthorized with message
-def unauthorized_error(err_msg):
-    abort(401, description = err_msg)
-
-# Throws error for 403 Forbidden with message
-def forbidden_error(err_msg):
-    abort(403, description = err_msg)
 
 @cached(cache)
 def load_file(file):
@@ -282,6 +258,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     allowed = 200
     authentication_required = 401
     authorization_required = 403
+    internal_error = 500
 
     auth_helper = init_auth_helper()
 
@@ -306,7 +283,8 @@ def get_file_access(dataset_uuid, token_from_query, request):
 
         # Throw error 500 if invalid access level value assigned to the dataset metadata node
         if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC or data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM or data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED:
-            internal_server_error("The 'data_access_level' value assigned for this dataset " + dataset_uuid + " is invalid")
+            app.logger.error("The 'data_access_level' value assigned for this dataset " + dataset_uuid + " is invalid")
+            return internal_error
 
         # Get the user access level based on token (optional) from HTTP header or query string
         # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
@@ -385,11 +363,13 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # Something wrong with fullfilling the request with secret as token
     # E.g., for some reason the gateway returns 401
     elif response.status_code == 401:    
-        unauthorized_error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
+        app.logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
+        return authorization_required
     # All other cases with 500 response
     # E.g., entity-api server down?
     else:  
-        internal_server_error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
+        app.logger.error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
+        return internal_error
 
 # Chceck if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
