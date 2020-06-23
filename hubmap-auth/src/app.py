@@ -282,7 +282,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
         app.logger.debug(data_access_level)
 
         # Throw error 500 if invalid access level value assigned to the dataset metadata node
-        if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC or data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM or data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED:
+        if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC and data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM and data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED:
             app.logger.error("The 'data_access_level' value assigned for this dataset " + dataset_uuid + " is invalid")
             return internal_error
 
