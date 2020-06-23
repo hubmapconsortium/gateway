@@ -276,7 +276,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
     if response.status_code == 200:
         # The call to entity-api returns string directly
-        data_access_level = response.content
+        data_access_level = response.text
 
         app.logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
         app.logger.debug(data_access_level)
