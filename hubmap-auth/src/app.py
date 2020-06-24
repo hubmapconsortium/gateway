@@ -1,5 +1,4 @@
-from flask import Flask, request, jsonify, make_response, Response, render_template, session, redirect, url_for
-from globus_sdk import AuthClient, AccessTokenAuthorizer, ConfidentialAppAuthClient
+from flask import Flask, request, jsonify, make_response, Response
 import requests
 import json
 import logging
@@ -41,7 +40,7 @@ def home():
 
 
 ####################################################################################################
-## API Auth, no UI
+## API Auth
 ####################################################################################################
 
 @app.route('/cache_clear', methods = ['GET'])
@@ -130,7 +129,7 @@ def api_auth():
 
 
 ####################################################################################################
-## File Auth, no UI
+## File Auth
 ####################################################################################################
 
 # Auth for file service
@@ -426,142 +425,4 @@ def api_access_allowed(item, request):
 
     # When no group access requried and user_info dict gets returned
     return True
-
-
-####################################################################################################
-## User UI Auth, with UI rendering and redirection
-####################################################################################################
-
-# User auth with UI rendering
-# All endpoints access need to be authenticated
-# Direct access will see the login form
-# Nginx auth_request module won't be able to display the login form for 401 response
-@app.route('/user_auth', methods = ['GET'])
-def user_auth():
-    # Nginx auth_request only cares about the response status code
-    # it ignores the response body
-    # We use body here only for direct visit to this endpoint
-    response_200 = make_response('OK', 200)
-    response_401 = make_response('Unauthorized', 401)
-
-    # use cookies.get(key) instead of cookies[key] to not get a
-    # KeyError if the cookie is missing.
-    # Cookie value is string not boolean
-    is_authenticated = request.cookies.get('is_authenticated')
-
-    if is_authenticated is not None:
-        if is_authenticated == 'True':
-            return response_200
-        else:
-            return response_401
-    else:
-        return response_401
-
-
-@app.route('/login_form', methods = ['GET'])
-def login_form():
-    resp = make_response(render_template('login.html'))
-
-    # Parsing query string
-    args = request.args
-    if "original_uri" in args:
-            original_uri = request.args.get("original_uri")
-            resp = make_response(render_template('login.html'))
-            # Store in cookie for later redirect
-            resp.set_cookie('original_uri', original_uri, domain = app.config['COOKIE_DOMAIN'])
-            
-            return resp
-    else:
-        # Just show the login page, won't be able to redirec to the orginal uri
-        return resp
-
-# Redirect users from react app login page to Globus auth login widget then redirect back
-@app.route('/login', methods = ['GET'])
-def login():
-    redirect_uri = url_for('login', _external=True)
-    confidential_app_auth_client = ConfidentialAppAuthClient(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
-    confidential_app_auth_client.oauth2_start_flow(redirect_uri)
-
-    # If there's no "code" query string parameter, we're in this route
-    # starting a Globus Auth login flow.
-    # Redirect out to Globus Auth
-    if 'code' not in request.args:                                        
-        auth_uri = confidential_app_auth_client.oauth2_get_authorize_url(additional_params={"scope": "openid profile email urn:globus:auth:scope:transfer.api.globus.org:all urn:globus:auth:scope:auth.globus.org:view_identities urn:globus:auth:scope:nexus.api.globus.org:groups" })
-        return redirect(auth_uri)
-    # If we do have a "code" param, we're coming back from Globus Auth
-    # and can start the process of exchanging an auth code for a token.
-    else:
-        auth_code = request.args.get('code')
-
-        token_response = confidential_app_auth_client.oauth2_exchange_code_for_tokens(auth_code)
-        
-        # Get all Bearer tokens
-        auth_token = token_response.by_resource_server['auth.globus.org']['access_token']
-        nexus_token = token_response.by_resource_server['nexus.api.globus.org']['access_token']
-        transfer_token = token_response.by_resource_server['transfer.api.globus.org']['access_token']
-
-        # Also get the user info (sub, email, name, preferred_username) using the AuthClient with the auth token
-        user_info = get_globus_user_info(auth_token)
-
-        # Response
-        original_uri = request.cookies.get('original_uri')
-
-        if original_uri is not None:
-            resp = make_response(redirect(original_uri))
-        else:
-            # If no original_uri found in cookie, won't be able to redirect
-            resp = make_response('You are authenticated :)', 200)
-
-        # Convert boolean to string ans store in cookie
-        resp.set_cookie('is_authenticated', str(True), domain = app.config['COOKIE_DOMAIN'])
-        resp.set_cookie('globus_user_id', user_info['sub'], domain = app.config['COOKIE_DOMAIN'])
-        resp.set_cookie('name', user_info['name'], domain = app.config['COOKIE_DOMAIN'])
-        resp.set_cookie('email', user_info['email'].lower(), domain = app.config['COOKIE_DOMAIN'])
-        resp.set_cookie('auth_token', auth_token, domain = app.config['COOKIE_DOMAIN'])
-        resp.set_cookie('nexus_token', nexus_token, domain = app.config['COOKIE_DOMAIN'])
-        resp.set_cookie('transfer_token', transfer_token, domain = app.config['COOKIE_DOMAIN'])
-
-        # No logner need the orginal uri at this point
-        resp.set_cookie('original_uri', expires=0, domain = app.config['COOKIE_DOMAIN'])
-        
-        return resp 
-
-
-# Revoke the tokens with Globus Auth
-# Expire all cookie data
-# Redirect the user to the Globus Auth logout page
-@app.route('/logout', methods = ['GET'])
-def logout():
-    confidential_app_auth_client = ConfidentialAppAuthClient(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
-
-    auth_token = request.cookies.get('auth_token')
-    nexus_token = request.cookies.get('nexus_token')
-    transfer_token = request.cookies.get('transfer_token')
-
-    # Revoke the tokens with Globus Auth
-    confidential_app_auth_client.oauth2_revoke_token(auth_token)
-    confidential_app_auth_client.oauth2_revoke_token(nexus_token)
-    confidential_app_auth_client.oauth2_revoke_token(transfer_token)
-
-    # Expire those values in cookie
-    resp = make_response("Bye~", 200)
-    resp.set_cookie('is_authenticated', expires=0, domain = app.config['COOKIE_DOMAIN'])
-    resp.set_cookie('globus_user_id', expires=0, domain = app.config['COOKIE_DOMAIN'])
-    resp.set_cookie('name', expires=0, domain = app.config['COOKIE_DOMAIN'])
-    resp.set_cookie('email', expires=0, domain = app.config['COOKIE_DOMAIN'])
-    resp.set_cookie('auth_token', expires=0, domain = app.config['COOKIE_DOMAIN'])
-    resp.set_cookie('nexus_token', expires=0, domain = app.config['COOKIE_DOMAIN'])
-    resp.set_cookie('transfer_token', expires=0, domain = app.config['COOKIE_DOMAIN'])
-
-    return resp
-
-
-####################################################################################################
-## Internal Functions Used By user UI Auth
-####################################################################################################
-
-# Get user info from globus with the auth access token
-def get_globus_user_info(token):
-    auth_client = AuthClient(authorizer=AccessTokenAuthorizer(token))
-    return auth_client.oauth2_userinfo()
 
