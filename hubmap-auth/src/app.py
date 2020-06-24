@@ -1,4 +1,4 @@
-from flask import Flask, abort, request, jsonify, make_response, Response, render_template, session, redirect, url_for
+from flask import Flask, request, jsonify, make_response, Response, render_template, session, redirect, url_for
 from globus_sdk import AuthClient, AccessTokenAuthorizer, ConfidentialAppAuthClient
 import requests
 import json
