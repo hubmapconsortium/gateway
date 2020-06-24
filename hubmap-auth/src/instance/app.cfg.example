@@ -2,6 +2,7 @@
 API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
 
 # Globus app client ID and secret
+# Used by HuBMAP commons AuthHelper
 GLOBUS_APP_ID = ''
 GLOBUS_APP_SECRET = ''
 
