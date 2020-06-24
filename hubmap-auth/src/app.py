@@ -256,11 +256,13 @@ def create_request_headers_for_auth(token):
 
 # Check if a given dataset is accessible based on token and access level assigned to the dataset
 def get_file_access(dataset_uuid, token_from_query, request):
+    # Returns one of the following codes
     allowed = 200
     authentication_required = 401
     authorization_required = 403
     internal_error = 500
 
+    # Will need this to call getProcessSecret() and getUserDataAccessLevel()
     auth_helper = init_auth_helper()
 
     # request.headers may or may not contain the 'Authorization' header
@@ -269,8 +271,11 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # First check the dataset access level based on the uuid without taking the token into consideration
     entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
     # Use modified version of globus app secrect from configuration as the internal token
+    # All API endpoints specified in gateway regardless of auth is required or not, 
+    # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
 
+    # Possible response status codes: 200, 401, and 500 to be handled below
     response = requests.get(url = entity_api_full_url, headers = request_headers) 
 
     # Using the globus app secret as internal token should always return 200 supposely
