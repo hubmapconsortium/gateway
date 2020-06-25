@@ -18,7 +18,6 @@ app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname
 app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
-app.config['FLASK_APP_BASE_URI'] = app.config['FLASK_APP_BASE_URI'].strip('/')
 app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
 # Set logging level (default is warning)
