@@ -2,6 +2,7 @@
 API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
 
 # Globus app client ID and secret
+# Used by HuBMAP commons AuthHelper
 GLOBUS_APP_ID = ''
 GLOBUS_APP_SECRET = ''
 
@@ -9,28 +10,14 @@ GLOBUS_APP_SECRET = ''
 # Used for file service
 GLOBUS_HUBMAP_READ_GROUP_UUID = '5777527e-ec11-11e8-ab41-0af86edb4424'
 
-# URL base to entity-api for getting metadata information of a given dataset UUID
+# URL base to entity-api for getting file access level of a given dataset UUID
 # Default value works for docker localhost
 # Works regardless the trailing slash /
-ENTITY_API_URL = 'http://localhost:3333/entities'
+ENTITY_API_URL = 'http://localhost:3333/entity-access-level/'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)
 CACHE_TTL = 7200
 
-##############################################################
-## Only For User UI Auth - NOT READY YET
-##############################################################
-# App name and deployment URI
-FLASK_APP_NAME = 'HuBMAP Auth'
-
-# Works regardless the trailing slash /
-FLASK_APP_BASE_URI = 'http://localhost:8080'
-
-# Cross-domain cookie
-COOKIE_DOMAIN = 'localhost'
-
-# Flask app session key
-SECRET_KEY = ''
 
