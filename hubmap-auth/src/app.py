@@ -379,9 +379,11 @@ def get_file_access(dataset_uuid, token_from_query, request):
 def is_secrect_token(request):
     auth_helper = init_auth_helper()
     internal_token = auth_helper.getProcessSecret()
-
-    auth_header = request.headers.get('Authorization')
-    parsed_token = auth_header[6:].strip()
+    parsed_token = None
+    
+    if 'Authorization' in request.headers:
+        auth_header = request.headers['Authorization']
+        parsed_token = auth_header[6:].strip()
 
     if internal_token == parsed_token:
         return True
