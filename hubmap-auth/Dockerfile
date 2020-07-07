@@ -3,6 +3,10 @@ FROM hubmap/api-base-image:latest
 
 LABEL description="HuBMAP Authentication and Authorization Service"
 
+# The commons branch to be used in requirements.txt during image build
+# Default is master branch specified in docker-compose.yml if not set before the build
+ARG COMMONS_BRANCH
+
 WORKDIR /usr/src/app
 
 # Copy from host to image

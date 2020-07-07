@@ -58,7 +58,7 @@ The `log` under `hubmap-auth` is another volume mount, this allows us to access 
 
 Note: Docker Compose requires Docker to be installed and running first.
 
-### Post-installation configurations
+### Docker post-installation configurations
 
 The Docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root and other users can only access it using sudo. The Docker daemon always runs as the root user. If you don’t want to preface the docker command with sudo, add users to the `docker` group:
 
@@ -96,6 +96,12 @@ For the `gateway` project, there's an example configuration file **app.cfg.examp
 Note: MySQL is defiend in the `docker-compose.yml` of the `uuid-api` project and the MySQL root password as well as user information are defiend in the compose yaml file as well. The Neo4j service gets defined in the `entity-api` project and you'll need to set the password for the native `neo4j` user in the `app.cfg` file, which is explained in the `entity-api` project.
 
 ### Step 3: build docker images and spin up the containers
+
+There are a few configurable environment variables to keep in mind:
+
+- `COMMONS_BRANCH`: build argument only to be used during image creation. We can specify which [commons](https://github.com/hubmapconsortium/commons) branch to use during the image creation. Default to master branch if not set or null.
+- `HOST_UID`: the user id on the host machine to be mapped to the container. Default to 1000 if not set or null.
+- `HOST_GID`: the user's group id on the host machine to be mapped to the container. Default to 1000 if not set or null.
 
 In the `gateway` project, first make sure the `hubmap-docker.sh` script is executable, 
 
