@@ -2,7 +2,7 @@
 
 The HuBMAP Web Gateway serves as an authentication and authorization gateway for the HuBMAP API services and File service. All API requests will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. As a result of this design, the API services and File service no longer need to handle the authentication and authorization.
 
-## Development and deployment environments
+## Localhost development and remote deployment environments
 
 We have the following 4 development and deployment environments:
 
@@ -70,7 +70,7 @@ The log out and log back in so that your group membership is re-evaluated. If te
 
 Note: the following instructions with docker commands are based on managing Docker as a non-root user.
 
-## Workflow of setting up multiple HuBMAP docker compose projects
+## Workflow of setting up multiple HuBMAP docker compose projects on localhost
 
 With a micro-services architecture design, we probably want to share a single database container across two or more applications, so that they can access the same data. Docker and Docker Compose make this possible through the use of Docker networks, allowing containers from different compose projects to be attached to the same network.
 
@@ -171,9 +171,9 @@ And to stop the services:
 ./hubmap-docker.sh localhost stop
 ````
 
-## Testing and Production deployment
+## Remote deployment
 
-For development environment, all the docker images are built on the same host machine and all the containers are running on the same host machine as well. It also comes with a sample Neo4j container and a MySQL database for a full-stack services. However, for testing and production deployment, the `ingest-api` will be running on a separate machine (due to dataset mount) and the Neo4j and MySQL are also running remotely. Additional changes include:
+For localhost development, all the docker images are built on the same host machine and all the containers are running on the same host machine as well. It also comes with a sample Neo4j container and a MySQL database for a full-stack services. However, for remote deployment (dev, test, stge, and prod), the `ingest-api` will be running on a separate machine (due to dataset mount) and the Neo4j and MySQL are also running remotely as well. Additional changes include:
 
 * Removing any volume bindings for application code, so that code stays inside the container and can't be changed from outside
 * Binding to different ports on the host
