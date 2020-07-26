@@ -2,7 +2,7 @@
 
 The HuBMAP Web Gateway serves as an authentication and authorization gateway for the HuBMAP API services and File service. All API requests will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. As a result of this design, the API services and File service no longer need to handle the authentication and authorization.
 
-## Development and deployment environments
+## Localhost development and remote deployment environments
 
 We have the following 4 development and deployment environments:
 
@@ -58,7 +58,7 @@ The `log` under `hubmap-auth` is another volume mount, this allows us to access 
 
 Note: Docker Compose requires Docker to be installed and running first.
 
-### Post-installation configurations
+### Docker post-installation configurations
 
 The Docker daemon binds to a Unix socket instead of a TCP port. By default that Unix socket is owned by the user root and other users can only access it using sudo. The Docker daemon always runs as the root user. If you don’t want to preface the docker command with sudo, add users to the `docker` group:
 
@@ -70,7 +70,7 @@ The log out and log back in so that your group membership is re-evaluated. If te
 
 Note: the following instructions with docker commands are based on managing Docker as a non-root user.
 
-## Workflow of setting up multiple HuBMAP docker compose projects
+## Workflow of setting up multiple HuBMAP docker compose projects on localhost
 
 With a micro-services architecture design, we probably want to share a single database container across two or more applications, so that they can access the same data. Docker and Docker Compose make this possible through the use of Docker networks, allowing containers from different compose projects to be attached to the same network.
 
@@ -126,6 +126,21 @@ Before we go ahead to start building the docker images, we can do a check to see
 ./hubmap-docker.sh localhost check
 ````
 
+In addition, there are a few configurable environment variables to keep in mind:
+
+- `COMMONS_BRANCH`: build argument only to be used during image creation. We can specify which [commons](https://github.com/hubmapconsortium/commons) branch to use during the image creation. Default to master branch if not set or null.
+- `HOST_UID`: the user id on the host machine to be mapped to the container. Default to 1000 if not set or null.
+- `HOST_GID`: the user's group id on the host machine to be mapped to the container. Default to 1000 if not set or null.
+
+We can set and verify the environment variable like below:
+
+````
+export COMMONS_BRANCH=devel
+echo $COMMONS_BRANCH
+````
+
+Note: Environment variables set like this are only stored temporally. When you exit the running instance of bash by exiting the terminal, they get discarded. So for rebuilding the docker images, we'll need to make sure to set the environment variables again if necessary.
+
 We can also validate and view the details of corresponding compose files:
 
 ````
@@ -156,9 +171,9 @@ And to stop the services:
 ./hubmap-docker.sh localhost stop
 ````
 
-## Testing and Production deployment
+## Remote deployment
 
-For development environment, all the docker images are built on the same host machine and all the containers are running on the same host machine as well. It also comes with a sample Neo4j container and a MySQL database for a full-stack services. However, for testing and production deployment, the `ingest-api` will be running on a separate machine (due to dataset mount) and the Neo4j and MySQL are also running remotely. Additional changes include:
+For localhost development, all the docker images are built on the same host machine and all the containers are running on the same host machine as well. It also comes with a sample Neo4j container and a MySQL database for a full-stack services. However, for remote deployment (dev, test, stge, and prod), the `ingest-api` will be running on a separate machine (due to dataset mount) and the Neo4j and MySQL are also running remotely as well. Additional changes include:
 
 * Removing any volume bindings for application code, so that code stays inside the container and can't be changed from outside
 * Binding to different ports on the host
