@@ -16,10 +16,12 @@ GLOBUS_HUBMAP_READ_GROUP_UUID = '5777527e-ec11-11e8-ab41-0af86edb4424'
 ENTITY_API_URL = 'http://localhost:3333/entity-access-level/'
 
 # For service status 
+# Use URLs that go through the gateway API auth instead of the ones 
+# designed for direct communication between containers
 UUID_API_STATUS_URL = 'http://localhost:8282/mysql_connection_status'
 ENTITY_API_STATUS_URL = 'http://localhost:8383/neo4j_connection_status'
 INGEST_API_STATUS_URL = 'http://localhost:8484/neo4j_connection_status'
-SEARCH_API_STATUS_URL = 'http://localhost:8686/indices'
+SEARCH_API_STATUS_URL = 'http://localhost:8686/elasticsearch_status'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
