@@ -37,6 +37,55 @@ cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'
 def home():
     return "This is HuBMAP Web Gateway :)"
 
+####################################################################################################
+## Status of API services and File service
+####################################################################################################
+
+@app.route('/status', methods = ['GET'])
+def status():
+    status_data = {
+        'search_api': {
+            'api_auth': False,
+            'neo4j_connection': False
+        },
+        'entity_api': {
+            'api_auth': False,
+            'neo4j_connection': False
+        },
+        'uuid_api': {
+            'api_auth': False,
+            'neo4j_connection': False
+        },
+        'ingest_api': {
+            'api_auth': False,
+            'neo4j_connection': False,
+            'file_service': False
+        }
+    }
+
+    # Use modified version of globus app secrect from configuration as the internal token
+    # All API endpoints specified in gateway regardless of auth is required or not, 
+    # will consider this internal token as valid and has the access to HuBMAP-Read group
+    request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
+
+    # Make a call to entity-api
+    entity_api_full_url = app.config['ENTITY_API_URL'] + '/neo4j_connection_status'
+
+    # Possible response status codes: 200, 401, and 500 to be handled below
+    entity_api_response = requests.get(url = entity_api_full_url, headers = request_headers) 
+
+    # Using the globus app secret as internal token should always return 200 supposely
+    # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
+    if entity_api_response.status_code == 200:
+        status_data['entity_api']['api_auth'] = True
+
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = entity_api_response.json
+        status_data['entity_api']['neo4j_connection'] = response_json['neo4j_connection']
+
+    # Final result
+    return jsonify(status_data)
+
 
 ####################################################################################################
 ## API Auth
