@@ -43,45 +43,77 @@ def home():
 
 @app.route('/status', methods = ['GET'])
 def status():
+    # By default only show API auth status
+    # Show additional status by adding to the dict when API auth check passes
     status_data = {
         'search_api': {
-            'api_auth': False,
-            'neo4j_connection': False
+            'api_auth': False
         },
         'entity_api': {
-            'api_auth': False,
-            'neo4j_connection': False
+            'api_auth': False
         },
         'uuid_api': {
-            'api_auth': False,
-            'neo4j_connection': False
+            'api_auth': False
         },
         'ingest_api': {
-            'api_auth': False,
-            'neo4j_connection': False,
-            'file_service': False
+            'api_auth': False
         }
     }
 
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
+    auth_helper = init_auth_helper()
     request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
 
-    # Make a call to entity-api
-    entity_api_full_url = app.config['ENTITY_API_URL'] + '/neo4j_connection_status'
+    # uuid-api
+    uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'], request_headers)
+    if uuid_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data['uuid_api']['api_auth'] = True
 
-    # Possible response status codes: 200, 401, and 500 to be handled below
-    entity_api_response = requests.get(url = entity_api_full_url, headers = request_headers) 
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = uuid_api_response.json()
+        if 'mysql_connection' in response_json:
+            # Add the mysql connection status
+            status_data['uuid_api']['mysql_connection'] = response_json['mysql_connection']
 
-    # Using the globus app secret as internal token should always return 200 supposely
-    # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
+    # entity-api
+    entity_api_response = status_request(app.config['ENTITY_API_STATUS_URL'], request_headers)
     if entity_api_response.status_code == 200:
+        # Overwrite the default value
         status_data['entity_api']['api_auth'] = True
 
         # Then parse the response json to determine if neo4j connection is working
-        response_json = entity_api_response.json
-        status_data['entity_api']['neo4j_connection'] = response_json['neo4j_connection']
+        response_json = entity_api_response.json()
+        if 'neo4j_connection' in response_json:
+            # Add the neo4j connection status
+            status_data['entity_api']['neo4j_connection'] = response_json['neo4j_connection']
+
+    # ingest-api
+    ingest_api_response = status_request(app.config['INGEST_API_STATUS_URL'], request_headers)
+    if ingest_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data['ingest_api']['api_auth'] = True
+
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = ingest_api_response.json()
+        if 'neo4j_connection' in response_json:
+            # Add the neo4j connection status
+            status_data['ingest_api']['neo4j_connection'] = response_json['neo4j_connection']
+
+    # search-api
+    search_api_response = status_request(app.config['SEARCH_API_STATUS_URL'], request_headers)
+    if search_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data['search_api']['api_auth'] = True
+
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = search_api_response.json()
+        # Elasticsearch connection is OK as long as we see the 'indices' key
+        if 'indices' in response_json:
+            # Add the elasticsearch connection status
+            status_data['search_api']['elasticsearch_connection'] = True
 
     # Final result
     return jsonify(status_data)
@@ -274,6 +306,11 @@ def init_auth_helper():
         auth_helper = AuthHelper.instance()
     
     return auth_helper
+
+# Make a call to the given target URL with the given headers
+def status_request(target_url, request_headers):
+    response = requests.get(url = target_url, headers = request_headers) 
+    return response
 
 # Get user infomation dict based on the http request(headers)
 # `group_required` is a boolean, when True, 'hmgroupids' is in the output

@@ -15,6 +15,12 @@ GLOBUS_HUBMAP_READ_GROUP_UUID = '5777527e-ec11-11e8-ab41-0af86edb4424'
 # Works regardless the trailing slash /
 ENTITY_API_URL = 'http://localhost:3333/entity-access-level/'
 
+# For service status 
+UUID_API_STATUS_URL = 'http://localhost:8282/mysql_connection_status'
+ENTITY_API_STATUS_URL = 'http://localhost:8383/neo4j_connection_status'
+INGEST_API_STATUS_URL = 'http://localhost:8484/neo4j_connection_status'
+SEARCH_API_STATUS_URL = 'http://localhost:8686/indices'
+
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)
