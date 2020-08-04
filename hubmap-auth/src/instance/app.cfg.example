@@ -18,10 +18,10 @@ ENTITY_API_URL = 'http://localhost:3333/entity-access-level/'
 # For service status 
 # Use URLs that go through the gateway API auth instead of the ones 
 # designed for direct communication between containers
-UUID_API_STATUS_URL = 'http://localhost:8282/mysql_connection_status'
-ENTITY_API_STATUS_URL = 'http://localhost:8383/neo4j_connection_status'
-INGEST_API_STATUS_URL = 'http://localhost:8484/neo4j_connection_status'
-SEARCH_API_STATUS_URL = 'http://localhost:8686/elasticsearch_status'
+UUID_API_STATUS_URL = 'http://localhost:8282/status'
+ENTITY_API_STATUS_URL = 'http://localhost:8383/status'
+INGEST_API_STATUS_URL = 'http://localhost:8484/status'
+SEARCH_API_STATUS_URL = 'http://localhost:8686/status'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
