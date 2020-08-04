@@ -20,6 +20,12 @@ app.config.from_pyfile('app.cfg')
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
 app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
+# Also remove trailing slash / for those status endpoints in case Flask takes / as a different endpoint
+app.config['UUID_API_STATUS_URL'] = app.config['UUID_API_STATUS_URL'].strip('/')
+app.config['ENTITY_API_STATUS_URL'] = app.config['ENTITY_API_STATUS_URL'].strip('/')
+app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip('/')
+app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip('/')
+
 # Set logging level (default is warning)
 logging.basicConfig(level=logging.DEBUG)
 
