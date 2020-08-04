@@ -122,7 +122,7 @@ def status():
         
         # Also check if the health status of elasticsearch cluster is available
         if 'elasticsearch_status' in response_json:
-            # Add the elasticsearch connection status
+            # Add the elasticsearch cluster health status
             status_data['search_api']['elasticsearch_status'] = response_json['elasticsearch_status']
 
     # Final result
