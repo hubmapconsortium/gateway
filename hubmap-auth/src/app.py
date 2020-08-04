@@ -52,16 +52,16 @@ def status():
     # By default only show API auth status
     # Show additional status by adding to the dict when API auth check passes
     status_data = {
-        'search_api': {
+        'uuid_api': {
             'api_auth': False
         },
         'entity_api': {
             'api_auth': False
         },
-        'uuid_api': {
+        'ingest_api': {
             'api_auth': False
         },
-        'ingest_api': {
+        'search_api': {
             'api_auth': False
         }
     }
@@ -114,12 +114,16 @@ def status():
         # Overwrite the default value
         status_data['search_api']['api_auth'] = True
 
-        # Then parse the response json to determine if neo4j connection is working
+        # Then parse the response json to determine if elasticsearch cluster is connected
         response_json = search_api_response.json()
-        # Elasticsearch connection is OK as long as we see the 'indices' key
-        if 'indices' in response_json:
+        if 'elasticsearch_connection' in response_json:
             # Add the elasticsearch connection status
-            status_data['search_api']['elasticsearch_connection'] = True
+            status_data['search_api']['elasticsearch_connection'] = response_json['elasticsearch_connection']
+        
+        # Also check if the health status of elasticsearch cluster is available
+        if 'elasticsearch_status' in response_json:
+            # Add the elasticsearch connection status
+            status_data['search_api']['elasticsearch_status'] = response_json['elasticsearch_status']
 
     # Final result
     return jsonify(status_data)
