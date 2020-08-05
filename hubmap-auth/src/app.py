@@ -49,20 +49,32 @@ def home():
 
 @app.route('/status', methods = ['GET'])
 def status():
+    # Some constants
+    UUID_API = 'uuid_api'
+    ENTITY_API = 'entity_api'
+    INGEST_API = 'ingest_api'
+    SEARCH_API = 'search_api'
+
+    API_AUTH = 'api_auth'
+    MYSQL_CONNECTION = 'mysql_connection'
+    NEO4J_CONNECTION = 'neo4j_connection'
+    ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
+    ELASTICSEARCH_STATUS = 'elasticsearch_status'
+
     # All API services have api_auth status (meaning the gateway's API auth is working)
     # Add additional API-specific status to the dict when API auth check passes
     status_data = {
-        'uuid_api': {
-            'api_auth': False
+        UUID_API: {
+            API_AUTH: False
         },
-        'entity_api': {
-            'api_auth': False
+        ENTITY_API: {
+            API_AUTH: False
         },
-        'ingest_api': {
-            'api_auth': False
+        INGEST_API: {
+            API_AUTH: False
         },
-        'search_api': {
-            'api_auth': False
+        SEARCH_API: {
+            API_AUTH: False
         }
     }
 
@@ -76,54 +88,54 @@ def status():
     uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'], request_headers)
     if uuid_api_response.status_code == 200:
         # Overwrite the default value
-        status_data['uuid_api']['api_auth'] = True
+        status_data[UUID_API][API_AUTH] = True
 
         # Then parse the response json to determine if neo4j connection is working
         response_json = uuid_api_response.json()
-        if 'mysql_connection' in response_json:
+        if MYSQL_CONNECTION in response_json:
             # Add the mysql connection status
-            status_data['uuid_api']['mysql_connection'] = response_json['mysql_connection']
+            status_data[UUID_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
 
     # entity-api
     entity_api_response = status_request(app.config['ENTITY_API_STATUS_URL'], request_headers)
     if entity_api_response.status_code == 200:
         # Overwrite the default value
-        status_data['entity_api']['api_auth'] = True
+        status_data[ENTITY_API][API_AUTH] = True
 
         # Then parse the response json to determine if neo4j connection is working
         response_json = entity_api_response.json()
-        if 'neo4j_connection' in response_json:
+        if NEO4J_CONNECTION in response_json:
             # Add the neo4j connection status
-            status_data['entity_api']['neo4j_connection'] = response_json['neo4j_connection']
+            status_data[ENTITY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
 
     # ingest-api
     ingest_api_response = status_request(app.config['INGEST_API_STATUS_URL'], request_headers)
     if ingest_api_response.status_code == 200:
         # Overwrite the default value
-        status_data['ingest_api']['api_auth'] = True
+        status_data[INGEST_API][API_AUTH] = True
 
         # Then parse the response json to determine if neo4j connection is working
         response_json = ingest_api_response.json()
-        if 'neo4j_connection' in response_json:
+        if NEO4J_CONNECTION in response_json:
             # Add the neo4j connection status
-            status_data['ingest_api']['neo4j_connection'] = response_json['neo4j_connection']
+            status_data[INGEST_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
 
     # search-api
     search_api_response = status_request(app.config['SEARCH_API_STATUS_URL'], request_headers)
     if search_api_response.status_code == 200:
         # Overwrite the default value
-        status_data['search_api']['api_auth'] = True
+        status_data[SEARCH_API][API_AUTH] = True
 
         # Then parse the response json to determine if elasticsearch cluster is connected
         response_json = search_api_response.json()
-        if 'elasticsearch_connection' in response_json:
+        if ELASTICSEARCH_CONNECTION in response_json:
             # Add the elasticsearch connection status
-            status_data['search_api']['elasticsearch_connection'] = response_json['elasticsearch_connection']
+            status_data[SEARCH_API][ELASTICSEARCH_CONNECTION] = response_json[ELASTICSEARCH_CONNECTION]
         
         # Also check if the health status of elasticsearch cluster is available
-        if 'elasticsearch_status' in response_json:
+        if ELASTICSEARCH_STATUS in response_json:
             # Add the elasticsearch cluster health status
-            status_data['search_api']['elasticsearch_status'] = response_json['elasticsearch_status']
+            status_data[SEARCH_API][ELASTICSEARCH_STATUS] = response_json[ELASTICSEARCH_STATUS]
 
     # Final result
     return jsonify(status_data)
