@@ -266,7 +266,7 @@ def get_status_data():
     NEO4J_CONNECTION = 'neo4j_connection'
     ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
     ELASTICSEARCH_STATUS = 'elasticsearch_status'
-    FILE_DOWNLOAD = 'file_download'
+    FILE_ASSETS_STATUS = 'file_assets_status'
 
     # All API services have api_auth status (meaning the gateway's API auth is working)
     # Add additional API-specific status to the dict when API auth check passes
@@ -355,9 +355,9 @@ def get_status_data():
 
         # Then parse the response json to determine if neo4j connection is working
         response_json = file_assets_response.json()
-        if FILE_DOWNLOAD in response_json:
+        if FILE_ASSETS_STATUS in response_json:
             # Add the neo4j connection status
-            status_data[FILE_ASSETS][FILE_DOWNLOAD] = response_json[FILE_DOWNLOAD]
+            status_data[FILE_ASSETS][FILE_ASSETS_STATUS] = response_json[FILE_ASSETS_STATUS]
 
     # Final result
     return status_data
