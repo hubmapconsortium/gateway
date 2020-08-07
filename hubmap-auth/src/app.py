@@ -25,6 +25,7 @@ app.config['UUID_API_STATUS_URL'] = app.config['UUID_API_STATUS_URL'].strip('/')
 app.config['ENTITY_API_STATUS_URL'] = app.config['ENTITY_API_STATUS_URL'].strip('/')
 app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip('/')
 app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip('/')
+app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
 
 # Set logging level (default is warning)
 logging.basicConfig(level=logging.DEBUG)
@@ -247,7 +248,7 @@ def init_auth_helper():
     return auth_helper
 
 # Make a call to the given target URL with the given headers
-def status_request(target_url, request_headers):
+def status_request(target_url, request_headers = None):
     response = requests.get(url = target_url, headers = request_headers) 
     return response
 
@@ -258,12 +259,14 @@ def get_status_data():
     ENTITY_API = 'entity_api'
     INGEST_API = 'ingest_api'
     SEARCH_API = 'search_api'
+    FILE_ASSETS = 'file_assets'
 
     API_AUTH = 'api_auth'
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
     ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
     ELASTICSEARCH_STATUS = 'elasticsearch_status'
+    FILE_DOWNLOAD = 'file_download'
 
     # All API services have api_auth status (meaning the gateway's API auth is working)
     # Add additional API-specific status to the dict when API auth check passes
@@ -278,6 +281,9 @@ def get_status_data():
             API_AUTH: False
         },
         SEARCH_API: {
+            API_AUTH: False
+        },
+        FILE_ASSETS: {
             API_AUTH: False
         }
     }
@@ -341,6 +347,18 @@ def get_status_data():
             # Add the elasticsearch cluster health status
             status_data[SEARCH_API][ELASTICSEARCH_STATUS] = response_json[ELASTICSEARCH_STATUS]
 
+    # file assets, no need to send headers
+    file_assets_response = status_request(app.config['FILE_ASSETS_STATUS_URL'])
+    if file_assets_response.status_code == 200:
+        # Overwrite the default value
+        status_data[FILE_ASSETS][API_AUTH] = True
+
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = file_assets_response.json()
+        if FILE_DOWNLOAD in response_json:
+            # Add the neo4j connection status
+            status_data[FILE_ASSETS][FILE_DOWNLOAD] = response_json[FILE_DOWNLOAD]
+
     # Final result
     return status_data
 
@@ -378,6 +396,10 @@ def get_file_access(dataset_uuid, token_from_query, request):
     authentication_required = 401
     authorization_required = 403
     internal_error = 500
+
+    # Used by file assets status only
+    if dataset_uuid == 'status':
+    	return allowed
 
     # Will need this to call getProcessSecret() and getUserDataAccessLevel()
     auth_helper = init_auth_helper()
