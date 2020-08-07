@@ -249,7 +249,7 @@ def init_auth_helper():
 
 # Make a call to the given target URL with the given headers
 def status_request(target_url, request_headers = None):
-    response = requests.get(url = target_url, headers = request_headers) 
+    response = requests.get(url = target_url, headers = request_headers, verify=False) 
     return response
 
 # Dict of API status data
