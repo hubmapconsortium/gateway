@@ -74,6 +74,21 @@
 {% endif %}
 
 {% endif %}
+
+{% endif %}
+
+{% if data.file_assets %}
+
+<h2>File Assets</h2>
+
+{% if data.file_assets.api_auth %}
+<p class="pl-4">API Auth: {{ data.file_assets.api_auth }}</p>
+{% endif %}
+
+{% if data.file_assets.file_download %}
+<p class="pl-4">File Download: {{ data.file_assets.file_download }}</p>
+{% endif %}
+
 {% endif %}
 
 </div>
