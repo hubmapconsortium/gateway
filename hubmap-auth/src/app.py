@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, Response
+from flask import Flask, request, jsonify, make_response, Response, render_template
 import requests
 import json
 import logging
@@ -18,7 +18,14 @@ app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname
 app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
-app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
+app.config['ENTITY_ACCESS_LEVEL_URL'] = app.config['ENTITY_ACCESS_LEVEL_URL'].strip('/')
+
+# Also remove trailing slash / for those status endpoints in case Flask takes / as a different endpoint
+app.config['UUID_API_STATUS_URL'] = app.config['UUID_API_STATUS_URL'].strip('/')
+app.config['ENTITY_API_STATUS_URL'] = app.config['ENTITY_API_STATUS_URL'].strip('/')
+app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip('/')
+app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip('/')
+app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
 
 # Set logging level (default is warning)
 logging.basicConfig(level=logging.DEBUG)
@@ -37,6 +44,20 @@ cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'
 def home():
     return "This is HuBMAP Web Gateway :)"
 
+####################################################################################################
+## Status of API services and File service
+####################################################################################################
+
+# JSON version of status
+@app.route('/status.json', methods = ['GET'])
+def status_json():
+    return jsonify(get_status_data())
+
+# HTML rendering of the status
+@app.route('/status.html', methods = ['GET'])
+def status_html():
+    resp = make_response(render_template('status.html', data = get_status_data()))
+    return resp
 
 ####################################################################################################
 ## API Auth
@@ -226,6 +247,122 @@ def init_auth_helper():
     
     return auth_helper
 
+# Make a call to the given target URL with the given headers
+def status_request(target_url, request_headers = None):
+    response = requests.get(url = target_url, headers = request_headers) 
+    return response
+
+# Dict of API status data
+def get_status_data():
+    # Some constants
+    UUID_API = 'uuid_api'
+    ENTITY_API = 'entity_api'
+    INGEST_API = 'ingest_api'
+    SEARCH_API = 'search_api'
+    FILE_ASSETS = 'file_assets'
+
+    API_AUTH = 'api_auth'
+    MYSQL_CONNECTION = 'mysql_connection'
+    NEO4J_CONNECTION = 'neo4j_connection'
+    ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
+    ELASTICSEARCH_STATUS = 'elasticsearch_status'
+    FILE_ASSETS_STATUS = 'file_assets_status'
+
+    # All API services have api_auth status (meaning the gateway's API auth is working)
+    # Add additional API-specific status to the dict when API auth check passes
+    status_data = {
+        UUID_API: {
+            API_AUTH: False
+        },
+        ENTITY_API: {
+            API_AUTH: False
+        },
+        INGEST_API: {
+            API_AUTH: False
+        },
+        SEARCH_API: {
+            API_AUTH: False
+        },
+        FILE_ASSETS: {
+            API_AUTH: False
+        }
+    }
+
+    # Use modified version of globus app secrect from configuration as the internal token
+    # All API endpoints specified in gateway regardless of auth is required or not, 
+    # will consider this internal token as valid and has the access to HuBMAP-Read group
+    auth_helper = init_auth_helper()
+    request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
+
+    # uuid-api
+    uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'], request_headers)
+    if uuid_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data[UUID_API][API_AUTH] = True
+
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = uuid_api_response.json()
+        if MYSQL_CONNECTION in response_json:
+            # Add the mysql connection status
+            status_data[UUID_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
+
+    # entity-api
+    entity_api_response = status_request(app.config['ENTITY_API_STATUS_URL'], request_headers)
+    if entity_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data[ENTITY_API][API_AUTH] = True
+
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = entity_api_response.json()
+        if NEO4J_CONNECTION in response_json:
+            # Add the neo4j connection status
+            status_data[ENTITY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
+
+    # ingest-api
+    ingest_api_response = status_request(app.config['INGEST_API_STATUS_URL'], request_headers)
+    if ingest_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data[INGEST_API][API_AUTH] = True
+
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = ingest_api_response.json()
+        if NEO4J_CONNECTION in response_json:
+            # Add the neo4j connection status
+            status_data[INGEST_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
+
+    # search-api
+    search_api_response = status_request(app.config['SEARCH_API_STATUS_URL'], request_headers)
+    if search_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data[SEARCH_API][API_AUTH] = True
+
+        # Then parse the response json to determine if elasticsearch cluster is connected
+        response_json = search_api_response.json()
+        if ELASTICSEARCH_CONNECTION in response_json:
+            # Add the elasticsearch connection status
+            status_data[SEARCH_API][ELASTICSEARCH_CONNECTION] = response_json[ELASTICSEARCH_CONNECTION]
+        
+        # Also check if the health status of elasticsearch cluster is available
+        if ELASTICSEARCH_STATUS in response_json:
+            # Add the elasticsearch cluster health status
+            status_data[SEARCH_API][ELASTICSEARCH_STATUS] = response_json[ELASTICSEARCH_STATUS]
+
+    # file assets, no need to send headers
+    file_assets_response = status_request(app.config['FILE_ASSETS_STATUS_URL'])
+    if file_assets_response.status_code == 200:
+        # Overwrite the default value
+        status_data[FILE_ASSETS][API_AUTH] = True
+
+        # Then parse the response json to determine if neo4j connection is working
+        response_json = file_assets_response.json()
+        if FILE_ASSETS_STATUS in response_json:
+            # Add the neo4j connection status
+            status_data[FILE_ASSETS][FILE_ASSETS_STATUS] = response_json[FILE_ASSETS_STATUS]
+
+    # Final result
+    return status_data
+
+
 # Get user infomation dict based on the http request(headers)
 # `group_required` is a boolean, when True, 'hmgroupids' is in the output
 def get_user_info_for_access_check(request, group_required):
@@ -260,6 +397,10 @@ def get_file_access(dataset_uuid, token_from_query, request):
     authorization_required = 403
     internal_error = 500
 
+    # Used by file assets status only
+    if dataset_uuid == 'status':
+    	return allowed
+
     # Will need this to call getProcessSecret() and getUserDataAccessLevel()
     auth_helper = init_auth_helper()
 
@@ -267,7 +408,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     final_request = request
 
     # First check the dataset access level based on the uuid without taking the token into consideration
-    entity_api_full_url = app.config['ENTITY_API_URL'] + '/' + dataset_uuid
+    entity_api_full_url = app.config['ENTITY_ACCESS_LEVEL_URL'] + '/' + dataset_uuid
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
