@@ -356,7 +356,7 @@ def get_status_data():
         # Then parse the response json to determine if neo4j connection is working
         response_json = file_assets_response.json()
         if FILE_ASSETS_STATUS in response_json:
-            # Add the neo4j connection status
+            # Add the file assets status since file is accessible via nginx
             status_data[FILE_ASSETS][FILE_ASSETS_STATUS] = response_json[FILE_ASSETS_STATUS]
 
     # Final result
