@@ -11,6 +11,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/status",
+      "auth": false
+    },
+    {
       "method": "POST",
       "endpoint": "/hmuuid",
       "auth": true,
@@ -49,6 +54,11 @@
     {
       "method": "GET",
       "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status",
       "auth": false
     },
     {
@@ -201,6 +211,11 @@
     {
       "method": "GET",
       "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status",
       "auth": false
     },
     {
@@ -480,6 +495,11 @@
     {
       "method": "GET",
       "endpoint": "/favicon.ico",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status",
       "auth": false
     },
     {
