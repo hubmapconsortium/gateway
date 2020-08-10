@@ -247,9 +247,10 @@ def init_auth_helper():
     
     return auth_helper
 
-# Make a call to the given target URL with the given headers
-def status_request(target_url, request_headers = None):
-    response = requests.get(url = target_url, headers = request_headers, verify=False) 
+# Make a call to the given target status URL
+def status_request(target_url):
+	# No ssl certificate verification needed
+    response = requests.get(url = target_url, verify = False) 
     return response
 
 # Dict of API status data
@@ -288,14 +289,8 @@ def get_status_data():
         }
     }
 
-    # Use modified version of globus app secrect from configuration as the internal token
-    # All API endpoints specified in gateway regardless of auth is required or not, 
-    # will consider this internal token as valid and has the access to HuBMAP-Read group
-    auth_helper = init_auth_helper()
-    request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
-
     # uuid-api
-    uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'], request_headers)
+    uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'])
     if uuid_api_response.status_code == 200:
         # Overwrite the default value
         status_data[UUID_API][API_AUTH] = True
@@ -307,7 +302,7 @@ def get_status_data():
             status_data[UUID_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
 
     # entity-api
-    entity_api_response = status_request(app.config['ENTITY_API_STATUS_URL'], request_headers)
+    entity_api_response = status_request(app.config['ENTITY_API_STATUS_URL'])
     if entity_api_response.status_code == 200:
         # Overwrite the default value
         status_data[ENTITY_API][API_AUTH] = True
@@ -319,7 +314,7 @@ def get_status_data():
             status_data[ENTITY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
 
     # ingest-api
-    ingest_api_response = status_request(app.config['INGEST_API_STATUS_URL'], request_headers)
+    ingest_api_response = status_request(app.config['INGEST_API_STATUS_URL'])
     if ingest_api_response.status_code == 200:
         # Overwrite the default value
         status_data[INGEST_API][API_AUTH] = True
@@ -331,7 +326,7 @@ def get_status_data():
             status_data[INGEST_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
 
     # search-api
-    search_api_response = status_request(app.config['SEARCH_API_STATUS_URL'], request_headers)
+    search_api_response = status_request(app.config['SEARCH_API_STATUS_URL'])
     if search_api_response.status_code == 200:
         # Overwrite the default value
         status_data[SEARCH_API][API_AUTH] = True
