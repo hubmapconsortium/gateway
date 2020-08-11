@@ -16,13 +16,13 @@ GLOBUS_HUBMAP_READ_GROUP_UUID = '5777527e-ec11-11e8-ab41-0af86edb4424'
 ENTITY_ACCESS_LEVEL_URL = 'http://localhost:3333/entity-access-level/'
 
 # For service status 
-# Use URLs that go through the gateway API auth instead of the ones 
+# Use URLs (shown for DEV) that go through the gateway API auth instead of the ones 
 # designed for direct communication between containers
-UUID_API_STATUS_URL = 'http://localhost:8282/status'
-ENTITY_API_STATUS_URL = 'http://localhost:8383/status'
-INGEST_API_STATUS_URL = 'http://localhost:8484/status'
-SEARCH_API_STATUS_URL = 'http://localhost:8686/status'
-FILE_ASSETS_STATUS_URL = 'http://localhost:8181/status/status.json'
+UUID_API_STATUS_URL = 'https://uuid-api.stage.hubmapconsortium.org/status'
+ENTITY_API_STATUS_URL = 'https://entity-api.dev.hubmapconsortium.org/status'
+INGEST_API_STATUS_URL = 'https://ingest-api.dev.hubmapconsortium.org/status'
+SEARCH_API_STATUS_URL = 'https://search-api.dev.hubmapconsortium.org/status'
+FILE_ASSETS_STATUS_URL = 'https://assets.dev.hubmapconsortium.org/status/file_assets_status.json'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
