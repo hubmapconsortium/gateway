@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, make_response, Response, render_template
 import requests
+from urllib3.exceptions import InsecureRequestWarning
 import json
 import logging
 from cachetools import cached, TTLCache
@@ -249,7 +250,10 @@ def init_auth_helper():
 
 # Make a call to the given target status URL
 def status_request(target_url):
-	# No ssl certificate verification needed
+    # Suppress InsecureRequestWarning warning when requesting status on https with ssl cert verify disabled
+    requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
+
+    # Disable ssl certificate verification
     response = requests.get(url = target_url, verify = False) 
     return response
 
@@ -394,7 +398,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
 
     # Used by file assets status only
     if dataset_uuid == 'status':
-    	return allowed
+        return allowed
 
     # Will need this to call getProcessSecret() and getUserDataAccessLevel()
     auth_helper = init_auth_helper()
