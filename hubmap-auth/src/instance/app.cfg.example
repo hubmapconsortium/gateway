@@ -22,7 +22,7 @@ UUID_API_STATUS_URL = 'http://localhost:8282/status'
 ENTITY_API_STATUS_URL = 'http://localhost:8383/status'
 INGEST_API_STATUS_URL = 'http://localhost:8484/status'
 SEARCH_API_STATUS_URL = 'http://localhost:8686/status'
-FILE_ASSETS_STATUS_URL = 'http://localhost:8181/status/status.json'
+FILE_ASSETS_STATUS_URL = 'http://localhost:8181/status/file_assets_status.json'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
