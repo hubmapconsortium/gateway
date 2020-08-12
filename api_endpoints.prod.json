@@ -531,6 +531,14 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reindex-all",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     }
   ]
 }
