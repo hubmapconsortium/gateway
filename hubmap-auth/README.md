@@ -67,8 +67,12 @@ When the data source of the `endpoints.json` gets updated, we'll need to clear t
 GET http://localhost:8080/cache_clear
 ````
 
-### File service
+### File assets service
 
 URI pattern: `https://assets.dev.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>?token=<globus-token>`
 
 The file auth supports both token from the above query string or the HTTP `Authorization` header field. When both are provided, the token from query string will be the winner.
+
+#### File assets status
+
+There's a json filed named `file_assets_status.json` under `src/static` will need to be placed on the file system where the file assets runs for the status check.

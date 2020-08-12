@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" integrity="sha384-VCmXjywReHh4PwowAiWNagnWcLhlEJLA5buUprzK8rxFgeH0kww/aWY76TfkUoSX" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/status.css') }}">
+
+<title>HuBMAP API Status</title>
+</head>
+<body>
+
+<div class="container" id="content">
+
+{% if data.uuid_api %}
+
+<h2>UUID API</h2>
+
+{% if data.uuid_api.api_auth %}
+<p class="pl-4">API Auth: {{ data.uuid_api.api_auth }}</p>
+{% endif %}
+
+{% if data.uuid_api.mysql_connection %}
+<p class="pl-4">MySQL Connection: {{ data.uuid_api.mysql_connection }}</p>
+{% endif %}
+
+{% endif %}
+
+
+{% if data.entity_api %}
+
+<h2>Entity API</h2>
+
+{% if data.entity_api.api_auth %}
+<p class="pl-4">API Auth: {{ data.entity_api.api_auth }}</p>
+{% endif %}
+
+{% if data.entity_api.neo4j_connection %}
+<p class="pl-4">Neo4j Connection: {{ data.entity_api.neo4j_connection }}</p>
+{% endif %}
+
+{% endif %}
+
+
+{% if data.ingest_api %}
+
+<h2>Ingest API</h2>
+
+{% if data.ingest_api.api_auth %}
+<p class="pl-4">API Auth: {{ data.ingest_api.api_auth }}</p>
+{% endif %}
+
+{% if data.ingest_api.neo4j_connection %}
+<p class="pl-4">Neo4j Connection: {{ data.ingest_api.neo4j_connection }}</p>
+{% endif %}
+
+{% endif %}
+
+
+{% if data.search_api %}
+<h2>Search API</h2>
+{% if data.search_api.api_auth %}
+<p class="pl-4">API Auth: {{ data.search_api.api_auth }}</p>
+
+{% if data.search_api.elasticsearch_connection %}
+<p class="pl-4">Elasticsearch Connection: {{ data.search_api.elasticsearch_connection }}</p>
+{% endif %}
+
+{% if data.search_api.elasticsearch_status %}
+<p class="pl-4">Elasticsearch Status: {{ data.search_api.elasticsearch_status }}</p>
+{% endif %}
+
+{% endif %}
+
+{% endif %}
+
+{% if data.file_assets %}
+
+<h2>File Assets</h2>
+
+{% if data.file_assets.api_auth %}
+<p class="pl-4">API Auth: {{ data.file_assets.api_auth }}</p>
+{% endif %}
+
+{% if data.file_assets.file_assets_status %}
+<p class="pl-4">File Assets Status: {{ data.file_assets.file_assets_status }}</p>
+{% endif %}
+
+{% endif %}
+
+</div>
+
+</body>
+</html>
+
