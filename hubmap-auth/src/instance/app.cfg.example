@@ -18,7 +18,7 @@ ENTITY_ACCESS_LEVEL_URL = 'http://localhost:3333/entity-access-level/'
 # For service status 
 # Use URLs (shown for DEV) that go through the gateway API auth instead of the ones 
 # designed for direct communication between containers
-UUID_API_STATUS_URL = 'https://uuid-api.stage.hubmapconsortium.org/status'
+UUID_API_STATUS_URL = 'https://uuid-api.dev.hubmapconsortium.org/status'
 ENTITY_API_STATUS_URL = 'https://entity-api.dev.hubmapconsortium.org/status'
 INGEST_API_STATUS_URL = 'https://ingest-api.dev.hubmapconsortium.org/status'
 SEARCH_API_STATUS_URL = 'https://search-api.dev.hubmapconsortium.org/status'
