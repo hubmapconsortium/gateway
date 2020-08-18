@@ -66,7 +66,7 @@ The Docker daemon binds to a Unix socket instead of a TCP port. By default that 
 sudo usermod -aG docker $USER
 ````
 
-The log out and log back in so that your group membership is re-evaluated. If testing on a virtual machine, it may be necessary to restart the virtual machine for changes to take effect.
+Then log out and log back in so that your group membership is re-evaluated. If testing on a virtual machine, it may be necessary to restart the virtual machine for changes to take effect.
 
 Note: the following instructions with docker commands are based on managing Docker as a non-root user.
 
@@ -211,6 +211,19 @@ nginx -s reload
 * Reloading is safer than restarting because if a syntax error is noticed in a config file, it will not proceed with the reload and your server remains running.
 * If there is a syntax error in a config file and you restart, it's possible the server will not restart correctly.
 
+## Rebuild `hubmap-auth` image soley
+
+You may only need to rebuild the `hubmap-auth` image while keeping other HuBMAP docker images. We first need to export the version environment variable by sourcing the script:
+
+````
+source ./docker-setup.sh
+````
+
+Then run the following script:
+
+````
+./hubmap-auth-docker.sh dev build
+````
 
 ## Update base image
 
