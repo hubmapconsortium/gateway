@@ -224,14 +224,14 @@ elif [ "$2" = "config" ]; then
     # Only have ingest-api and ingest-ui on the same host machine for localhost environment
     # dev, test, or prod deployment has ingest-api on a separate machine
     cd $DIR/../ingest-ui/docker
-    export INGEST_UI_VERSION=$(tr -d "\n\r" < VERSION | xargs)
+    export INGEST_UI_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
     echo "###### INGEST-UI $INGEST_UI_VERSION ########"
     docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml config
 
     # ingest-api and ingest-pipeline containers for localhost only
     if [ "$1" = "localhost" ]; then
         cd $DIR/../ingest-ui/docker
-        export INGEST_API_VERSION=$(tr -d "\n\r" < VERSION | xargs)
+        export INGEST_API_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
         echo "###### INGEST-API $INGEST_API_VERSION ########"
         docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml config
         
@@ -241,17 +241,17 @@ elif [ "$2" = "config" ]; then
     fi
 
     cd $DIR/../uuid-api/docker
-    export UUID_API_VERSION=$(tr -d "\n\r" < VERSION | xargs)
+    export UUID_API_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
     echo "###### UUID-API $UUID_API_VERSION ########"
     docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml config
 
     cd $DIR/../entity-api/docker
-    export ENTITY_API_VERSION=$(tr -d "\n\r" < VERSION | xargs)
+    export ENTITY_API_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
     echo "###### ENTITY-API $ENTITY_API_VERSION ########"
     docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml config
 
     cd $DIR/../search-api/docker
-    export SEARCH_API_VERSION=$(tr -d "\n\r" < VERSION | xargs)
+    export SEARCH_API_VERSION=$(tr -d "\n\r" < ../VERSION | xargs)
     echo "###### SEARCH-API $SEARCH_API_VERSION ########"
     docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml config
 elif [ "$2" = "check" ]; then
