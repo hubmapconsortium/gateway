@@ -5,9 +5,9 @@ function get_dir_of_this_script () {
     # Thank you https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself
     SCRIPT_SOURCE="${BASH_SOURCE[0]}"
     while [ -h "$SCRIPT_SOURCE" ]; do # resolve $SCRIPT_SOURCE until the file is no longer a symlink
-	DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
-	SCRIPT_SOURCE="$(readlink "$SCRIPT_SOURCE")"
-	[[ $SCRIPT_SOURCE != /* ]] && SCRIPT_SOURCE="$DIR/$SCRIPT_SOURCE" # if $SCRIPT_SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+        DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
+        SCRIPT_SOURCE="$(readlink "$SCRIPT_SOURCE")"
+        [[ $SCRIPT_SOURCE != /* ]] && SCRIPT_SOURCE="$DIR/$SCRIPT_SOURCE" # if $SCRIPT_SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
     done
     DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
     }
@@ -54,13 +54,13 @@ while true; do
         -N|--no-cache)
             BUILD_OPTS+="--no-cache"
             ;;
-	-v)
-	    VERBOSE=1
-	    ;;
-	-h)
-	    echo_help
-	    exit 0
-	    ;;
+    -v)
+        VERBOSE=1
+        ;;
+    -h)
+        echo_help
+        exit 0
+        ;;
     --)
         shift
         break
@@ -92,8 +92,9 @@ fi
 
 # set some environment variables which may be used by the docker-compose scripts
 if [ -e $DIR/../ingest-pipeline/build_number ] ; then
-	export INGEST_PIPELINE_BUILD_NUM=`cat $DIR/../ingest-pipeline/build_number`
+    export INGEST_PIPELINE_BUILD_NUM=`cat $DIR/../ingest-pipeline/build_number`
 fi
+
 if [ "$1" = "localhost" ]; then
     if [ -z "$HOST_UID" ] ; then
         log_name=`logname`
@@ -104,6 +105,7 @@ if [ "$1" = "localhost" ]; then
         export HOST_GID=`id -g $log_name`
     fi
 fi
+
 if [ -n "$VERBOSE" ] ; then
     echo 'INGEST_PIPELINE_BUILD_NUM is ' $INGEST_PIPELINE_BUILD_NUM
     echo 'HOST_UID is ' $HOST_UID
@@ -139,16 +141,16 @@ if [ "$2" = "build" ]; then
     
     # Also build ingest-api and ingest-pipeline for localhost only
     if [ "$1" = "localhost" ]; then
-	cd $DIR/../ingest-ui/docker
+        cd $DIR/../ingest-ui/docker
         ./docker-setup-ingest-api.$1.sh
         docker-compose -f docker-compose-ingest-api.$1.yml build  $BUILD_OPTS
-	cd $DIR/../ingest-pipeline/docker
-	./docker-setup.$1.sh
-	docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BUILD_OPTS
+    
+        cd $DIR/../ingest-pipeline/docker
+        ./docker-setup.$1.sh
+        docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BUILD_OPTS
     fi
 
 elif [ "$2" = "start" ]; then
-
     # Spin up the containers for each project
     cd $DIR/../uuid-api/docker
     docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml up -d
@@ -167,11 +169,12 @@ elif [ "$2" = "start" ]; then
 
     # Also start the ingest-api and ingest-pipeline for localhost only
     if [ "$1" = "localhost" ]; then
-	cd $DIR/../ingest-ui/docker
+        cd $DIR/../ingest-ui/docker
         docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml up -d
-	cd $DIR/../ingest-pipeline/docker
-	./docker-setup.$1.sh
-	docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml up -d
+    
+        cd $DIR/../ingest-pipeline/docker
+        ./docker-setup.$1.sh
+        docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml up -d
     fi
 
     # The last one is gateway since nginx conf files require 
@@ -194,10 +197,11 @@ elif [ "$2" = "stop" ]; then
 
     # Also stop the ingest-api and ingest-pipeline containers for localhost only
     if [ "$1" = "localhost" ]; then
-	cd $DIR/../ingest-ui/docker
+        cd $DIR/../ingest-ui/docker
         docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml stop
-	cd $DIR/../ingest-pipeline/docker
-	docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml stop
+    
+        cd $DIR/../ingest-pipeline/docker
+        docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml stop
     fi
 
     cd $DIR/../uuid-api/docker
@@ -209,39 +213,44 @@ elif [ "$2" = "stop" ]; then
     cd $DIR/../search-api/docker
     docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml stop
 elif [ "$2" = "config" ]; then
-    # Stop the gateway first
+    # Export the VERSION as environment variable in each project
     cd $DIR
-    echo '###### GATEWAY ########'
+    export HUBMAP_AUTH_VERSION=`cat VERSION`
+    echo "###### GATEWAY $HUBMAP_AUTH_VERSION ########"
     docker-compose -p gateway -f docker-compose.yml -f docker-compose.$1.yml config
-
-    # Stop each service
 
     # Only have ingest-api and ingest-ui on the same host machine for localhost environment
     # dev, test, or prod deployment has ingest-api on a separate machine
     cd $DIR/../ingest-ui/docker
-    echo '###### INGEST-UI ########'
+    export INGEST_UI_VERSION=`cat ../VERSION`
+    echo "###### INGEST-UI $INGEST_UI_VERSION ########"
     docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml config
 
-    # Also stop the ingest-api and ingest-pipeline containers for localhost only
+    # ingest-api and ingest-pipeline containers for localhost only
     if [ "$1" = "localhost" ]; then
-	cd $DIR/../ingest-ui/docker
-    echo '###### INGEST-API ########'
-    docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml config
-	cd $DIR/../ingest-pipeline/docker
-    echo '###### INGEST-PIPELINE ########'
-	docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml config
+        cd $DIR/../ingest-ui/docker
+        export INGEST_API_VERSION=`cat ../VERSION`
+        echo "###### INGEST-API $INGEST_API_VERSION ########"
+        docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml config
+        
+        cd $DIR/../ingest-pipeline/docker
+        echo "###### INGEST-PIPELINE ########"
+        docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml config
     fi
 
     cd $DIR/../uuid-api/docker
-    echo '###### UUID-API ########'
+    export UUID_API_VERSION=`cat ../VERSION`
+    echo "###### UUID-API $UUID_API_VERSION ########"
     docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml config
 
     cd $DIR/../entity-api/docker
-    echo '###### ENTITY-API ########'
+    export ENTITY_API_VERSION=`cat ../VERSION`
+    echo "###### ENTITY-API $ENTITY_API_VERSION ########"
     docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml config
 
     cd $DIR/../search-api/docker
-    echo '###### SEARCH-API ########'
+    export SEARCH_API_VERSION=`cat ../VERSION`
+    echo "###### SEARCH-API $SEARCH_API_VERSION ########"
     docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml config
 elif [ "$2" = "check" ]; then
     # Bash array
@@ -257,7 +266,7 @@ elif [ "$2" = "check" ]; then
     if [ "$1" = "localhost" ]; then
         config_paths+=(
             '../ingest-ui/src/ingest-api/instance/app.cfg'
-	    '../ingest-pipeline/src/ingest-pipeline/instance/app.cfg'
+        '../ingest-pipeline/src/ingest-pipeline/instance/app.cfg'
         )
     fi
 
