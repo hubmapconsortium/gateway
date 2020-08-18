@@ -118,35 +118,37 @@ if [ "$2" = "build" ]; then
     docker network create gateway_hubmap
 
     # Build images for gateway since this is the current dir
-    ./docker-setup.sh
+    # Use the `source` command to execute ./docker-setup.sh in the current process 
+    # since that script contains export environment variable
+    source ./docker-setup.sh
     docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BULD_OPTS
 
     cd $DIR/../uuid-api/docker
-    ./docker-setup.sh
+    source ./docker-setup.sh
     docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BUILD_OPTS
 
     cd $DIR/../entity-api/docker
-    ./docker-setup.sh
+    source ./docker-setup.sh
     docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BUILD_OPTS
 
     cd $DIR/../search-api/docker
-    ./docker-setup.sh
+    source ./docker-setup.sh
     docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BUILD_OPTS
 
     # Only have ingest-api and ingest-ui on the same host machine for localhost environment
     # dev, test, or prod deployment has ingest-api on a separate machine
     cd $DIR/../ingest-ui/docker
-    ./docker-setup-ingest-ui.sh
+    source ./docker-setup-ingest-ui.sh
     docker-compose -f docker-compose-ingest-ui.$1.yml build $BULD_OPTS
     
     # Also build ingest-api and ingest-pipeline for localhost only
     if [ "$1" = "localhost" ]; then
         cd $DIR/../ingest-ui/docker
-        ./docker-setup-ingest-api.$1.sh
+        source ./docker-setup-ingest-api.$1.sh
         docker-compose -f docker-compose-ingest-api.$1.yml build  $BUILD_OPTS
     
         cd $DIR/../ingest-pipeline/docker
-        ./docker-setup.$1.sh
+        source ./docker-setup.$1.sh
         docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BUILD_OPTS
     fi
 
@@ -215,21 +217,21 @@ elif [ "$2" = "stop" ]; then
 elif [ "$2" = "config" ]; then
     # Export the VERSION as environment variable in each project
     cd $DIR
-    export HUBMAP_AUTH_VERSION=`cat VERSION`
+    export HUBMAP_AUTH_VERSION=$(tr -d "\n\r" < VERSION | xargs)
     echo "###### GATEWAY $HUBMAP_AUTH_VERSION ########"
     docker-compose -p gateway -f docker-compose.yml -f docker-compose.$1.yml config
 
     # Only have ingest-api and ingest-ui on the same host machine for localhost environment
     # dev, test, or prod deployment has ingest-api on a separate machine
     cd $DIR/../ingest-ui/docker
-    export INGEST_UI_VERSION=`cat ../VERSION`
+    export INGEST_UI_VERSION=$(tr -d "\n\r" < VERSION | xargs)
     echo "###### INGEST-UI $INGEST_UI_VERSION ########"
     docker-compose -p ingest-ui -f docker-compose-ingest-ui.$1.yml config
 
     # ingest-api and ingest-pipeline containers for localhost only
     if [ "$1" = "localhost" ]; then
         cd $DIR/../ingest-ui/docker
-        export INGEST_API_VERSION=`cat ../VERSION`
+        export INGEST_API_VERSION=$(tr -d "\n\r" < VERSION | xargs)
         echo "###### INGEST-API $INGEST_API_VERSION ########"
         docker-compose -p ingest-api -f docker-compose-ingest-api.$1.yml config
         
@@ -239,17 +241,17 @@ elif [ "$2" = "config" ]; then
     fi
 
     cd $DIR/../uuid-api/docker
-    export UUID_API_VERSION=`cat ../VERSION`
+    export UUID_API_VERSION=$(tr -d "\n\r" < VERSION | xargs)
     echo "###### UUID-API $UUID_API_VERSION ########"
     docker-compose -p uuid-api -f docker-compose.yml -f docker-compose.$1.yml config
 
     cd $DIR/../entity-api/docker
-    export ENTITY_API_VERSION=`cat ../VERSION`
+    export ENTITY_API_VERSION=$(tr -d "\n\r" < VERSION | xargs)
     echo "###### ENTITY-API $ENTITY_API_VERSION ########"
     docker-compose -p entity-api -f docker-compose.yml -f docker-compose.$1.yml config
 
     cd $DIR/../search-api/docker
-    export SEARCH_API_VERSION=`cat ../VERSION`
+    export SEARCH_API_VERSION=$(tr -d "\n\r" < VERSION | xargs)
     echo "###### SEARCH-API $SEARCH_API_VERSION ########"
     docker-compose -p search-api -f docker-compose.yml -f docker-compose.$1.yml config
 elif [ "$2" = "check" ]; then
