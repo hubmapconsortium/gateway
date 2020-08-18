@@ -116,6 +116,7 @@ if [ "$2" = "build" ]; then
     docker network create gateway_hubmap
 
     # Build images for gateway since this is the current dir
+    ./docker-setup.sh
     docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BULD_OPTS
 
     cd $DIR/../uuid-api/docker
