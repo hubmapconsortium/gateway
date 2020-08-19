@@ -216,14 +216,27 @@ nginx -s reload
 You may only need to rebuild the `hubmap-auth` image while keeping other HuBMAP docker images unchanged. We first need to export the version environment variable by sourcing the script:
 
 ````
-source ./docker-setup.sh
+source ./hubmap-auth-docker.sh dev build
 ````
 
-Then run the following script:
+To start up the hubmap-auth container:
 
 ````
-./hubmap-auth-docker.sh dev build
+source ./hubmap-auth-docker.sh dev start
 ````
+
+And stop the running container by:
+
+````
+source ./hubmap-auth-docker.sh dev stop
+````
+
+You can also stop the running container and remove it by:
+
+````
+source ./hubmap-auth-docker.sh dev down
+````
+
 
 ## Update base image
 
