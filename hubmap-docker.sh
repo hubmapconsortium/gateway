@@ -147,7 +147,6 @@ elif [ "$2" = "stop" ]; then
     cd $DIR/../search-api/docker
     ./search-api-docker.sh $1 stop
 elif [ "$2" = "config" ]; then
-    # Export the VERSION as environment variable in each project
     cd $DIR
     echo "###### GATEWAY ########"
     ./hubmap-auth-docker.sh $1 config
@@ -181,45 +180,36 @@ elif [ "$2" = "config" ]; then
     echo "###### SEARCH-API ########"
     ./search-api-docker.sh $1 config
 elif [ "$2" = "check" ]; then
-    # Bash array
-    config_paths=(
-        '../gateway/hubmap-auth/src/instance/app.cfg'
-        '../uuid-api/src/instance/app.cfg'
-        '../entity-api/src/instance/app.cfg'
-        '../search-api/src/instance/app.cfg'
-        '../ingest-ui/src/ingest-ui/.env'
-    )
-
-    # Add ingest-api and ingest-pipeline configs to the array for localhost only
-    if [ "$1" = "localhost" ]; then
-        config_paths+=(
-            '../ingest-ui/src/ingest-api/instance/app.cfg'
-            '../ingest-pipeline/src/ingest-pipeline/instance/app.cfg'
-        )
-    fi
-
     cd $DIR
-    for pth in "${config_paths[@]}"; do
-        if [ ! -e $pth ]; then
-            echo "Missing $pth"
-            exit -1
-        fi
-    done
+    echo "###### GATEWAY ########"
+    ./hubmap-auth-docker.sh $1 check
 
-    # The `absent_or_newer` checks if the copied src at docker/some-api/src directory exists 
-    # and if the source src directory is newer. 
-    # If both conditions are true `absent_or_newer` writes an error message 
-    # and causes hubmap-docker.sh to exit with an error code.
-    absent_or_newer ../uuid-api/docker/uuid-api/src ../uuid-api/src
-    absent_or_newer ../entity-api/docker/entity-api/src ../entity-api/src
-    absent_or_newer ../search-api/docker/search-api/src ../search-api/src
-    absent_or_newer ../ingest-ui/docker/ingest-ui/src ../ingest-ui/src/ingest-ui
+    # Only have ingest-api and ingest-ui on the same host machine for localhost environment
+    # dev, test, or prod deployment has ingest-api on a separate machine
+    cd $DIR/../ingest-ui/docker
+    echo "###### INGEST-UI ########"
+    ./ingest-ui-docker.sh $1 check
 
-    # Also check the ingest-api for localhost and dev only
+    # ingest-api and ingest-pipeline containers for localhost only
     if [ "$1" = "localhost" ]; then
-        absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
+        cd $DIR/../ingest-ui/docker
+        echo "###### INGEST-API ########"
+        ./ingest-api-docker.sh $1 check
+        
+        cd $DIR/../ingest-pipeline/docker
+        echo "###### INGEST-PIPELINE ########"
+        ./ingest-pipeline-docker.sh $1 check
     fi
 
-    # Good sign when you see it
-    echo 'Checks complete, all good :)'
+    cd $DIR/../uuid-api/docker
+    echo "###### UUID-API ########"
+    ./uuid-api-docker.sh $1 check
+
+    cd $DIR/../entity-api/docker
+    echo "###### ENTITY-API ########"
+    ./entity-api-docker.sh $1 check
+
+    cd $DIR/../search-api/docker
+    echo "###### SEARCH-API ########"
+    ./search-api-docker.sh $1 check
 fi
