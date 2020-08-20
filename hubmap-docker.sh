@@ -35,7 +35,7 @@ fi
 
 # set DIR to be the directory of the current script
 get_dir_of_this_script
-echo 'DIR is ' $DIR
+echo 'DIR:' $DIR
 
 # Use the current user UID and GID to run processes in containers
 if [ "$1" = "localhost" ]; then
@@ -49,8 +49,8 @@ if [ "$1" = "localhost" ]; then
     fi
 fi
 
-echo 'HOST_UID is ' $HOST_UID
-echo 'HOST_GID is ' $HOST_GID
+echo 'HOST_UID:' $HOST_UID
+echo 'HOST_GID:' $HOST_GID
 
 if [ "$2" = "build" ]; then
     # First create the shared docker network
