@@ -82,7 +82,6 @@ if [ "$2" = "build" ]; then
         ./ingest-api-docker.sh $1 build
     
         cd $DIR/../ingest-pipeline/docker
-        source ./docker-setup.$1.sh
         ./ingest-pipeline-docker.sh $1 build
     fi
 
