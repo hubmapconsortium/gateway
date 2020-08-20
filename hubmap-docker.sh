@@ -10,64 +10,18 @@ function get_dir_of_this_script () {
         [[ $SCRIPT_SOURCE != /* ]] && SCRIPT_SOURCE="$DIR/$SCRIPT_SOURCE" # if $SCRIPT_SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
     done
     DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
-    }
+}
 
+# The `absent_or_newer` checks if the copied src at docker/some-api/src directory exists 
+# and if the source src directory is newer. 
+# If both conditions are true `absent_or_newer` writes an error message 
+# and causes hubmap-docker.sh to exit with an error code.
 function absent_or_newer () {
     if  [ \( -e $1 \) -a \( $2 -nt $1 \) ]; then
         echo "$1 is out of date"
         exit -1
     fi
 }
-
-function echo_help () {
-    echo "Usage: $0 [-vh] [localhost|dev|test|stage|prod] [build|start|stop|check|config]"
-    echo "       -v verbose"
-    echo "       -h help"
-}
-
-# Command line parsing.  See for ex. https://sookocheff.com/post/bash/parsing-bash-script-arguments-with-shopts/
-# and https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     machine=Linux;;
-    Darwin*)    machine=Mac;;
-    CYGWIN*)    machine=Cygwin;;
-    MINGW*)     machine=MinGw;;
-    *)          machine="UNKNOWN:${unameOut}"
-esac
-BUILD_OPTS=
-VERBOSE=
-if [ "$machine" = 'Mac' ] ; then
-    options=$(getopt vh "$@")
-else
-    options=$(getopt -o vh -- "$@")
-fi
-[ $? -eq 0 ] || {
-    echo "Incorrect option provided"
-    echo_help
-    exit 1
-}
-eval set -- "$options"
-while true; do
-    case "$1" in
-    -v)
-        VERBOSE=1
-        ;;
-    -h)
-        echo_help
-        exit 0
-        ;;
-    --)
-        shift
-        break
-        ;;
-    esac
-    shift
-done
-if [ -n "$VERBOSE" ] ; then
-    echo '$1' $1
-    echo '$2' $2
-fi
 
 if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" ]]; then
     echo "Unknown build environment '$1', specify one of the following: localhost|dev|test|stage|prod"
@@ -81,15 +35,9 @@ fi
 
 # set DIR to be the directory of the current script
 get_dir_of_this_script
-if [ -n "$VERBOSE" ] ; then
-    echo 'DIR is ' $DIR
-fi
+echo 'DIR is ' $DIR
 
-# set some environment variables which may be used by the docker-compose scripts
-if [ -e $DIR/../ingest-pipeline/build_number ] ; then
-    export INGEST_PIPELINE_BUILD_NUM=`cat $DIR/../ingest-pipeline/build_number`
-fi
-
+# Use the current user UID and GID to run processes in containers
 if [ "$1" = "localhost" ]; then
     if [ -z "$HOST_UID" ] ; then
         log_name=`logname`
@@ -101,11 +49,8 @@ if [ "$1" = "localhost" ]; then
     fi
 fi
 
-if [ -n "$VERBOSE" ] ; then
-    echo 'INGEST_PIPELINE_BUILD_NUM is ' $INGEST_PIPELINE_BUILD_NUM
-    echo 'HOST_UID is ' $HOST_UID
-    echo 'HOST_GID is ' $HOST_GID
-fi
+echo 'HOST_UID is ' $HOST_UID
+echo 'HOST_GID is ' $HOST_GID
 
 if [ "$2" = "build" ]; then
     # First create the shared docker network
@@ -138,7 +83,7 @@ if [ "$2" = "build" ]; then
     
         cd $DIR/../ingest-pipeline/docker
         source ./docker-setup.$1.sh
-        docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+        ./ingest-pipeline-docker.sh $1 build
     fi
 
 elif [ "$2" = "start" ]; then
@@ -165,7 +110,7 @@ elif [ "$2" = "start" ]; then
     
         cd $DIR/../ingest-pipeline/docker
         ./docker-setup.$1.sh
-        docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml up -d
+        ./ingest-pipeline-docker.sh $1 start
     fi
 
     # The last one is gateway since nginx conf files require 
@@ -192,7 +137,7 @@ elif [ "$2" = "stop" ]; then
         ./ingest-api-docker.sh $1 stop
     
         cd $DIR/../ingest-pipeline/docker
-        docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml stop
+        ./ingest-pipeline-docker.sh $1 stop
     fi
 
     cd $DIR/../uuid-api/docker
@@ -223,7 +168,7 @@ elif [ "$2" = "config" ]; then
         
         cd $DIR/../ingest-pipeline/docker
         echo "###### INGEST-PIPELINE ########"
-        docker-compose -p ingest-pipeline -f docker-compose.yml -f docker-compose.$1.yml config
+        ./ingest-pipeline-docker.sh $1 config
     fi
 
     cd $DIR/../uuid-api/docker
@@ -277,5 +222,6 @@ elif [ "$2" = "check" ]; then
         absent_or_newer ../ingest-ui/docker/ingest-api/src ../ingest-ui/src/ingest-api
     fi
 
+    # Good sign when you see it
     echo 'Checks complete, all good :)'
 fi
