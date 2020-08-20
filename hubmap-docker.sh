@@ -109,7 +109,6 @@ elif [ "$2" = "start" ]; then
         ./ingest-api-docker.sh $1 start
     
         cd $DIR/../ingest-pipeline/docker
-        ./docker-setup.$1.sh
         ./ingest-pipeline-docker.sh $1 start
     fi
 
