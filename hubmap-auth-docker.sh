@@ -45,19 +45,19 @@ else
             echo 'Checks complete, all good :)'
         elif [ "$2" = "config" ]; then
             export_version
-            docker-compose -p gateway -f docker-compose.yml -f docker-compose.$1.yml config
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose config
         elif [ "$2" = "build" ]; then
             export_version
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml build
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose build
         elif [ "$2" = "start" ]; then
             export_version
-            docker-compose -p gateway -f docker-compose.yml -f docker-compose.$1.yml up -d
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose up -d
         elif [ "$2" = "stop" ]; then
             export_version
-            docker-compose -p gateway -f docker-compose.yml -f docker-compose.$1.yml stop
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose stop
         elif [ "$2" = "down" ]; then
             export_version
-            docker-compose -p gateway -f docker-compose.yml -f docker-compose.$1.yml down
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose down
         fi
     fi
 fi
