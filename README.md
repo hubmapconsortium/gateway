@@ -112,13 +112,12 @@ To see the usage of this script:
 It outputs:
 
 ````
-Usage: ./hubmap-docker.sh [-vhN] [localhost|dev|test|stage|prod] [build|start|stop|check|config]
+Usage: ./hubmap-docker.sh [-vh] [localhost|dev|test|stage|prod] [build|start|stop|check|config]
        -v verbose
        -h help
-       -N use --no-cache for build
 ````
 
-The `hubmap-docker.sh` basically takes two arguments: deployment environment (localhost|dev|test|stage|prod) and the option (build|start|stop|check|config). In addition, you can also use `-v` to see the verbose output and `-h` for the usage help tip. The `--no-cache` is used with `build` to avoid the docker cache when creating images.
+The `hubmap-docker.sh` basically takes two arguments: deployment environment (localhost|dev|test|stage|prod) and the option (build|start|stop|check|config). In addition, you can also use `-v` to see the verbose output and `-h` for the usage help tip. 
 
 Before we go ahead to start building the docker images, we can do a check to see if all the required configuration files are in place:
 
