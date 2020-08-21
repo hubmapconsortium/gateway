@@ -52,6 +52,8 @@ if [ "$1" = "localhost" ]; then
     echo 'HOST_GID:' $HOST_GID
 fi
 
+# Create the docker network "gateway_hubmap" if doesn't exists
+docker network inspect gateway_hubmap >/dev/null 2>&1 || docker network create gateway_hubmap
 
 # Direct the execution to individual script for each project
 cd $DIR/../uuid-api/docker
