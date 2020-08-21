@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Print a new line and the banner
+echo
+echo "==================== HUBMAP-AUTH ===================="
+
 # Set the version environment variable for the docker build
 # Version number is from the VERSION file
 # Also remove newlines and leading/trailing slashes if present in that VERSION file
@@ -8,9 +12,9 @@ function export_version() {
     echo "HUBMAP_AUTH_VERSION: $HUBMAP_AUTH_VERSION"
 }
 
+# This function sets DIR to the directory in which this script itself is found.
+# Thank you https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself                                                                      
 function get_dir_of_this_script () {
-    # This function sets DIR to the directory in which this script itself is found.
-    # Thank you https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself
     SCRIPT_SOURCE="${BASH_SOURCE[0]}"
     while [ -h "$SCRIPT_SOURCE" ]; do # resolve $SCRIPT_SOURCE until the file is no longer a symlink
         DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
@@ -45,19 +49,19 @@ else
             echo 'Checks complete, all good :)'
         elif [ "$2" = "config" ]; then
             export_version
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose config
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway config
         elif [ "$2" = "build" ]; then
             export_version
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose build
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway build
         elif [ "$2" = "start" ]; then
             export_version
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose up -d
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway up -d
         elif [ "$2" = "stop" ]; then
             export_version
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose stop
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway stop
         elif [ "$2" = "down" ]; then
             export_version
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway --verbose down
+            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway down
         fi
     fi
 fi

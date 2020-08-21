@@ -1,8 +1,19 @@
 #!/bin/bash
 
+# Print the banner
+echo
+echo '#     #        ######  #     #    #    ######     ######'                                     
+echo '#     # #    # #     # ##   ##   # #   #     #    #     #  ####   ####  #    # ###### #####'
+echo '#     # #    # #     # # # # #  #   #  #     #    #     # #    # #    # #   #  #      #    #'
+echo '####### #    # ######  #  #  # #     # ######     #     # #    # #      ####   #####  #    #'
+echo '#     # #    # #     # #     # ####### #          #     # #    # #      #  #   #      #####'
+echo '#     # #    # #     # #     # #     # #          #     # #    # #    # #   #  #      #   #'
+echo '#     #  ####  ######  #     # #     # #          ######   ####   ####  #    # ###### #    #'
+echo
+
+# This function sets DIR to the directory in which this script itself is found.
+# Thank you https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself                                                                      
 function get_dir_of_this_script () {
-    # This function sets DIR to the directory in which this script itself is found.
-    # Thank you https://stackoverflow.com/questions/59895/how-to-get-the-source-directory-of-a-bash-script-from-within-the-script-itself
     SCRIPT_SOURCE="${BASH_SOURCE[0]}"
     while [ -h "$SCRIPT_SOURCE" ]; do # resolve $SCRIPT_SOURCE until the file is no longer a symlink
         DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
@@ -10,17 +21,6 @@ function get_dir_of_this_script () {
         [[ $SCRIPT_SOURCE != /* ]] && SCRIPT_SOURCE="$DIR/$SCRIPT_SOURCE" # if $SCRIPT_SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
     done
     DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
-}
-
-# The `absent_or_newer` checks if the copied src at docker/some-api/src directory exists 
-# and if the source src directory is newer. 
-# If both conditions are true `absent_or_newer` writes an error message 
-# and causes hubmap-docker.sh to exit with an error code.
-function absent_or_newer () {
-    if  [ \( -e $1 \) -a \( $2 -nt $1 \) ]; then
-        echo "$1 is out of date"
-        exit -1
-    fi
 }
 
 if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" ]]; then
@@ -35,9 +35,9 @@ fi
 
 # set DIR to be the directory of the current script
 get_dir_of_this_script
-echo 'DIR:' $DIR
+echo 'DIR of script:' $DIR
 
-# Use the current user UID and GID to run processes in containers
+# Use the current user UID and GID to run processes in containers for localhost build
 if [ "$1" = "localhost" ]; then
     if [ -z "$HOST_UID" ] ; then
         log_name=`logname`
@@ -47,10 +47,10 @@ if [ "$1" = "localhost" ]; then
         log_name=`logname`
         export HOST_GID=`id -g $log_name`
     fi
-fi
 
-echo 'HOST_UID:' $HOST_UID
-echo 'HOST_GID:' $HOST_GID
+    echo 'HOST_UID:' $HOST_UID
+    echo 'HOST_GID:' $HOST_GID
+fi
 
 if [ "$2" = "build" ]; then
     # First create the shared docker network
@@ -122,8 +122,6 @@ elif [ "$2" = "stop" ]; then
     cd $DIR
     ./hubmap-auth-docker.sh $1 stop
 
-    # Stop each service
-
     # Only have ingest-api and ingest-ui on the same host machine for localhost environment
     # dev, test, or prod deployment has ingest-api on a separate machine
     cd $DIR/../ingest-ui/docker
@@ -148,68 +146,54 @@ elif [ "$2" = "stop" ]; then
     ./search-api-docker.sh $1 stop
 elif [ "$2" = "config" ]; then
     cd $DIR
-    echo "###### GATEWAY ########"
     ./hubmap-auth-docker.sh $1 config
 
     # Only have ingest-api and ingest-ui on the same host machine for localhost environment
     # dev, test, or prod deployment has ingest-api on a separate machine
     cd $DIR/../ingest-ui/docker
-    echo "###### INGEST-UI ########"
     ./ingest-ui-docker.sh $1 config
 
     # ingest-api and ingest-pipeline containers for localhost only
     if [ "$1" = "localhost" ]; then
         cd $DIR/../ingest-ui/docker
-        echo "###### INGEST-API ########"
         ./ingest-api-docker.sh $1 config
         
         cd $DIR/../ingest-pipeline/docker
-        echo "###### INGEST-PIPELINE ########"
         ./ingest-pipeline-docker.sh $1 config
     fi
 
     cd $DIR/../uuid-api/docker
-    echo "###### UUID-API ########"
     ./uuid-api-docker.sh $1 config
 
     cd $DIR/../entity-api/docker
-    echo "###### ENTITY-API ########"
     ./entity-api-docker.sh $1 config
 
     cd $DIR/../search-api/docker
-    echo "###### SEARCH-API ########"
     ./search-api-docker.sh $1 config
 elif [ "$2" = "check" ]; then
     cd $DIR
-    echo "###### GATEWAY ########"
     ./hubmap-auth-docker.sh $1 check
 
     # Only have ingest-api and ingest-ui on the same host machine for localhost environment
     # dev, test, or prod deployment has ingest-api on a separate machine
     cd $DIR/../ingest-ui/docker
-    echo "###### INGEST-UI ########"
     ./ingest-ui-docker.sh $1 check
 
     # ingest-api and ingest-pipeline containers for localhost only
     if [ "$1" = "localhost" ]; then
         cd $DIR/../ingest-ui/docker
-        echo "###### INGEST-API ########"
         ./ingest-api-docker.sh $1 check
         
         cd $DIR/../ingest-pipeline/docker
-        echo "###### INGEST-PIPELINE ########"
         ./ingest-pipeline-docker.sh $1 check
     fi
 
     cd $DIR/../uuid-api/docker
-    echo "###### UUID-API ########"
     ./uuid-api-docker.sh $1 check
 
     cd $DIR/../entity-api/docker
-    echo "###### ENTITY-API ########"
     ./entity-api-docker.sh $1 check
 
     cd $DIR/../search-api/docker
-    echo "###### SEARCH-API ########"
     ./search-api-docker.sh $1 check
 fi
