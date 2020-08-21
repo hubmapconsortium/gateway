@@ -28,8 +28,8 @@ if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" 
     exit 255
 fi
 
-if [[ "$2" != "check" && "$2" != "config" && "$2" != "build" && "$2" != "start" && "$2" != "stop" ]]; then
-    echo "Unknown command '$2', specify one of the following: check|config|build|start|stop"
+if [[ "$2" != "check" && "$2" != "config" && "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "down" ]]; then
+    echo "Unknown command '$2', specify one of the following: check|config|build|start|stop|down"
     exit 255
 fi
 
@@ -52,148 +52,32 @@ if [ "$1" = "localhost" ]; then
     echo 'HOST_GID:' $HOST_GID
 fi
 
-if [ "$2" = "build" ]; then
-    # First create the shared docker network
-    docker network create gateway_hubmap
 
-    # Build images for gateway since this is the current dir
-    # Use the `source` command to execute ./docker-setup.sh in the current process 
-    # since that script contains export environment variable
-    cd $DIR
-    ./hubmap-auth-docker.sh $1 build
+# Direct the execution to individual script for each project
+cd $DIR/../uuid-api/docker
+./uuid-api-docker.sh $1 $2
 
-    cd $DIR/../uuid-api/docker
-    ./uuid-api-docker.sh $1 build
+cd $DIR/../entity-api/docker
+./entity-api-docker.sh $1 $2
 
-    cd $DIR/../entity-api/docker
-    ./entity-api-docker.sh $1 build
+cd $DIR/../search-api/docker
+./search-api-docker.sh $1 $2
 
-    cd $DIR/../search-api/docker
-    ./search-api-docker.sh $1 build
+# Only have ingest-api and ingest-ui on the same host machine for localhost environment
+# dev/test/staage/prod deployment has ingest-api on a separate machine
 
-    # Only have ingest-api and ingest-ui on the same host machine for localhost environment
-    # dev, test, or prod deployment has ingest-api on a separate machine
+cd $DIR/../ingest-ui/docker
+./ingest-ui-docker.sh $1 $2
+
+# Also start the ingest-api and ingest-pipeline for localhost only
+if [ "$1" = "localhost" ]; then
     cd $DIR/../ingest-ui/docker
-    ./ingest-ui-docker.sh $1 build
-    
-    # Also build ingest-api and ingest-pipeline for localhost only
-    if [ "$1" = "localhost" ]; then
-        cd $DIR/../ingest-ui/docker
-        ./ingest-api-docker.sh $1 build
-    
-        cd $DIR/../ingest-pipeline/docker
-        ./ingest-pipeline-docker.sh $1 build
-    fi
+    ./ingest-api-docker.sh $1 $2
 
-elif [ "$2" = "start" ]; then
-    # Spin up the containers for each project
-    cd $DIR/../uuid-api/docker
-    ./uuid-api-docker.sh $1 start
-
-    cd $DIR/../entity-api/docker
-    ./entity-api-docker.sh $1 start
-
-    cd $DIR/../search-api/docker
-    ./search-api-docker.sh $1 start
-    
-    # Only have ingest-api and ingest-ui on the same host machine for localhost environment
-    # dev, test, or prod deployment has ingest-api on a separate machine
-
-    cd $DIR/../ingest-ui/docker
-    ./ingest-ui-docker.sh $1 start
-
-    # Also start the ingest-api and ingest-pipeline for localhost only
-    if [ "$1" = "localhost" ]; then
-        cd $DIR/../ingest-ui/docker
-        ./ingest-api-docker.sh $1 start
-    
-        cd $DIR/../ingest-pipeline/docker
-        ./ingest-pipeline-docker.sh $1 start
-    fi
-
-    # The last one is gateway since nginx conf files require 
-    # entity-api, uuid-api, ingest-ui, ingest-api, and ingest-pipeline to be running
-    # before starting the gateway service
-    cd $DIR
-    ./hubmap-auth-docker.sh $1 start
-
-elif [ "$2" = "stop" ]; then
-    # Stop the gateway first
-    cd $DIR
-    ./hubmap-auth-docker.sh $1 stop
-
-    # Only have ingest-api and ingest-ui on the same host machine for localhost environment
-    # dev, test, or prod deployment has ingest-api on a separate machine
-    cd $DIR/../ingest-ui/docker
-    ./ingest-ui-docker.sh $1 stop
-
-    # Also stop the ingest-api and ingest-pipeline containers for localhost only
-    if [ "$1" = "localhost" ]; then
-        cd $DIR/../ingest-ui/docker
-        ./ingest-api-docker.sh $1 stop
-    
-        cd $DIR/../ingest-pipeline/docker
-        ./ingest-pipeline-docker.sh $1 stop
-    fi
-
-    cd $DIR/../uuid-api/docker
-    ./uuid-api-docker.sh $1 stop
-
-    cd $DIR/../entity-api/docker
-    ./entity-api-docker.sh $1 stop
-
-    cd $DIR/../search-api/docker
-    ./search-api-docker.sh $1 stop
-elif [ "$2" = "config" ]; then
-    cd $DIR
-    ./hubmap-auth-docker.sh $1 config
-
-    # Only have ingest-api and ingest-ui on the same host machine for localhost environment
-    # dev, test, or prod deployment has ingest-api on a separate machine
-    cd $DIR/../ingest-ui/docker
-    ./ingest-ui-docker.sh $1 config
-
-    # ingest-api and ingest-pipeline containers for localhost only
-    if [ "$1" = "localhost" ]; then
-        cd $DIR/../ingest-ui/docker
-        ./ingest-api-docker.sh $1 config
-        
-        cd $DIR/../ingest-pipeline/docker
-        ./ingest-pipeline-docker.sh $1 config
-    fi
-
-    cd $DIR/../uuid-api/docker
-    ./uuid-api-docker.sh $1 config
-
-    cd $DIR/../entity-api/docker
-    ./entity-api-docker.sh $1 config
-
-    cd $DIR/../search-api/docker
-    ./search-api-docker.sh $1 config
-elif [ "$2" = "check" ]; then
-    cd $DIR
-    ./hubmap-auth-docker.sh $1 check
-
-    # Only have ingest-api and ingest-ui on the same host machine for localhost environment
-    # dev, test, or prod deployment has ingest-api on a separate machine
-    cd $DIR/../ingest-ui/docker
-    ./ingest-ui-docker.sh $1 check
-
-    # ingest-api and ingest-pipeline containers for localhost only
-    if [ "$1" = "localhost" ]; then
-        cd $DIR/../ingest-ui/docker
-        ./ingest-api-docker.sh $1 check
-        
-        cd $DIR/../ingest-pipeline/docker
-        ./ingest-pipeline-docker.sh $1 check
-    fi
-
-    cd $DIR/../uuid-api/docker
-    ./uuid-api-docker.sh $1 check
-
-    cd $DIR/../entity-api/docker
-    ./entity-api-docker.sh $1 check
-
-    cd $DIR/../search-api/docker
-    ./search-api-docker.sh $1 check
+    cd $DIR/../ingest-pipeline/docker
+    ./ingest-pipeline-docker.sh $1 $2
 fi
+
+# The last one is gateway since nginx conf files require all proxied services to be running prior to the nignx start
+cd $DIR
+./hubmap-auth-docker.sh $1 $2
