@@ -260,6 +260,9 @@ def status_request(target_url):
 # Dict of API status data
 def get_status_data():
     # Some constants
+    GATEWAY = 'gateway'
+    VERSION = 'version'
+    BUILD = 'build'
     UUID_API = 'uuid_api'
     ENTITY_API = 'entity_api'
     INGEST_API = 'ingest_api'
@@ -276,22 +279,33 @@ def get_status_data():
     # All API services have api_auth status (meaning the gateway's API auth is working)
     # Add additional API-specific status to the dict when API auth check passes
     status_data = {
+        GATEWAY: {
+            VERSION: None
+        },
         UUID_API: {
+            VERSION: None,
             API_AUTH: False
         },
         ENTITY_API: {
+            VERSION: None,
             API_AUTH: False
         },
         INGEST_API: {
+            VERSION: None,
             API_AUTH: False
         },
         SEARCH_API: {
+            VERSION: None,
+            BUILD: None,
             API_AUTH: False
         },
         FILE_ASSETS: {
             API_AUTH: False
         }
     }
+
+    # Gateway version
+    status_data[GATEWAY][VERSION] = (Path(__file__).parent.parent / 'VERSION').read_text()
 
     # uuid-api
     uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'])
@@ -301,6 +315,10 @@ def get_status_data():
 
         # Then parse the response json to determine if neo4j connection is working
         response_json = uuid_api_response.json()
+        if VERSION in response_json:
+            # Set version
+            status_data[UUID_API][VERSION] = response_json[VERSION]
+
         if MYSQL_CONNECTION in response_json:
             # Add the mysql connection status
             status_data[UUID_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
@@ -313,6 +331,10 @@ def get_status_data():
 
         # Then parse the response json to determine if neo4j connection is working
         response_json = entity_api_response.json()
+        if VERSION in response_json:
+            # Set version
+            status_data[ENTITY_API][VERSION] = response_json[VERSION]
+
         if NEO4J_CONNECTION in response_json:
             # Add the neo4j connection status
             status_data[ENTITY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
@@ -325,6 +347,10 @@ def get_status_data():
 
         # Then parse the response json to determine if neo4j connection is working
         response_json = ingest_api_response.json()
+        if VERSION in response_json:
+            # Set version
+            status_data[INGEST_API][VERSION] = response_json[VERSION]
+
         if NEO4J_CONNECTION in response_json:
             # Add the neo4j connection status
             status_data[INGEST_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
@@ -337,6 +363,10 @@ def get_status_data():
 
         # Then parse the response json to determine if elasticsearch cluster is connected
         response_json = search_api_response.json()
+        if VERSION in response_json:
+            # Set version
+            status_data[SEARCH_API][VERSION] = response_json[VERSION]
+
         if ELASTICSEARCH_CONNECTION in response_json:
             # Add the elasticsearch connection status
             status_data[SEARCH_API][ELASTICSEARCH_CONNECTION] = response_json[ELASTICSEARCH_CONNECTION]
