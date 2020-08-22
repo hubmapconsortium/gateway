@@ -27,6 +27,9 @@ services:
       # search-api
       - "8686:8686" 
     volumes:
+      # Mount the VERSION file and BUILD file
+      - "./VERSION:/usr/src/app/src/VERSION"
+      - "./BUILD:/usr/src/app/src/BUILD"
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
       # Mount conf.d-localhost to the nginx conf.d on container
@@ -35,3 +38,4 @@ services:
       - "/hubmap-data:/hubmap-data"
       # Mount the API endpoints json file for API endpoints lookup
       - "./api_endpoints.localhost.json:/usr/src/app/api_endpoints.json"
+

@@ -7,6 +7,7 @@ from cachetools import cached, TTLCache
 import functools
 import re
 import os
+from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 # HuBMAP commons
@@ -268,7 +269,6 @@ def get_status_data():
     INGEST_API = 'ingest_api'
     SEARCH_API = 'search_api'
     FILE_ASSETS = 'file_assets'
-
     API_AUTH = 'api_auth'
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
@@ -277,35 +277,31 @@ def get_status_data():
     FILE_ASSETS_STATUS = 'file_assets_status'
 
     # All API services have api_auth status (meaning the gateway's API auth is working)
+    # We won't get other status if api_auth fails
     # Add additional API-specific status to the dict when API auth check passes
+    # Gateway version and build are parsed from VERSION and BUILD files directly
+    # instead of making API calls. So they alwasy present
     status_data = {
         GATEWAY: {
-            VERSION: None
+            VERSION: (Path(__file__).parent / 'VERSION').read_text(),
+            BUILD: (Path(__file__).parent / 'BUILD').read_text()
         },
         UUID_API: {
-            VERSION: None,
             API_AUTH: False
         },
         ENTITY_API: {
-            VERSION: None,
             API_AUTH: False
         },
         INGEST_API: {
-            VERSION: None,
             API_AUTH: False
         },
         SEARCH_API: {
-            VERSION: None,
-            BUILD: None,
             API_AUTH: False
         },
         FILE_ASSETS: {
             API_AUTH: False
         }
     }
-
-    # Gateway version
-    status_data[GATEWAY][VERSION] = (Path(__file__).parent.parent / 'VERSION').read_text()
 
     # uuid-api
     uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'])
@@ -318,6 +314,10 @@ def get_status_data():
         if VERSION in response_json:
             # Set version
             status_data[UUID_API][VERSION] = response_json[VERSION]
+
+        if BUILD in response_json:
+            # Set build
+            status_data[UUID_API][BUILD] = response_json[BUILD]
 
         if MYSQL_CONNECTION in response_json:
             # Add the mysql connection status
@@ -335,6 +335,10 @@ def get_status_data():
             # Set version
             status_data[ENTITY_API][VERSION] = response_json[VERSION]
 
+        if BUILD in response_json:
+            # Set build
+            status_data[ENTITY_API][BUILD] = response_json[BUILD]
+
         if NEO4J_CONNECTION in response_json:
             # Add the neo4j connection status
             status_data[ENTITY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
@@ -351,6 +355,10 @@ def get_status_data():
             # Set version
             status_data[INGEST_API][VERSION] = response_json[VERSION]
 
+        if BUILD in response_json:
+            # Set build
+            status_data[INGEST_API][BUILD] = response_json[BUILD]
+
         if NEO4J_CONNECTION in response_json:
             # Add the neo4j connection status
             status_data[INGEST_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
@@ -366,6 +374,10 @@ def get_status_data():
         if VERSION in response_json:
             # Set version
             status_data[SEARCH_API][VERSION] = response_json[VERSION]
+
+        if BUILD in response_json:
+            # Set build
+            status_data[SEARCH_API][BUILD] = response_json[BUILD]
 
         if ELASTICSEARCH_CONNECTION in response_json:
             # Add the elasticsearch connection status
