@@ -283,8 +283,9 @@ def get_status_data():
     # instead of making API calls. So they alwasy present
     status_data = {
         GATEWAY: {
-            VERSION: (Path(__file__).parent / 'VERSION').read_text(),
-            BUILD: (Path(__file__).parent / 'BUILD').read_text()
+            # Use strip() to remove leading and trailing spaces, newlines, and tabs
+            VERSION: (Path(__file__).parent / 'VERSION').read_text().strip(),
+            BUILD: (Path(__file__).parent / 'BUILD').read_text().strip()
         },
         UUID_API: {
             API_AUTH: False
