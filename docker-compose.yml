@@ -14,6 +14,12 @@ services:
     image: hubmap-auth:${HUBMAP_AUTH_VERSION:?err}
     hostname: hubmap-auth
     container_name: hubmap-auth
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - gateway_hubmap
     volumes:
