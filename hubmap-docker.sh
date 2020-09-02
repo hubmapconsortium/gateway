@@ -116,7 +116,7 @@ if [ "$2" = "build" ]; then
     docker network create gateway_hubmap
 
     # Build images for gateway since this is the current dir
-    docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BULD_OPTS
+    docker-compose -f docker-compose.yml -f docker-compose.$1.yml build $BUILD_OPTS
 
     cd $DIR/../uuid-api/docker
     ./docker-setup.sh
@@ -134,7 +134,7 @@ if [ "$2" = "build" ]; then
     # dev, test, or prod deployment has ingest-api on a separate machine
     cd $DIR/../ingest-ui/docker
     ./docker-setup-ingest-ui.sh
-    docker-compose -f docker-compose-ingest-ui.$1.yml build $BULD_OPTS
+    docker-compose -f docker-compose-ingest-ui.$1.yml build $BUILD_OPTS
     
     # Also build ingest-api and ingest-pipeline for localhost only
     if [ "$1" = "localhost" ]; then
