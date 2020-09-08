@@ -145,12 +145,17 @@
     },
     {
       "method": "GET",
-      "endpoint": "/collections/redirect/<*>",
+      "endpoint": "/collections/<*>",
       "auth": false
     },
     {
       "method": "GET",
-      "endpoint": "/collections/<*>",
+      "endpoint": "/collection/redirect/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/doi/redirect/<*>",
       "auth": false
     },
     {
