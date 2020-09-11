@@ -20,6 +20,9 @@ services:
       # 8443 is used by ingest-api running on another machine
       - "8443:8443" 
     volumes:
+      # Mount the VERSION file and BUILD file
+      - "VERSION:/usr/src/app/src/VERSION"
+      - "BUILD:/usr/src/app/src/BUILD"
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
       # Mount conf.d-test to the nginx conf.d on container

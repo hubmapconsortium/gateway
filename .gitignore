@@ -1,6 +1,12 @@
 # __pycache__ directories in any path
 **/__pycache__
 
+BUILD
+
+# the copied
+hubmap-auth/src/BUILD
+hubmap-auth/src/VERSION
+
 # log files in any path
 **/*.log
 
