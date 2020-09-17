@@ -15,9 +15,32 @@
 
 <div class="container" id="content">
 
+{% if data.gateway %}
+
+<h2>Gateway</h2>
+
+{% if data.gateway.version %}
+<p class="pl-4">Version: {{ data.gateway.version }}</p>
+{% endif %}
+
+{% if data.gateway.build %}
+<p class="pl-4">Build: {{ data.gateway.build }}</p>
+{% endif %}
+
+{% endif %}
+
+
 {% if data.uuid_api %}
 
 <h2>UUID API</h2>
+
+{% if data.uuid_api.version %}
+<p class="pl-4">Version: {{ data.uuid_api.version }}</p>
+{% endif %}
+
+{% if data.uuid_api.build %}
+<p class="pl-4">Build: {{ data.uuid_api.build }}</p>
+{% endif %}
 
 {% if data.uuid_api.api_auth %}
 <p class="pl-4">API Auth: {{ data.uuid_api.api_auth }}</p>
@@ -34,6 +57,14 @@
 
 <h2>Entity API</h2>
 
+{% if data.entity_api.version %}
+<p class="pl-4">Version: {{ data.entity_api.version }}</p>
+{% endif %}
+
+{% if data.entity_api.build %}
+<p class="pl-4">Build: {{ data.entity_api.build }}</p>
+{% endif %}
+
 {% if data.entity_api.api_auth %}
 <p class="pl-4">API Auth: {{ data.entity_api.api_auth }}</p>
 {% endif %}
@@ -49,6 +80,14 @@
 
 <h2>Ingest API</h2>
 
+{% if data.ingest_api.version %}
+<p class="pl-4">Version: {{ data.ingest_api.version }}</p>
+{% endif %}
+
+{% if data.ingest_api.build %}
+<p class="pl-4">Build: {{ data.ingest_api.build }}</p>
+{% endif %}
+
 {% if data.ingest_api.api_auth %}
 <p class="pl-4">API Auth: {{ data.ingest_api.api_auth }}</p>
 {% endif %}
@@ -61,7 +100,17 @@
 
 
 {% if data.search_api %}
+
 <h2>Search API</h2>
+
+{% if data.search_api.version %}
+<p class="pl-4">Version: {{ data.search_api.version }}</p>
+{% endif %}
+
+{% if data.search_api.build %}
+<p class="pl-4">Build: {{ data.search_api.build }}</p>
+{% endif %}
+
 {% if data.search_api.api_auth %}
 <p class="pl-4">API Auth: {{ data.search_api.api_auth }}</p>
 

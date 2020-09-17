@@ -66,7 +66,7 @@ The Docker daemon binds to a Unix socket instead of a TCP port. By default that 
 sudo usermod -aG docker $USER
 ````
 
-The log out and log back in so that your group membership is re-evaluated. If testing on a virtual machine, it may be necessary to restart the virtual machine for changes to take effect.
+Then log out and log back in so that your group membership is re-evaluated. If testing on a virtual machine, it may be necessary to restart the virtual machine for changes to take effect.
 
 Note: the following instructions with docker commands are based on managing Docker as a non-root user.
 
@@ -112,13 +112,12 @@ To see the usage of this script:
 It outputs:
 
 ````
-Usage: ./hubmap-docker.sh [-vhN] [localhost|dev|test|stage|prod] [build|start|stop|check|config]
+Usage: ./hubmap-docker.sh [-vh] [localhost|dev|test|stage|prod] [build|start|stop|check|config]
        -v verbose
        -h help
-       -N use --no-cache for build
 ````
 
-The `hubmap-docker.sh` basically takes two arguments: deployment environment (localhost|dev|test|stage|prod) and the option (build|start|stop|check|config). In addition, you can also use `-v` to see the verbose output and `-h` for the usage help tip. The `--no-cache` is used with `build` to avoid the docker cache when creating images.
+The `hubmap-docker.sh` basically takes two arguments: deployment environment (localhost|dev|test|stage|prod) and the option (build|start|stop|check|config). In addition, you can also use `-v` to see the verbose output and `-h` for the usage help tip. 
 
 Before we go ahead to start building the docker images, we can do a check to see if all the required configuration files are in place:
 
@@ -211,13 +210,40 @@ nginx -s reload
 * Reloading is safer than restarting because if a syntax error is noticed in a config file, it will not proceed with the reload and your server remains running.
 * If there is a syntax error in a config file and you restart, it's possible the server will not restart correctly.
 
+## Rebuild `hubmap-auth` image individually
+
+You may only need to rebuild the `hubmap-auth` image while keeping other HuBMAP docker images unchanged. We first need to export the version environment variable by sourcing the script:
+
+````
+source ./hubmap-auth-docker.sh dev build
+````
+
+To start up the hubmap-auth container:
+
+````
+source ./hubmap-auth-docker.sh dev start
+````
+
+And stop the running container by:
+
+````
+source ./hubmap-auth-docker.sh dev stop
+````
+
+You can also stop the running container and remove it by:
+
+````
+source ./hubmap-auth-docker.sh dev down
+````
+
 
 ## Update base image
 
 The `entity-api`, `uuid-api`, `ingest-api`, and `hubmap-auth` docker images are based on the `hubmap/api-base-image:latest` image. If you need to update the base image, go to the `api-base-image` directory and recrerate it with:
 
 ````
-docker build -t hubmap/api-base-image:latest
+cd api-base-image
+docker build -t hubmap/api-base-image:latest .
 ````
 
 Then publish it to the DockerHub:
