@@ -12,3 +12,6 @@ hubmap-auth/src/VERSION
 
 # hubmap-auth app.cfg
 hubmap-auth/src/instance/app.cfg
+
+# maintenance.on file for ingest-ui and portal-ui maintenance page
+**/maintenance.on
