@@ -12,3 +12,6 @@ hubmap-auth/src/VERSION
 
 # hubmap-auth app.cfg
 hubmap-auth/src/instance/app.cfg
+
+# indicator file of maintenance
+**/maintenance.on
