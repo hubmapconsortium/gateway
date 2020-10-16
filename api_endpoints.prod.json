@@ -64,62 +64,98 @@
     {
       "method": "GET",
       "endpoint": "/dataset/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "PUT",
       "endpoint": "/dataset/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "POST",
       "endpoint": "/dataset",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "GET",
       "endpoint": "/donor/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "PUT",
       "endpoint": "/donor/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "POST",
       "endpoint": "/donor",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "GET",
       "endpoint": "/sample/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "PUT",
       "endpoint": "/sample/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "POST",
       "endpoint": "/sample",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "GET",
       "endpoint": "/collection/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "PUT",
       "endpoint": "/collection/<*>",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "POST",
       "endpoint": "/collection",
-      "auth": false
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     }
   ],
   "ingest.api.hubmapconsortium.org": [
