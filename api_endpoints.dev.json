@@ -63,145 +63,63 @@
     },
     {
       "method": "GET",
-      "endpoint": "/entities",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/types/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/types",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/<*>/provenance",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/uuid/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/ancestors/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/descendants/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/parents/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/children/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/collections",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/collections/<*>",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/collection/redirect/<*>",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/doi/redirect/<*>",
+      "endpoint": "/dataset/<*>",
       "auth": false
     },
     {
       "method": "PUT",
-      "endpoint": "/entities/donor/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "endpoint": "/dataset/<*>",
+      "auth": false
     },
     {
-      "method": "PUT",
-      "endpoint": "/samples/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "PUT",
-      "endpoint": "/entities/sample/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "PUT",
-      "endpoint": "/entities/dataset/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/dataset/globus-url/<*>",
+      "method": "POST",
+      "endpoint": "/dataset",
       "auth": false
     },
     {
       "method": "GET",
-      "endpoint": "/entity-access-level/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "endpoint": "/donor/<*>",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/donor/<*>",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/donor",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/sample/<*>",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/sample/<*>",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/sample",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collection/<*>",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/collection/<*>",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/collection",
+      "auth": false
     }
   ],
   "ingest-api.dev.hubmapconsortium.org": [
