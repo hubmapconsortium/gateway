@@ -23,8 +23,8 @@ function get_dir_of_this_script () {
     DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
 }
 
-if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" ]]; then
-    echo "Unknown build environment '$1', specify one of the following: localhost|dev|test|stage|prod"
+if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" && "$1" != "refactor" ]]; then
+    echo "Unknown build environment '$1', specify one of the following: localhost|dev|test|stage|prod|refactor"
     exit 255
 fi
 
