@@ -78,7 +78,7 @@ else
         elif [ "$2" = "build" ]; then
             # Only mount the VERSION file and BUILD file for localhost and dev
             # On test/stage/prod, copy the VERSION file and BUILD file to image
-            if [[ "$1" != "localhost" && "$1" != "dev" ]]; then
+            if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "refactor" ]]; then
                 cp VERSION hubmap-auth/src
                 cp BUILD hubmap-auth/src
             fi
