@@ -63,7 +63,7 @@
     },
     {
       "method": "DELETE",
-      "endpoint": "/schema_cache",
+      "endpoint": "/cache",
       "auth": false
     },
     {
