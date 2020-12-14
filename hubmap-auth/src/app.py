@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, make_response, Response, render_template
 import requests
+import requests_cache
 from urllib3.exceptions import InsecureRequestWarning
 import json
 import logging
@@ -37,6 +38,10 @@ logging.basicConfig(level=logging.DEBUG)
 # with a per-item time-to-live (TTL) value
 # Here we use two hours, 7200 seconds for ttl
 cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'])
+
+# Requests cache generates the hubmap_gateway.sqlite
+# Use the same CACHE_TTL from configuration
+requests_cache.install_cache('hubmap_gateway', backend='sqlite', expire_after=app.config['CACHE_TTL'])
 
 ####################################################################################################
 ## Default route
