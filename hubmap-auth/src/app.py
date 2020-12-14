@@ -20,7 +20,7 @@ app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname
 app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
-app.config['ENTITY_ACCESS_LEVEL_URL'] = app.config['ENTITY_ACCESS_LEVEL_URL'].strip('/')
+app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
 # Also remove trailing slash / for those status endpoints in case Flask takes / as a different endpoint
 app.config['UUID_API_STATUS_URL'] = app.config['UUID_API_STATUS_URL'].strip('/')
@@ -450,7 +450,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     final_request = request
 
     # First check the dataset access level based on the uuid without taking the token into consideration
-    entity_api_full_url = app.config['ENTITY_ACCESS_LEVEL_URL'] + '/' + dataset_uuid
+    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + dataset_uuid + "?property=data_access_level"
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
