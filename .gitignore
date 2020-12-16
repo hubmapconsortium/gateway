@@ -10,6 +10,9 @@ hubmap-auth/src/VERSION
 # log files in any path
 **/*.log
 
+# Rotated log files
+**/*.log*
+
 # hubmap-auth app.cfg
 hubmap-auth/src/instance/app.cfg
 
