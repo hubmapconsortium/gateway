@@ -79,8 +79,8 @@ else
             # Only mount the VERSION file and BUILD file for localhost and dev
             # On test/stage/prod, copy the VERSION file and BUILD file to image
             if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "refactor" ]]; then
-                cp VERSION hubmap-auth/src
-                cp BUILD hubmap-auth/src
+                cp VERSION hubmap-auth
+                cp BUILD hubmap-auth
             fi
 
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway build

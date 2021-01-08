@@ -289,8 +289,8 @@ def get_status_data():
     status_data = {
         GATEWAY: {
             # Use strip() to remove leading and trailing spaces, newlines, and tabs
-            VERSION: (Path(__file__).parent / 'VERSION').read_text().strip(),
-            BUILD: (Path(__file__).parent / 'BUILD').read_text().strip()
+            VERSION: (Path(__file__).absolute().parent.parent / 'VERSION').read_text().strip(),
+            BUILD: (Path(__file__).absolute().parent.parent / 'BUILD').read_text().strip()
         },
         UUID_API: {
             API_AUTH: False
