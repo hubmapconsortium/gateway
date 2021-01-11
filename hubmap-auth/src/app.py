@@ -13,7 +13,6 @@ from urllib.parse import urlparse, parse_qs
 
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
-from hubmap_commons.hubmap_const import HubmapConst
 from hubmap_commons.exceptions import HTTPException
 
 # Specify the absolute path of the instance folder and use the config file relative to the instance path
@@ -444,6 +443,11 @@ def get_file_access(dataset_uuid, token_from_query, request):
     authorization_required = 403
     internal_error = 500
 
+    # All lowercase for easy comparision
+    ACCESS_LEVEL_PUBLIC = 'public'
+    ACCESS_LEVEL_CONSORTIUM = 'consortium'
+    ACCESS_LEVEL_PROTECTED = 'protected'
+
     # Used by file assets status only
     if dataset_uuid == 'status':
         return allowed
@@ -468,13 +472,13 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
     if response.status_code == 200:
         # The call to entity-api returns string directly
-        data_access_level = response.text
+        data_access_level = (response.text).lower()
 
         app.logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
         app.logger.debug(data_access_level)
 
         # Throw error 500 if invalid access level value assigned to the dataset metadata node
-        if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC and data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM and data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED:
+        if data_access_level != ACCESS_LEVEL_PUBLIC and data_access_level != ACCESS_LEVEL_CONSORTIUM and data_access_level != ACCESS_LEVEL_PROTECTED:
             app.logger.error("The 'data_access_level' value assigned for this dataset " + dataset_uuid + " is invalid")
             return internal_error
 
@@ -505,7 +509,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
         # In this case we can't call auth_helper.getUserDataAccessLevel() because it returns HTTPException when Authorization header is missing
         if 'Authorization' not in final_request.headers:
             # Return 401 if the data access level is consortium or protected since they's require token but Authorization header missing
-            if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC:
+            if data_access_level != ACCESS_LEVEL_PUBLIC:
                 return authentication_required
             # Only return 200 since public dataset doesn't require token
             return allowed
@@ -514,7 +518,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
         # Then we can call auth_helper.getUserDataAccessLevel() to find out the user's assigned access level
         try:
             # The user_info contains HIGHEST access level of the user based on the token
-            # Default to HubmapConst.ACCESS_LEVEL_PUBLIC if none of the Authorization/Mauthorization header presents
+            # Default to ACCESS_LEVEL_PUBLIC if none of the Authorization/Mauthorization header presents
             # This call raises an HTTPException with a 401 if any auth issues are found
             user_info = auth_helper.getUserDataAccessLevel(final_request)
 
@@ -532,22 +536,22 @@ def get_file_access(dataset_uuid, token_from_query, request):
 
         # By now the user_info is returned and based on the logic of auth_helper.getUserDataAccessLevel(), 
         # 'data_access_level' should always be found user_info and its value is always one of the 
-        # HubmapConst.ACCESS_LEVEL_PUBLIC, HubmapConst.ACCESS_LEVEL_CONSORTIUM, or HubmapConst.ACCESS_LEVEL_PROTECTED
+        # ACCESS_LEVEL_PUBLIC, ACCESS_LEVEL_CONSORTIUM, or ACCESS_LEVEL_PROTECTED
         # So no need to check unknown value
-        user_access_level = user_info['data_access_level']
+        user_access_level = user_info['data_access_level'].lower()
 
         # By now we have both data_access_level and the user_access_level obtained with one of the valid values
         # Allow file access as long as data_access_level is public, no need to care about the user_access_level (since Authorization header presents with valid token)
-        if data_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC:
+        if data_access_level == ACCESS_LEVEL_PUBLIC:
             return allowed
         
         # When data_access_level is comsortium, allow access only when the user_access_level (remember this is the highest level) is consortium or protected
-        if (data_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM and
-            (user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED or user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM)):
+        if (data_access_level == ACCESS_LEVEL_CONSORTIUM and
+            (user_access_level == ACCESS_LEVEL_PROTECTED or user_access_level == ACCESS_LEVEL_CONSORTIUM)):
             return allowed
         
         # When data_access_level is protected, allow access only when user_access_level is also protected
-        if data_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED and user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
+        if data_access_level == ACCESS_LEVEL_PROTECTED and user_access_level == ACCESS_LEVEL_PROTECTED:
             return allowed
             
         # All other cases
