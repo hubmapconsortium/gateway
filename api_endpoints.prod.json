@@ -505,6 +505,16 @@
     },
     {
       "method": "GET",
+      "endpoint": "/count",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/count",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/indices",
       "auth": false
     },
