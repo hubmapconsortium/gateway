@@ -159,75 +159,79 @@ def api_auth():
 # The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
-    app.logger.info("======file_auth Orginal request.headers======")
-    app.logger.info(request.headers)
-
-    # Nginx auth_request only cares about the response status code
-    # it ignores the response body
-    # We use body here only for direct visit to this endpoint
-    response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
-    response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
-    response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
-    response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
-  
-    method = None
-    orig_uri = None
-
-    # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
-    # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
-    # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
-    if ("X-Original-Request-Method" in request.headers) and ("X-Original-URI" in request.headers):
-        method = request.headers.get("X-Original-Request-Method")
-        orig_uri = request.headers.get("X-Original-URI")
-
-    # File access only via http GET
-    if method is not None:
-        if method.upper() == 'GET':
-            if orig_uri is not None:
-                parsed_uri = urlparse(orig_uri)
-                
-                app.logger.debug("======parsed_uri======")
-                app.logger.debug(parsed_uri)
-
-                # Parse the path to get the dataset UUID
-                # Remove the leading slash before split
-                path_list = parsed_uri.path.strip("/").split("/")
-                dataset_uuid = path_list[0]
-
-                # Also get the "token" parameter from query string
-                # query is a dict, keys are the unique query variable names and the values are lists of values for each name
-                token_from_query = None
-                query = parse_qs(parsed_uri.query)
-
-                if "token" in query:
-                    token_from_query = query["token"][0]
-                
-                app.logger.debug("======token_from_query======")
-                app.logger.debug(token_from_query)
-
-                # Check if the globus token is valid for accessing this secured dataset
-                code = get_file_access(dataset_uuid, token_from_query, request)
-
-                app.logger.debug("======get_file_access() result code======")
-                app.logger.debug(code)
-
-                if code == 200:
-                    return response_200
-                elif code == 401:
+    try:
+        app.logger.info("======file_auth Orginal request.headers======")
+        app.logger.info(request.headers)
+    
+        # Nginx auth_request only cares about the response status code
+        # it ignores the response body
+        # We use body here only for direct visit to this endpoint
+        response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
+        response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
+        response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
+        response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
+      
+        method = None
+        orig_uri = None
+    
+        # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
+        # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
+        # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
+        if ("X-Original-Request-Method" in request.headers) and ("X-Original-URI" in request.headers):
+            method = request.headers.get("X-Original-Request-Method")
+            orig_uri = request.headers.get("X-Original-URI")
+    
+        # File access only via http GET
+        if method is not None:
+            if method.upper() == 'GET':
+                if orig_uri is not None:
+                    parsed_uri = urlparse(orig_uri)
+                    
+                    app.logger.debug("======parsed_uri======")
+                    app.logger.debug(parsed_uri)
+    
+                    # Parse the path to get the dataset UUID
+                    # Remove the leading slash before split
+                    path_list = parsed_uri.path.strip("/").split("/")
+                    dataset_uuid = path_list[0]
+    
+                    # Also get the "token" parameter from query string
+                    # query is a dict, keys are the unique query variable names and the values are lists of values for each name
+                    token_from_query = None
+                    query = parse_qs(parsed_uri.query)
+    
+                    if "token" in query:
+                        token_from_query = query["token"][0]
+                    
+                    app.logger.debug("======token_from_query======")
+                    app.logger.debug(token_from_query)
+    
+                    # Check if the globus token is valid for accessing this secured dataset
+                    code = get_file_access(dataset_uuid, token_from_query, request)
+    
+                    app.logger.debug("======get_file_access() result code======")
+                    app.logger.debug(code)
+    
+                    if code == 200:
+                        return response_200
+                    elif code == 401:
+                        return response_401
+                    elif code == 403:
+                        return response_403
+                    elif code == 500:
+                        return response_500
+                else: 
+                    # Missing dataset UUID in path
                     return response_401
-                elif code == 403:
-                    return response_403
-                elif code == 500:
-                    return response_500
-            else: 
-                # Missing dataset UUID in path
+            else:
+                # Wrong http method
                 return response_401
-        else:
-            # Wrong http method
-            return response_401
-    # Not a valid http request
-    return response_401
-
+        # Not a valid http request
+        return response_401
+    except Exception as e:
+        eMsg = str(e)
+        app.logger.error(e, exc_info=True)
+        return(Response("Unexpected error: " + eMsg, 500))    
 
 ####################################################################################################
 ## Internal Functions Used By API Auth and File Auth
