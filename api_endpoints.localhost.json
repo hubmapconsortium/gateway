@@ -454,7 +454,7 @@
     },
     {
       "method": "GET",
-      "endpoint": "/specimens/<*>/siblingids",
+      "endpoint": "/specimens/<*>/ingest-group-ids",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
@@ -462,7 +462,7 @@
     },
     {
       "method": "GET",
-      "endpoint": "/specimens/<*>/sibling-count",
+      "endpoint": "/specimens/<*>/ingest-group-count",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
