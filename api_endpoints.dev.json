@@ -68,6 +68,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/entities/<*>/ancestor-organs",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/entities/<*>",
       "auth": true,
       "groups": [
@@ -121,7 +126,7 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },
+    },      
     {
       "method": "GET",
       "endpoint": "/ancestors/<*>",
