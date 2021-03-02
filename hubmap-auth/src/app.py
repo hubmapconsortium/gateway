@@ -472,8 +472,9 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
 
+    # Disable ssl certificate verification
     # Possible response status codes: 200, 401, and 500 to be handled below
-    response = requests.get(url = entity_api_full_url, headers = request_headers) 
+    response = requests.get(url = entity_api_full_url, headers = request_headers, verify = False) 
 
     # Using the globus app secret as internal token should always return 200 supposely
     # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
