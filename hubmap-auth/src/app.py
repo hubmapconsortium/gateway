@@ -485,9 +485,9 @@ def get_file_access(dataset_uuid, token_from_query, request):
         logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
         logger.debug(data_access_level)
 
-        # Throw error 500 if invalid access level value assigned to the dataset metadata node
-        if data_access_level != ACCESS_LEVEL_PUBLIC and data_access_level != ACCESS_LEVEL_CONSORTIUM and data_access_level != ACCESS_LEVEL_PROTECTED:
-            logger.error("The 'data_access_level' value assigned for this dataset " + dataset_uuid + " is invalid")
+        # Throw error 500 if invalid access level value assigned to the dataset
+        if data_access_level not in [ACCESS_LEVEL_PUBLIC, ACCESS_LEVEL_CONSORTIUM, ACCESS_LEVEL_PROTECTED]:
+            logger.error("The 'data_access_level' value of this dataset " + dataset_uuid + " is invalid")
             return internal_error
 
         # Get the user access level based on token (optional) from HTTP header or query string
