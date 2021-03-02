@@ -260,6 +260,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/entities/<*>",
+      "auth": false
+    },      
+    {
       "method": "POST",
       "endpoint": "/datasets/derived",
       "auth": false
