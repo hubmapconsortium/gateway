@@ -62,34 +62,15 @@
       "auth": false
     },
     {
-      "method": "GET",
-      "endpoint": "/entities",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/types/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/types",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/<*>/provenance",
+      "method": "DELETE",
+      "endpoint": "/cache",
       "auth": false
     },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/ancestor-organs",
+      "auth": false
+    },      
     {
       "method": "GET",
       "endpoint": "/entities/<*>",
@@ -100,7 +81,7 @@
     },
     {
       "method": "GET",
-      "endpoint": "/entities/uuid/<*>",
+      "endpoint": "/<*>/entities",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
@@ -108,59 +89,7 @@
     },
     {
       "method": "GET",
-      "endpoint": "/entities/ancestors/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/descendants/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/parents/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/entities/children/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/collections",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/collections/<*>",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/collection/redirect/<*>",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/doi/redirect/<*>",
-      "auth": false
-    },
-    {
-      "method": "PUT",
-      "endpoint": "/entities/donor/<*>",
+      "endpoint": "/entity-types",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
@@ -168,7 +97,23 @@
     },
     {
       "method": "PUT",
-      "endpoint": "/samples/<*>",
+      "endpoint": "/entities/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/multiple-samples/<*>",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
@@ -176,15 +121,39 @@
     },
     {
       "method": "PUT",
-      "endpoint": "/entities/sample/<*>",
+      "endpoint": "/entities/multiple-samples",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
     },
     {
-      "method": "PUT",
-      "endpoint": "/entities/dataset/<*>",
+      "method": "GET",
+      "endpoint": "/ancestors/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/descendants/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/parents/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/children/<*>",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
@@ -197,7 +166,40 @@
     },
     {
       "method": "GET",
-      "endpoint": "/entity-access-level/<*>",
+      "endpoint": "/dataset/globus-url/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collections",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collections/<*>",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/collections/<*>/add-datasets",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collection/redirect/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/provenance",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/file-upload",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
@@ -258,6 +260,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/entities/<*>",
+      "auth": false
+    },      
+    {
       "method": "POST",
       "endpoint": "/datasets/derived",
       "auth": false
@@ -296,6 +303,14 @@
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
     },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/submit",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },      
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/unpublish",
@@ -465,7 +480,15 @@
     },
     {
       "method": "GET",
-      "endpoint": "/specimens/<*>/siblingids",
+      "endpoint": "/specimens/<*>/ingest-group-ids",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/specimens/<*>/ingest-group-count",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
@@ -482,6 +505,14 @@
     {
       "method": "GET",
       "endpoint": "/specimens/search",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/allowable-edit-states",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
@@ -522,6 +553,16 @@
     {
       "method": "POST",
       "endpoint": "/<*>/search",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/count",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/count",
       "auth": false
     },
     {

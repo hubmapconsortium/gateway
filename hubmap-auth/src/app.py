@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify, make_response, Response, render_template
 import requests
-from urllib3.exceptions import InsecureRequestWarning
+import requests_cache
+# Don't confuse urllib (Python native library) with urllib3 (3rd-party library, requests also uses urllib3)
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import json
 import logging
 from cachetools import cached, TTLCache
@@ -12,15 +14,22 @@ from urllib.parse import urlparse, parse_qs
 
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
-from hubmap_commons.hubmap_const import HubmapConst
 from hubmap_commons.exceptions import HTTPException
+
+
+# Set logging fromat and level (default is warning)
+# All the API logging is forwarded to the uWSGI server and gets written into the log file `uwsgo-entity-api.log`
+# Log rotation is handled via logrotate on the host system with a configuration file
+# Do NOT handle log file and rotation via the Python logging to avoid issues with multi-worker processes
+logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG, datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 # Specify the absolute path of the instance folder and use the config file relative to the instance path
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
 app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
-app.config['ENTITY_ACCESS_LEVEL_URL'] = app.config['ENTITY_ACCESS_LEVEL_URL'].strip('/')
+app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
 # Also remove trailing slash / for those status endpoints in case Flask takes / as a different endpoint
 app.config['UUID_API_STATUS_URL'] = app.config['UUID_API_STATUS_URL'].strip('/')
@@ -29,14 +38,19 @@ app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip(
 app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip('/')
 app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
 
-# Set logging level (default is warning)
-logging.basicConfig(level=logging.DEBUG)
-
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
 # with a per-item time-to-live (TTL) value
 # Here we use two hours, 7200 seconds for ttl
 cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'])
+
+# Requests cache generates the hubmap_gateway.sqlite
+# Use the same CACHE_TTL from configuration
+requests_cache.install_cache('hubmap_gateway', backend='sqlite', expire_after=app.config['CACHE_TTL'])
+
+# Suppress InsecureRequestWarning warning when requesting status on https with ssl cert verify disabled
+requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
+
 
 ####################################################################################################
 ## Default route
@@ -68,7 +82,7 @@ def status_html():
 @app.route('/cache_clear', methods = ['GET'])
 def cache_clear():
     cache.clear()
-    app.logger.info("All gatewat API Auth function cache cleared.")
+    logger.info("All gatewat API Auth function cache cleared.")
     return "All function cache cleared."
 
 
@@ -82,8 +96,8 @@ def api_auth():
     # The regular expression pattern takes any alphabetical and numerical characters, also other characters permitted in the URI
     regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
-    app.logger.info("======api_auth request.headers======")
-    app.logger.info(request.headers)
+    logger.info("======api_auth request.headers======")
+    logger.info(request.headers)
 
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
@@ -159,8 +173,8 @@ def api_auth():
 # The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
-    app.logger.info("======file_auth Orginal request.headers======")
-    app.logger.info(request.headers)
+    logger.info("======file_auth Orginal request.headers======")
+    logger.info(request.headers)
 
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
@@ -186,8 +200,8 @@ def file_auth():
             if orig_uri is not None:
                 parsed_uri = urlparse(orig_uri)
                 
-                app.logger.debug("======parsed_uri======")
-                app.logger.debug(parsed_uri)
+                logger.debug("======parsed_uri======")
+                logger.debug(parsed_uri)
 
                 # Parse the path to get the dataset UUID
                 # Remove the leading slash before split
@@ -202,14 +216,14 @@ def file_auth():
                 if "token" in query:
                     token_from_query = query["token"][0]
                 
-                app.logger.debug("======token_from_query======")
-                app.logger.debug(token_from_query)
+                logger.debug("======token_from_query======")
+                logger.debug(token_from_query)
 
                 # Check if the globus token is valid for accessing this secured dataset
                 code = get_file_access(dataset_uuid, token_from_query, request)
 
-                app.logger.debug("======get_file_access() result code======")
-                app.logger.debug(code)
+                logger.debug("======get_file_access() result code======")
+                logger.debug(code)
 
                 if code == 200:
                     return response_200
@@ -251,9 +265,6 @@ def init_auth_helper():
 
 # Make a call to the given target status URL
 def status_request(target_url):
-    # Suppress InsecureRequestWarning warning when requesting status on https with ssl cert verify disabled
-    requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
-
     # Disable ssl certificate verification
     response = requests.get(url = target_url, verify = False) 
     return response
@@ -284,8 +295,8 @@ def get_status_data():
     status_data = {
         GATEWAY: {
             # Use strip() to remove leading and trailing spaces, newlines, and tabs
-            VERSION: (Path(__file__).parent / 'VERSION').read_text().strip(),
-            BUILD: (Path(__file__).parent / 'BUILD').read_text().strip()
+            VERSION: (Path(__file__).absolute().parent.parent / 'VERSION').read_text().strip(),
+            BUILD: (Path(__file__).absolute().parent.parent / 'BUILD').read_text().strip()
         },
         UUID_API: {
             API_AUTH: False
@@ -439,6 +450,11 @@ def get_file_access(dataset_uuid, token_from_query, request):
     authorization_required = 403
     internal_error = 500
 
+    # All lowercase for easy comparision
+    ACCESS_LEVEL_PUBLIC = 'public'
+    ACCESS_LEVEL_CONSORTIUM = 'consortium'
+    ACCESS_LEVEL_PROTECTED = 'protected'
+
     # Used by file assets status only
     if dataset_uuid == 'status':
         return allowed
@@ -450,27 +466,28 @@ def get_file_access(dataset_uuid, token_from_query, request):
     final_request = request
 
     # First check the dataset access level based on the uuid without taking the token into consideration
-    entity_api_full_url = app.config['ENTITY_ACCESS_LEVEL_URL'] + '/' + dataset_uuid
+    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + dataset_uuid + "?property=data_access_level"
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
 
+    # Disable ssl certificate verification
     # Possible response status codes: 200, 401, and 500 to be handled below
-    response = requests.get(url = entity_api_full_url, headers = request_headers) 
+    response = requests.get(url = entity_api_full_url, headers = request_headers, verify = False) 
 
     # Using the globus app secret as internal token should always return 200 supposely
     # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
     if response.status_code == 200:
         # The call to entity-api returns string directly
-        data_access_level = response.text
+        data_access_level = (response.text).lower()
 
-        app.logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
-        app.logger.debug(data_access_level)
+        logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
+        logger.debug(data_access_level)
 
-        # Throw error 500 if invalid access level value assigned to the dataset metadata node
-        if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC and data_access_level != HubmapConst.ACCESS_LEVEL_CONSORTIUM and data_access_level != HubmapConst.ACCESS_LEVEL_PROTECTED:
-            app.logger.error("The 'data_access_level' value assigned for this dataset " + dataset_uuid + " is invalid")
+        # Throw error 500 if invalid access level value assigned to the dataset
+        if data_access_level not in [ACCESS_LEVEL_PUBLIC, ACCESS_LEVEL_CONSORTIUM, ACCESS_LEVEL_PROTECTED]:
+            logger.error("The 'data_access_level' value of this dataset " + dataset_uuid + " is invalid")
             return internal_error
 
         # Get the user access level based on token (optional) from HTTP header or query string
@@ -483,7 +500,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
             # and it's immutable(read only version of the headers from a WSGI environment)
             # So we can't modify the request.headers
             # Instead, we use a custom request object and set as the 'Authorization' header 
-            app.logger.debug("======set Authorization header with query string token value======")
+            logger.debug("======set Authorization header with query string token value======")
 
             custom_headers_dict = create_request_headers_for_auth(token_from_query)
 
@@ -493,14 +510,14 @@ def get_file_access(dataset_uuid, token_from_query, request):
             final_request = CustomRequest(custom_headers_dict)
 
         # By now, request.headers may or may not contain the 'Authorization' header
-        app.logger.debug("======file_auth final_request.headers======")
-        app.logger.debug(final_request.headers)
+        logger.debug("======file_auth final_request.headers======")
+        logger.debug(final_request.headers)
 
         # When Authorization is not present, return value is based on the data_access_level of the given dataset
         # In this case we can't call auth_helper.getUserDataAccessLevel() because it returns HTTPException when Authorization header is missing
         if 'Authorization' not in final_request.headers:
             # Return 401 if the data access level is consortium or protected since they's require token but Authorization header missing
-            if data_access_level != HubmapConst.ACCESS_LEVEL_PUBLIC:
+            if data_access_level != ACCESS_LEVEL_PUBLIC:
                 return authentication_required
             # Only return 200 since public dataset doesn't require token
             return allowed
@@ -509,17 +526,17 @@ def get_file_access(dataset_uuid, token_from_query, request):
         # Then we can call auth_helper.getUserDataAccessLevel() to find out the user's assigned access level
         try:
             # The user_info contains HIGHEST access level of the user based on the token
-            # Default to HubmapConst.ACCESS_LEVEL_PUBLIC if none of the Authorization/Mauthorization header presents
+            # Default to ACCESS_LEVEL_PUBLIC if none of the Authorization/Mauthorization header presents
             # This call raises an HTTPException with a 401 if any auth issues are found
             user_info = auth_helper.getUserDataAccessLevel(final_request)
 
-            app.logger.info("======user_info======")
-            app.logger.info(user_info)
+            logger.info("======user_info======")
+            logger.info(user_info)
         # If returns HTTPException with a 401, invalid header format or expired/invalid token
         except HTTPException as e:
             msg = "HTTPException from calling auth_helper.getUserDataAccessLevel() HTTP code: " + str(e.get_status_code()) + " " + e.get_description() 
 
-            app.logger.warning(msg)
+            logger.warning(msg)
 
             # In the case of requested dataset is public but provided globus token is invalid/expired,
             # we'll return 401 so the end user knows something wrong with the token rather than allowing file access
@@ -527,22 +544,22 @@ def get_file_access(dataset_uuid, token_from_query, request):
 
         # By now the user_info is returned and based on the logic of auth_helper.getUserDataAccessLevel(), 
         # 'data_access_level' should always be found user_info and its value is always one of the 
-        # HubmapConst.ACCESS_LEVEL_PUBLIC, HubmapConst.ACCESS_LEVEL_CONSORTIUM, or HubmapConst.ACCESS_LEVEL_PROTECTED
+        # ACCESS_LEVEL_PUBLIC, ACCESS_LEVEL_CONSORTIUM, or ACCESS_LEVEL_PROTECTED
         # So no need to check unknown value
-        user_access_level = user_info['data_access_level']
+        user_access_level = user_info['data_access_level'].lower()
 
         # By now we have both data_access_level and the user_access_level obtained with one of the valid values
         # Allow file access as long as data_access_level is public, no need to care about the user_access_level (since Authorization header presents with valid token)
-        if data_access_level == HubmapConst.ACCESS_LEVEL_PUBLIC:
+        if data_access_level == ACCESS_LEVEL_PUBLIC:
             return allowed
         
         # When data_access_level is comsortium, allow access only when the user_access_level (remember this is the highest level) is consortium or protected
-        if (data_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM and
-            (user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED or user_access_level == HubmapConst.ACCESS_LEVEL_CONSORTIUM)):
+        if (data_access_level == ACCESS_LEVEL_CONSORTIUM and
+            (user_access_level == ACCESS_LEVEL_PROTECTED or user_access_level == ACCESS_LEVEL_CONSORTIUM)):
             return allowed
         
         # When data_access_level is protected, allow access only when user_access_level is also protected
-        if data_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED and user_access_level == HubmapConst.ACCESS_LEVEL_PROTECTED:
+        if data_access_level == ACCESS_LEVEL_PROTECTED and user_access_level == ACCESS_LEVEL_PROTECTED:
             return allowed
             
         # All other cases
@@ -550,12 +567,12 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # Something wrong with fullfilling the request with secret as token
     # E.g., for some reason the gateway returns 401
     elif response.status_code == 401:    
-        app.logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
+        logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
         return authorization_required
     # All other cases with 500 response
     # E.g., entity-api server down?
     else:  
-        app.logger.error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
+        logger.error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
         return internal_error
 
 # Always pass through the requests with using modified version of the globus app secret as internal token
@@ -576,8 +593,8 @@ def is_secrect_token(request):
 # Chceck if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
 def api_access_allowed(item, request):
-    app.logger.info("======Matched endpoint======")
-    app.logger.info(item)
+    logger.info("======Matched endpoint======")
+    logger.info(item)
 
     # Check if auth is required for this endpoint
     if item['auth'] == False:

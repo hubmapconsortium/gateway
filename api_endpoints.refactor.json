@@ -1,5 +1,5 @@
 {
-  "uuid.api.hubmapconsortium.org": [
+  "uuid-api.refactor.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -45,7 +45,7 @@
       ]
     }
   ],
-  "entity.api.hubmapconsortium.org": [
+  "entity-api.refactor.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -206,7 +206,7 @@
       ]
     }
   ],
-  "ingest.api.hubmapconsortium.org": [
+  "ingest-api.refactor.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",
@@ -519,7 +519,7 @@
       ]
     }
   ],
-  "search.api.hubmapconsortium.org": [
+  "search-api.refactor.hubmapconsortium.org": [
     {
       "method": "GET",
       "endpoint": "/",

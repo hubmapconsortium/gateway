@@ -23,8 +23,8 @@ function get_dir_of_this_script () {
     DIR="$( cd -P "$( dirname "$SCRIPT_SOURCE" )" >/dev/null 2>&1 && pwd )"
 }
 
-if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" ]]; then
-    echo "Unknown build environment '$1', specify one of the following: localhost|dev|test|stage|prod"
+if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" && "$1" != "refactor" ]]; then
+    echo "Unknown build environment '$1', specify one of the following: localhost|dev|test|stage|prod|refactor"
     exit 255
 fi
 
@@ -66,16 +66,19 @@ cd $DIR/../search-api/docker
 ./search-api-docker.sh $1 $2
 
 # Only have ingest-api and ingest-ui on the same host machine for localhost environment
-# dev/test/staage/prod deployment has ingest-api on a separate machine
+# dev/test/stage/prod deployment has ingest-api on a separate machine
 
 cd $DIR/../ingest-ui/docker
 ./ingest-ui-docker.sh $1 $2
 
-# Also start the ingest-api and ingest-pipeline for localhost only
-if [ "$1" = "localhost" ]; then
-    cd $DIR/../ingest-ui/docker
+# Start the ingest-api for localhost and refactor
+if [[ "$1" == "localhost" || "$1" == "refactor" ]]; then
+    cd $DIR/../ingest-api/docker
     ./ingest-api-docker.sh $1 $2
+fi
 
+# Start the ingest-pipeline for localhost only
+if [ "$1" = "localhost" ]; then
     cd $DIR/../ingest-pipeline/docker
     ./ingest-pipeline-docker.sh $1 $2
 fi

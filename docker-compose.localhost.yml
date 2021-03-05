@@ -28,8 +28,8 @@ services:
       - "8686:8686" 
     volumes:
       # Mount the VERSION file and BUILD file
-      - "./VERSION:/usr/src/app/src/VERSION"
-      - "./BUILD:/usr/src/app/src/BUILD"
+      - "./VERSION:/usr/src/app/VERSION"
+      - "./BUILD:/usr/src/app/BUILD"
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
       # Mount conf.d-localhost to the nginx conf.d on container
