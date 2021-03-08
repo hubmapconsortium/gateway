@@ -1,7 +1,0 @@
-requests>=2.25.1
-cachetools>=4.2.1
-Flask>=1.1.2
-requests_cache>=0.5.2
-
-# The commons to be used for local development
-file:../../commons#egg=hubmap-commons --no-index
