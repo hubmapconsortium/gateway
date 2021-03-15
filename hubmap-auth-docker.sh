@@ -41,8 +41,8 @@ function get_dir_of_this_script () {
     echo 'DIR of script:' $DIR
 }
 
-if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" ]]; then
-    echo "Unknown build environment '$1', specify one of the following: localhost|dev|test|stage|prod"
+if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" && "$1" != "refactor" ]]; then
+    echo "Unknown build environment '$1', specify one of the following: localhost|dev|test|stage|prod|refactor"
 else
     if [[ "$2" != "check" && "$2" != "config" && "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "down" ]]; then
         echo "Unknown command '$2', specify one of the following: check|config|build|start|stop|down"
@@ -78,9 +78,9 @@ else
         elif [ "$2" = "build" ]; then
             # Only mount the VERSION file and BUILD file for localhost and dev
             # On test/stage/prod, copy the VERSION file and BUILD file to image
-            if [[ "$1" != "localhost" && "$1" != "dev" ]]; then
-                cp VERSION hubmap-auth/src
-                cp BUILD hubmap-auth/src
+            if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "refactor" ]]; then
+                cp VERSION hubmap-auth
+                cp BUILD hubmap-auth
             fi
 
             docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway build

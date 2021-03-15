@@ -7,6 +7,9 @@ BUILD
 hubmap-auth/src/BUILD
 hubmap-auth/src/VERSION
 
+# requests-cache generated sqlite
+**/*.sqlite
+
 # log files in any path
 **/*.log
 
