@@ -45,9 +45,10 @@ app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].stri
 # Here we use two hours, 7200 seconds for ttl
 cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'])
 
-# Requests cache generates the sqlite file, path defined in app.config['REQUESTS_CACHE_SQLITE']
+# Requests cache generates the sqlite file
+# File path defined in app.config['REQUESTS_CACHE_SQLITE_NAME'] without the .sqlite extension
 # Use the same CACHE_TTL from configuration
-requests_cache.install_cache(app.config['REQUESTS_CACHE_SQLITE'], backend='sqlite', expire_after=app.config['CACHE_TTL'])
+requests_cache.install_cache(app.config['REQUESTS_CACHE_SQLITE_NAME'], backend='sqlite', expire_after=app.config['CACHE_TTL'])
 
 # Suppress InsecureRequestWarning warning when requesting status on https with ssl cert verify disabled
 requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
