@@ -9,6 +9,7 @@ from cachetools import cached, TTLCache
 import functools
 import re
 import os
+import time
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
@@ -44,9 +45,9 @@ app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].stri
 # Here we use two hours, 7200 seconds for ttl
 cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'])
 
-# Requests cache generates the hubmap_gateway.sqlite
+# Requests cache generates the sqlite file, path defined in app.config['REQUESTS_CACHE_SQLITE']
 # Use the same CACHE_TTL from configuration
-requests_cache.install_cache('hubmap_gateway', backend='sqlite', expire_after=app.config['CACHE_TTL'])
+requests_cache.install_cache(app.config['REQUESTS_CACHE_SQLITE'], backend='sqlite', expire_after=app.config['CACHE_TTL'])
 
 # Suppress InsecureRequestWarning warning when requesting status on https with ssl cert verify disabled
 requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
