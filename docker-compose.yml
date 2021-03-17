@@ -23,6 +23,8 @@ services:
     networks:
       - gateway_hubmap
     volumes:
+      # Mount the requests_cache generated sqlite database
+      - "./hubmap-auth/src/hubmap_gateway.sqlite:/usr/src/app/src/hubmap_gateway.sqlite"
       # Make the uwsgi/nginx log files generated on container available through from host
       - "./hubmap-auth/log:/usr/src/app/log"
       # favicon.ico
