@@ -1,8 +1,8 @@
 # File path to API endpoints json file within docker container, DO NOT MODIFY
 API_ENDPOINTS_FILE = '/usr/src/app/api_endpoints.json'
 
-# File path to the requests_cache generated sqlite within docker container, DO NOT MODIFY
-REQUESTS_CACHE_SQLITE = '/usr/src/app/requests_cache/hubmap_gateway.sqlite'
+# File path to the requests_cache generated sqlite (without extension) within docker container, DO NOT MODIFY
+REQUESTS_CACHE_SQLITE_NAME = '/usr/src/app/requests_cache/hubmap_gateway'
 
 # Globus app client ID and secret
 # Used by HuBMAP commons AuthHelper
