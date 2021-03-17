@@ -9,6 +9,7 @@ from cachetools import cached, TTLCache
 import functools
 import re
 import os
+import time
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
@@ -44,9 +45,9 @@ app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].stri
 # Here we use two hours, 7200 seconds for ttl
 cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'])
 
-# Requests cache generates the hubmap_gateway.sqlite
+# Requests cache generates the sqlite file, path defined in app.config['REQUESTS_CACHE_SQLITE']
 # Use the same CACHE_TTL from configuration
-requests_cache.install_cache('hubmap_gateway', backend='sqlite', expire_after=app.config['CACHE_TTL'])
+requests_cache.install_cache(app.config['REQUESTS_CACHE_SQLITE'], backend='sqlite', expire_after=app.config['CACHE_TTL'])
 
 # Suppress InsecureRequestWarning warning when requesting status on https with ssl cert verify disabled
 requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
@@ -265,8 +266,14 @@ def init_auth_helper():
 
 # Make a call to the given target status URL
 def status_request(target_url):
+    # Verify if requests used the cached response from the SQLite database
+    now = time.ctime(int(time.time()))
+
     # Disable ssl certificate verification
     response = requests.get(url = target_url, verify = False) 
+
+    logger.debug(f"Time: {now} / GET request URL: {target_url} / Used requests cache: {response.from_cache}")
+
     return response
 
 # Dict of API status data
@@ -472,9 +479,14 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
 
+    # Verify if requests used the cached response from the SQLite database
+    now = time.ctime(int(time.time()))
+
     # Disable ssl certificate verification
     # Possible response status codes: 200, 401, and 500 to be handled below
     response = requests.get(url = entity_api_full_url, headers = request_headers, verify = False) 
+
+    logger.debug(f"Time: {now} / GET request URL: {entity_api_full_url} / Used requests cache: {response.from_cache}")
 
     # Using the globus app secret as internal token should always return 200 supposely
     # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
