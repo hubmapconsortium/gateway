@@ -198,7 +198,8 @@ def file_auth():
 
     # File access only via http GET
     if method is not None:
-        if method.upper() == 'GET':
+    	# Supports both GET and HEAD request methods
+        if method.upper() in ['GET', 'HEAD']:
             if orig_uri is not None:
                 parsed_uri = urlparse(orig_uri)
                 
