@@ -199,7 +199,7 @@ def file_auth():
 
     # File access only via http GET
     if method is not None:
-    	# Supports both GET and HEAD request methods
+        # Supports both GET and HEAD request methods
         if method.upper() in ['GET', 'HEAD']:
             if orig_uri is not None:
                 parsed_uri = urlparse(orig_uri)
@@ -588,7 +588,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
         logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
         return authorization_required
     elif response.status_code == 404:
-    	logger.error(f"Dataset with uuid {dataset_uuid} not found")
+        logger.error(f"Dataset with uuid {dataset_uuid} not found")
         return not_found
     # All other cases with 500 response
     else:  
