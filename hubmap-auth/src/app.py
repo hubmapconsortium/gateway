@@ -240,8 +240,8 @@ def file_auth():
                 elif code == 403:
                     return response_403
                 # Returned 404 will be considered as 500 by nginx auth_request module
-                # The end user or client will never see 404 but 500
                 elif code == 404:
+                    logger.warning("The end user or client will never see 404 but 500")
                     return response_404
                 elif code == 500:
                     return response_500
