@@ -184,6 +184,7 @@ def file_auth():
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
+    response_404 = make_response(jsonify({"message": "ERROR: Not Found"}), 404)
     response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
   
     method = None
@@ -233,7 +234,9 @@ def file_auth():
                 elif code == 401:
                     return response_401
                 elif code == 403:
-                    return response_403
+                    return 
+                elif code == 404:
+                    return response_404
                 elif code == 500:
                     return response_500
             else: 
@@ -457,6 +460,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     allowed = 200
     authentication_required = 401
     authorization_required = 403
+    not_found = 404
     internal_error = 500
 
     # All lowercase for easy comparision
@@ -583,8 +587,10 @@ def get_file_access(dataset_uuid, token_from_query, request):
     elif response.status_code == 401:    
         logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
         return authorization_required
+    elif response.status_code == 404:
+    	logger.error(f"Dataset with uuid {dataset_uuid} not found")
+        return not_found
     # All other cases with 500 response
-    # E.g., entity-api server down?
     else:  
         logger.error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
         return internal_error
