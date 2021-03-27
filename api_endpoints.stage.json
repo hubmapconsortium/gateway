@@ -218,6 +218,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/redirect/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/entities/<*>/provenance",
       "auth": false
     },
