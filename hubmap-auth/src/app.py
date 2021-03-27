@@ -180,11 +180,16 @@ def file_auth():
 
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
-    # We use body here only for direct visit to this endpoint
+    # We use body here only for description purposes and direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
     response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
+
+    # Note: 404 is not supported http://nginx.org/en/docs/http/ngx_http_auth_request_module.html
+    # Any response code other than 200/401/403 returned by the subrequest is considered an error 500
+    # The end user or client will never see 404 but 500
+    response_404 = make_response(jsonify({"message": "ERROR: Not Found"}), 404)
   
     method = None
     orig_uri = None
@@ -198,7 +203,7 @@ def file_auth():
 
     # File access only via http GET
     if method is not None:
-    	# Supports both GET and HEAD request methods
+        # Supports both GET and HEAD request methods
         if method.upper() in ['GET', 'HEAD']:
             if orig_uri is not None:
                 parsed_uri = urlparse(orig_uri)
@@ -234,6 +239,10 @@ def file_auth():
                     return response_401
                 elif code == 403:
                     return response_403
+                # Returned 404 will be considered as 500 by nginx auth_request module
+                elif code == 404:
+                    logger.warning("The end user or client will never see 404 but 500")
+                    return response_404
                 elif code == 500:
                     return response_500
             else: 
@@ -457,6 +466,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     allowed = 200
     authentication_required = 401
     authorization_required = 403
+    not_found = 404
     internal_error = 500
 
     # All lowercase for easy comparision
@@ -583,8 +593,10 @@ def get_file_access(dataset_uuid, token_from_query, request):
     elif response.status_code == 401:    
         logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
         return authorization_required
+    elif response.status_code == 404:
+        logger.error(f"Dataset with uuid {dataset_uuid} not found")
+        return not_found
     # All other cases with 500 response
-    # E.g., entity-api server down?
     else:  
         logger.error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
         return internal_error
