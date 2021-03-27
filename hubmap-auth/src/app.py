@@ -181,12 +181,15 @@ def file_auth():
     # Nginx auth_request only cares about the response status code
     # it ignores the response body
     # We use body here only for description purposes and direct visit to this endpoint
-    # Note: 404 is not supported http://nginx.org/en/docs/http/ngx_http_auth_request_module.html
-    # Any response code other than 200/401/403 returned by the subrequest is considered an error 500
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
     response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
+
+    # Note: 404 is not supported http://nginx.org/en/docs/http/ngx_http_auth_request_module.html
+    # Any response code other than 200/401/403 returned by the subrequest is considered an error 500
+    # The end user or client will never see 404 but 500
+    response_404 = make_response(jsonify({"message": "ERROR: Not Found"}), 404)
   
     method = None
     orig_uri = None
@@ -236,7 +239,10 @@ def file_auth():
                     return response_401
                 elif code == 403:
                     return response_403
-                # 404 will be considered as 500 due to the design of nginx auth_request module
+                # Returned 404 will be considered as 500 by nginx auth_request module
+                # The end user or client will never see 404 but 500
+                elif code == 404:
+                    return response_404
                 elif code == 500:
                     return response_500
             else: 
