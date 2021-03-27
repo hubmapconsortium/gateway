@@ -4,6 +4,8 @@
 BUILD
 
 # the copied
+hubmap-auth/BUILD
+hubmap-auth/VERSION
 hubmap-auth/src/BUILD
 hubmap-auth/src/VERSION
 
