@@ -95,10 +95,7 @@
     {
       "method": "GET",
       "endpoint": "/entity-types",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "PUT",
@@ -123,22 +120,11 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },
-    {
-      "method": "PUT",
-      "endpoint": "/entities/multiple-samples",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },      
+    },     
     {
       "method": "GET",
       "endpoint": "/ancestors/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
@@ -151,10 +137,7 @@
     {
       "method": "GET",
       "endpoint": "/parents/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
