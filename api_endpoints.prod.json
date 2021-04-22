@@ -193,6 +193,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/collection/redirect/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/doi/redirect/<*>",
       "auth": false
     },
