@@ -198,6 +198,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/doi/redirect/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/redirect/<*>",
       "auth": false
     },
