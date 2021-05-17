@@ -175,6 +175,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/entities/<*>/globus-url",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/collections",
       "auth": false
     },
