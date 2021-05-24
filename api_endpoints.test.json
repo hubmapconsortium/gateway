@@ -175,6 +175,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/entities/<*>/globus-url",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/collections",
       "auth": false
     },
@@ -390,6 +395,30 @@
       "method": "GET",
       "endpoint": "/logout",
       "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/uploads",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/uploads/<*>/validate",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/uploads/<*>/arrange-into-datasets",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "GET",
