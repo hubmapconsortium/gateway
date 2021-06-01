@@ -243,14 +243,6 @@
     },
     {
       "method": "GET",
-      "endpoint": "/hello",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
       "endpoint": "/datasets",
       "auth": true,
       "groups": [
@@ -395,6 +387,30 @@
       "method": "GET",
       "endpoint": "/logout",
       "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/file-upload",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/file-commit",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/file-remove",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "POST",
