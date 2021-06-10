@@ -215,6 +215,16 @@
       "method": "GET",
       "endpoint": "/entities/<*>/provenance",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/latest-revision",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/revision",
+      "auth": false
     }
  ],
   "localhost:8484": [
