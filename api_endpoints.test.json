@@ -286,6 +286,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/file-system-abs-path",
+      "auth": false
+    },
+    {
       "method": "POST",
       "endpoint": "/datasets/ingest",
       "auth": true,
