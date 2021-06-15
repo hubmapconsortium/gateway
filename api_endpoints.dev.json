@@ -217,12 +217,14 @@
       "auth": false
     },
     {
-      "method": "POST",
-      "endpoint": "/file-upload",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "method": "GET",
+      "endpoint": "/datasets/<*>/latest-revision",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/revision",
+      "auth": false
     }
   ],
   "ingest-api.dev.hubmapconsortium.org": [
@@ -283,6 +285,11 @@
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/status/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/file-system-abs-path",
       "auth": false
     },
     {
