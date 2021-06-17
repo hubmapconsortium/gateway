@@ -516,14 +516,12 @@ def get_file_access(uuid, token_from_query, request):
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
 
-    # Verify if requests used the cached response from the SQLite database
-    now = time.ctime(int(time.time()))
-
     # Disable ssl certificate verification
     # Possible response status codes: 200, 401, and 500 to be handled below
     response = requests.get(url = entity_api_full_url, headers = request_headers, verify = False) 
 
-    logger.debug(f"Time: {now} / GET request URL: {entity_api_full_url} / Used requests cache: {response.from_cache}")
+    # Verify if requests used the cached response from the SQLite database
+    verify_request_cache(entity_api_full_url, response.from_cache)
 
     # Using the globus app secret as internal token should always return 200 supposely
     # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
@@ -690,14 +688,12 @@ def get_dataset_uuid_via_file_uuid_retrival(uuid):
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
-    
-    # Verify if requests used the cached response from the SQLite database
-    now = time.ctime(int(time.time()))
 
     # Disable ssl certificate verification
     response = requests.get(url = uuid_api_full_url, headers = request_headers, verify = False) 
 
-    logger.debug(f"Time: {now} / GET request URL: {uuid_api_full_url} / Used requests cache: {response.from_cache}")
+    # Verify if requests used the cached response from the SQLite database
+    verify_request_cache(uuid_api_full_url, response.from_cache)
 
     if response.status_code == 200:
         file_uuid_dict = response.json()
@@ -737,3 +733,8 @@ def get_dataset_uuid_via_file_uuid_retrival(uuid):
 
     # Final return
     return dataset_uuid
+
+# Verify if requests used the cached response from the SQLite database
+def verify_request_cache(url, response_from_cache):
+    now = time.ctime(int(time.time()))
+    logger.debug(f"Time: {now} / GET request URL: {url} / Used requests cache: {response_from_cache}")
