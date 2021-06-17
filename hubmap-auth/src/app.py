@@ -490,7 +490,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
     request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
 
     # First decide if the given uuid is the dataset uuid or thumbnail.jpg file uuid
-    uuid_api_full_url = app.config['UUID_API_URL'] + '/' + dataset_uuid
+    uuid_api_full_url = app.config['UUID_API_URL'] + '/file-id/' + dataset_uuid
     
     # Verify if requests used the cached response from the SQLite database
     now = time.ctime(int(time.time()))
@@ -500,14 +500,14 @@ def get_file_access(dataset_uuid, token_from_query, request):
     logger.debug(f"Time: {now} / GET request URL: {entity_api_full_url} / Used requests cache: {response.from_cache}")
 
     if response.status_code == 200:
-        ids_dict = response.json()
+        file_uuid_dict = response.json()
 
         # This given uuid is a file uuid
-        if 'type' in ids_dict and ids_dict['type'].lower() == 'file':
+        if 'ancestor_uuid' in ids_dict:
             logger.debug(f"======The given uuid {dataset_uuid} is not a dataset uuid but a file uuid======")
 
             # For file uuid, its parent_id is the entity uuid
-            dataset_uuid = ids_dict['ancestor_id']
+            dataset_uuid = file_uuid_dict['ancestor_uuid']
     else:
         # uuid-api will also return 400 if the given id is invalid
         # We'll just hanle that and all other cases all together here
