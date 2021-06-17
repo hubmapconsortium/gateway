@@ -171,7 +171,7 @@ def api_auth():
 ####################################################################################################
 
 # Auth for file service
-# URL pattern: https://assets.dev.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>[?token=<globus-token>]
+# URL pattern: https://assets.dev.hubmapconsortium.org/<dataset-uuid or file-uuid (for thumbnail.jpg)>/<relative-file-path>[?token=<globus-token>]
 # The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
@@ -211,7 +211,7 @@ def file_auth():
                 logger.debug("======parsed_uri======")
                 logger.debug(parsed_uri)
 
-                # Parse the path to get the dataset UUID
+                # Parse the path to get the dataset UUID or thumbnail.jpg file UUID
                 # Remove the leading slash before split
                 path_list = parsed_uri.path.strip("/").split("/")
                 dataset_uuid = path_list[0]
@@ -484,13 +484,48 @@ def get_file_access(dataset_uuid, token_from_query, request):
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
 
-    # First check the dataset access level based on the uuid without taking the token into consideration
-    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + dataset_uuid + "?property=data_access_level"
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
 
+    # First decide if the given uuid is the dataset uuid or thumbnail.jpg file uuid
+    uuid_api_full_url = app.config['UUID_API_URL'] + '/' + dataset_uuid
+    
+    # Verify if requests used the cached response from the SQLite database
+    now = time.ctime(int(time.time()))
+
+    response = requests.get(url = uuid_api_full_url, headers = request_headers, verify = False) 
+    
+    logger.debug(f"Time: {now} / GET request URL: {entity_api_full_url} / Used requests cache: {response.from_cache}")
+
+    if response.status_code == 200:
+        ids_dict = response.json()
+
+        # This given uuid is a file uuid
+        if 'type' in ids_dict and ids_dict['type'].lower() == 'file':
+            logger.debug(f"======The given uuid {dataset_uuid} is not a dataset uuid but a file uuid======")
+
+            # For file uuid, its parent_id is the entity uuid
+            dataset_uuid = ids_dict['ancestor_id']
+    else:
+        # uuid-api will also return 400 if the given id is invalid
+        # We'll just hanle that and all other cases all together here
+        msg = f"Unable to make a request to query the id via uuid-api: {id}"
+        # Log the full stack trace, prepend a line with our message
+        logger.exception(msg)
+
+        logger.debug("======status code from uuid-api======")
+        logger.debug(response.status_code)
+
+        logger.debug("======response text from uuid-api======")
+        logger.debug(response.text)
+
+        return internal_error
+
+    # Check the dataset access level based on the uuid without taking the token into consideration
+    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + dataset_uuid + "?property=data_access_level"
+    
     # Verify if requests used the cached response from the SQLite database
     now = time.ctime(int(time.time()))
 
