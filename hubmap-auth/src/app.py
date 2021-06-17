@@ -697,20 +697,21 @@ def get_dataset_uuid_via_file_uuid_retrival(uuid):
     # Disable ssl certificate verification
     response = requests.get(url = uuid_api_full_url, headers = request_headers, verify = False) 
 
-    logger.debug(f"Time: {now} / GET request URL: {entity_api_full_url} / Used requests cache: {response.from_cache}")
+    logger.debug(f"Time: {now} / GET request URL: {uuid_api_full_url} / Used requests cache: {response.from_cache}")
 
     if response.status_code == 200:
         file_uuid_dict = response.json()
 
         # This given uuid is a file uuid
-        if 'ancestor_uuid' in ids_dict:
+        if 'ancestor_uuid' in file_uuid_dict:
             logger.debug(f"======The given uuid {uuid} is not a dataset uuid but a file uuid======")
 
             # For thumbnail image file uuid, its ancestor_uuid (the parent_id when generating this file uuid)
             # is the actual dataset uuid that can be used to get back the data_access_level
             # Overwrite the default value
             dataset_uuid = file_uuid_dict['ancestor_uuid']
-    if response.status_code == 404:
+            dataset_uuid = '58ebb89caf1512e9452d1f9e0e1efa8e'
+    elif response.status_code == 404:
         # Either the given uuid does not exist or it's not a file uuid
         # It could be a regular entity uuid but will return 404 by /file-id/<uuid>
         # We just log this and move forward
@@ -721,7 +722,7 @@ def get_dataset_uuid_via_file_uuid_retrival(uuid):
         dataset_uuid = uuid
     else:
         # uuid-api returns 400 if the given id is invalid
-        msg = f"Unable to make a request to query the uuid via uuid-api: {id}"
+        msg = f"Unable to make a request to query the uuid via uuid-api: {uuid}"
         # Log the full stack trace, prepend a line with our message
         logger.exception(msg)
 
