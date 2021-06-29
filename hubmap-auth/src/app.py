@@ -3,13 +3,13 @@ import requests
 import requests_cache
 # Don't confuse urllib (Python native library) with urllib3 (3rd-party library, requests also uses urllib3)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-import json
-import logging
-from cachetools import cached, TTLCache
-import functools
 import re
 import os
 import time
+import json
+import logging
+import functools
+from cachetools import cached, TTLCache
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
@@ -124,7 +124,7 @@ def api_auth():
     # We use body here only for direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
-    
+
     # In the json, we use authority as the key to differ each service section
     authority = None
     method = None
@@ -155,7 +155,7 @@ def api_auth():
                             return response_200
                         else:
                             return response_401
-                    
+
             # Second pass, loop through the list to do the wildcard match
             for item in data[authority]:
                 if (item['method'].upper() == method.upper()) and (wildcard_delimiter in item['endpoint']):
@@ -210,7 +210,7 @@ def file_auth():
     # Any response code other than 200/401/403 returned by the subrequest is considered an error 500
     # The end user or client will never see 404 but 500
     response_404 = make_response(jsonify({"message": "ERROR: Not Found"}), 404)
-  
+
     method = None
     orig_uri = None
 
@@ -227,7 +227,7 @@ def file_auth():
         if method.upper() in ['GET', 'HEAD']:
             if orig_uri is not None:
                 parsed_uri = urlparse(orig_uri)
-                
+
                 logger.debug("======parsed_uri======")
                 logger.debug(parsed_uri)
 
@@ -245,7 +245,7 @@ def file_auth():
 
                 if "token" in query:
                     token_from_query = query["token"][0]
-                
+
                 logger.debug("======token_from_query======")
                 logger.debug(token_from_query)
 
@@ -267,7 +267,7 @@ def file_auth():
                     return response_404
                 elif code == 500:
                     return response_500
-            else: 
+            else:
                 # Missing dataset UUID in path
                 return response_401
         else:
@@ -424,7 +424,7 @@ def get_status_data():
         if ELASTICSEARCH_CONNECTION in response_json:
             # Add the elasticsearch connection status
             status_data[SEARCH_API][ELASTICSEARCH_CONNECTION] = response_json[ELASTICSEARCH_CONNECTION]
-        
+
         # Also check if the health status of elasticsearch cluster is available
         if ELASTICSEARCH_STATUS in response_json:
             # Add the elasticsearch cluster health status
@@ -497,11 +497,11 @@ def get_file_access(uuid, token_from_query, request):
 
     # First get the real dataset uuid based on the given uuid
     # If the given uuid is a thumbnail.jpg image file uuid, it'll return
-    # the associated dataset uuid. 
+    # the associated dataset uuid.
     # Otherwise treat the given uuid as a dataset uuid
     try:
         dataset_uuid = get_dataset_uuid_via_file_uuid_retrival(uuid)
-    except requests.exceptions.RequestException as e:
+    except requests.exceptions.RequestException:
         # We'll just hanle 400 and all other cases all together here as 500
         # because nginx auth_request only handles 200/401/403/500
         return internal_error
@@ -510,7 +510,7 @@ def get_file_access(uuid, token_from_query, request):
     # or we have found the dataset uuid of the given file uuid
     # Check the data access level of the target dataset
     entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + dataset_uuid + "?property=data_access_level"
-    
+
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
@@ -599,28 +599,28 @@ def get_file_access(uuid, token_from_query, request):
         # Allow file access as long as data_access_level is public, no need to care about the user_access_level (since Authorization header presents with valid token)
         if data_access_level == ACCESS_LEVEL_PUBLIC:
             return allowed
-        
+
         # When data_access_level is comsortium, allow access only when the user_access_level (remember this is the highest level) is consortium or protected
         if (data_access_level == ACCESS_LEVEL_CONSORTIUM and
             (user_access_level == ACCESS_LEVEL_PROTECTED or user_access_level == ACCESS_LEVEL_CONSORTIUM)):
             return allowed
-        
+
         # When data_access_level is protected, allow access only when user_access_level is also protected
         if data_access_level == ACCESS_LEVEL_PROTECTED and user_access_level == ACCESS_LEVEL_PROTECTED:
             return allowed
-            
+
         # All other cases
         return authorization_required
     # Something wrong with fullfilling the request with secret as token
     # E.g., for some reason the gateway returns 401
-    elif response.status_code == 401:    
+    elif response.status_code == 401:
         logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
         return authorization_required
     elif response.status_code == 404:
         logger.error(f"Dataset with uuid {dataset_uuid} not found")
         return not_found
     # All other cases with 500 response
-    else:  
+    else:
         logger.error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
         return internal_error
 
@@ -628,7 +628,7 @@ def get_file_access(uuid, token_from_query, request):
 def is_secrect_token(request):
     internal_token = auth_helper_instance.getProcessSecret()
     parsed_token = None
-    
+
     if 'Authorization' in request.headers:
         auth_header = request.headers['Authorization']
         parsed_token = auth_header[6:].strip()
@@ -651,7 +651,7 @@ def api_access_allowed(item, request):
     # Check if using modified version of the globus app secret as internal token
     if is_secrect_token(request):
         return True
-    
+
     # When auth is required, we need to check if group access is also required
     group_required = True if 'groups' in item else False
 
