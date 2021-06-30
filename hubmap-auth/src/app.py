@@ -249,7 +249,7 @@ def file_auth():
                 logger.debug("======token_from_query======")
                 logger.debug(token_from_query)
 
-                # Check if the globus token is valid for accessing this secured dataset
+                # Check if the globus token is valid for accessing this secured file
                 code = get_file_access(uuid, token_from_query, request)
 
                 logger.debug("======get_file_access() resulting code======")
@@ -471,13 +471,14 @@ def create_request_headers_for_auth(token):
 
     return headers_dict
 
-# Check if the target dataset is accessible based on token 
-# and access level assigned to the dataset
-# The uuid passed in could either be a real dataset uuid or
-# a dataset thumbnail image file uuid associated with the target dataset
+# Check if the target file associated with this uuid is accessible 
+# based on token and access level assigned to the entity
+# The uuid passed in could either be a real entity (Donor/Sample/Dataset) uuid or
+# a file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
 def get_file_access(uuid, token_from_query, request):
     # Returns one of the following codes
     allowed = 200
+    bad_request = 400
     authentication_required = 401
     authorization_required = 403
     not_found = 404
@@ -495,12 +496,13 @@ def get_file_access(uuid, token_from_query, request):
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
 
-    # First get the real dataset uuid based on the given uuid
-    # If the given uuid is a thumbnail.jpg image file uuid, it'll return
-    # the associated dataset uuid.
-    # Otherwise treat the given uuid as a dataset uuid
+    # First assume the given uuid is a file uuid
+    # We'll get the real entity uuid based on this assumed file uuid
+    # If the given uuid is indeed a file uuid, it'll return
+    # the associated parent entity uuid.
+    # If the given uuid is actually an entity uuid, just return it
     try:
-        dataset_uuid = get_dataset_uuid_via_file_uuid_retrival(uuid)
+        entity_uuid, given_uuid_is_file_uuid = get_entity_uuid_by_file_uuid(uuid)
     except requests.exceptions.RequestException:
         # We'll just hanle 400 and all other cases all together here as 500
         # because nginx auth_request only handles 200/401/403/500
@@ -509,7 +511,7 @@ def get_file_access(uuid, token_from_query, request):
     # By now, the given uuid is either a real dataset uuid
     # or we have found the dataset uuid of the given file uuid
     # Check the data access level of the target dataset
-    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + dataset_uuid + "?property=data_access_level"
+    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + entity_uuid
 
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
@@ -526,8 +528,34 @@ def get_file_access(uuid, token_from_query, request):
     # Using the globus app secret as internal token should always return 200 supposely
     # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
     if response.status_code == 200:
-        # The call to entity-api returns string directly
-        data_access_level = (response.text).lower()
+        entity_dict = response.json()
+
+        supported_entity_types = ['Donor', 'Sample', 'Dataset']
+
+        data_access_level = None
+
+        if 'entity_type' in entity_dict:
+            if entity_dict['entity_type'] in supported_entity_types:
+                # Default
+                data_access_level = entity_dict['data_access_level']
+
+                # Donor and Sample only uses `data_access_level` and its value can only be public or consortium
+                # Only Dataset has the protected data_access_level
+                # For Dataset, use 'status' to determine the access of its attached files
+                # namely the thumbnail file
+                # treat the thumbnail file as Dataset metadata rather than the files within the dataset
+                if entity_dict['entity_type'] == 'Dataset':
+                    if given_uuid_is_file_uuid:
+                        if entity_dict['status'].lower() == 'published':
+                            data_access_level = 'public'
+            else:
+                logger.error(f"Unsupported 'entity_type' {entity_dict['entity_type']} from returned result of entity uuid {entity_uuid}")
+
+                return bad_request
+        else:
+            logger.error(f"Missing 'entity_type' from returned result of entity uuid {entity_uuid}")
+            
+            return internal_error
 
         logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
         logger.debug(data_access_level)
@@ -675,13 +703,15 @@ def api_access_allowed(item, request):
     # When no group access requried and user_info dict gets returned
     return True
 
-# If the given uuid is a thumbnail.jpg image file uuid
-# we'll retrive the associated dataset uuid
-# Otherwise if the given uuid itself is a dataset uuid, just return it
-def get_dataset_uuid_via_file_uuid_retrival(uuid):
-    dataset_uuid = None
+# If the given uuid is a file uuid
+# we'll retrive the parent entity uuid
+# If the given uuid itself is an entity uuid, just return it
+def get_entity_uuid_by_file_uuid(uuid):
+    entity_uuid = None
+    given_uuid_is_file_uuid = True
 
-    # First determine if the given uuid is the real dataset uuid or thumbnail.jpg file uuid
+    # First determine if the given uuid is the real entity uuid or file uuid
+    # by making a call to the uuid-api's file-id endpoint
     uuid_api_full_url = app.config['UUID_API_URL'] + '/file-id/' + uuid
 
     # Use modified version of globus app secrect from configuration as the internal token
@@ -700,22 +730,24 @@ def get_dataset_uuid_via_file_uuid_retrival(uuid):
 
         # This given uuid is a file uuid
         if 'ancestor_uuid' in file_uuid_dict:
-            logger.debug(f"======The given uuid {uuid} is not a dataset uuid but a file uuid======")
+            logger.debug(f"======The given uuid {uuid} is a file uuid======")
 
-            # For thumbnail image file uuid, its ancestor_uuid (the parent_id when generating this file uuid)
-            # is the actual dataset uuid that can be used to get back the data_access_level
+            # For file uuid, its ancestor_uuid (the parent_id when generating this file uuid)
+            # is the actual entity uuid that can be used to get back the data_access_level
             # Overwrite the default value
-            dataset_uuid = file_uuid_dict['ancestor_uuid']
-            dataset_uuid = '58ebb89caf1512e9452d1f9e0e1efa8e'
+            entity_uuid = file_uuid_dict['ancestor_uuid']
     elif response.status_code == 404:
         # Either the given uuid does not exist or it's not a file uuid
         # It could be a regular entity uuid but will return 404 by /file-id/<uuid>
         # We just log this and move forward
         # The call to entity-api will tell us if this dataset uuid exists and valid
-        logger.debug(f"======Unable to find the file uuid: {uuid}, treat it as dataset uuid======")
+        logger.debug(f"======Unable to find the file uuid: {uuid}, treat it as an entity uuid======")
 
-        # Treat the given uuid as a dataset uuid
-        dataset_uuid = uuid
+        # Treat the given uuid as an entity uuid
+        entity_uuid = uuid
+
+        # Overwrite the default value
+        given_uuid_is_file_uuid = False
     else:
         # uuid-api returns 400 if the given id is invalid
         msg = f"Unable to make a request to query the uuid via uuid-api: {uuid}"
@@ -732,7 +764,7 @@ def get_dataset_uuid_via_file_uuid_retrival(uuid):
         raise requests.exceptions.RequestException(response.text)
 
     # Final return
-    return dataset_uuid
+    return entity_uuid, given_uuid_is_file_uuid
 
 # Verify if requests used the cached response from the SQLite database
 def verify_request_cache(url, response_from_cache):
