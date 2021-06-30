@@ -206,9 +206,10 @@ def file_auth():
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
     response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
 
-    # Note: 404 is not supported http://nginx.org/en/docs/http/ngx_http_auth_request_module.html
+    # Note: 400 and 404 are not supported http://nginx.org/en/docs/http/ngx_http_auth_request_module.html
     # Any response code other than 200/401/403 returned by the subrequest is considered an error 500
     # The end user or client will never see 404 but 500
+    response_400 = make_response(jsonify({"message": "ERROR: Bad Request"}), 400)
     response_404 = make_response(jsonify({"message": "ERROR: Not Found"}), 404)
 
     method = None
@@ -257,6 +258,9 @@ def file_auth():
 
                 if code == 200:
                     return response_200
+                # Returned 400 will be considered as 500 by nginx auth_request module
+                elif code == 400:
+                    return response_400
                 elif code == 401:
                     return response_401
                 elif code == 403:
@@ -488,6 +492,7 @@ def get_file_access(uuid, token_from_query, request):
     ACCESS_LEVEL_PUBLIC = 'public'
     ACCESS_LEVEL_CONSORTIUM = 'consortium'
     ACCESS_LEVEL_PROTECTED = 'protected'
+    DATASET_STATUS_PUBLISHED = 'published'
 
     # Special case used by file assets status only
     if uuid == 'status':
@@ -529,35 +534,41 @@ def get_file_access(uuid, token_from_query, request):
     # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
     if response.status_code == 200:
         entity_dict = response.json()
-
         supported_entity_types = ['Donor', 'Sample', 'Dataset']
-
         data_access_level = None
 
-        if 'entity_type' in entity_dict:
-            if entity_dict['entity_type'] in supported_entity_types:
-                # Default
-                data_access_level = entity_dict['data_access_level']
-
-                # Donor and Sample only uses `data_access_level` and its value can only be public or consortium
-                # Only Dataset has the protected data_access_level
-                # For Dataset, use 'status' to determine the access of its attached files
-                # namely the thumbnail file
-                # treat the thumbnail file as Dataset metadata rather than the files within the dataset
-                if entity_dict['entity_type'] == 'Dataset':
-                    if given_uuid_is_file_uuid:
-                        if entity_dict['status'].lower() == 'published':
-                            data_access_level = 'public'
-            else:
-                logger.error(f"Unsupported 'entity_type' {entity_dict['entity_type']} from returned result of entity uuid {entity_uuid}")
-
-                return bad_request
-        else:
+        # Won't happen in normal situations
+        if 'entity_type' not in entity_dict:
             logger.error(f"Missing 'entity_type' from returned result of entity uuid {entity_uuid}")
-            
             return internal_error
 
-        logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
+        entity_type = entity_dict['entity_type']
+
+        # Only support Donor/Sample/Dataset
+        if entity_type not in supported_entity_types:
+            logger.error(f"Unsupported 'entity_type' {entity_type} from returned result of entity uuid {entity_uuid}")
+            return bad_request
+
+        # Won't happen in normal situations
+        if 'data_access_level' not in entity_dict:
+            logger.error(f"Missing 'data_access_level' from returned result of entity uuid {entity_uuid}")
+            return internal_error
+
+        # Default
+        data_access_level = entity_dict['data_access_level']
+
+        # ??????????????????????? Do we really need this?
+        # Donor and Sample `data_access_level` value can only be either "public" or "consortium"
+        # Dataset has the "protected" data_access_level
+        # Use 'status' to determine the access of Dataset attached files(thumbnail file)
+        # We treat the thumbnail file as Dataset metadata rather than 
+        # the data files contained within the dataset
+        if entity_type == 'Dataset' and given_uuid_is_file_uuid and (entity_dict['status'].lower() == DATASET_STATUS_PUBLISHED):
+            # Overwrite the default value
+            data_access_level = ACCESS_LEVEL_PUBLIC
+        # ??????????????????????? Do we really need this?
+
+        logger.debug(f"======data_access_level returned by entity-api for {entity_type} uuid {entity_uuid}======")
         logger.debug(data_access_level)
 
         # Throw error 500 if invalid access level value assigned to the dataset
@@ -645,7 +656,7 @@ def get_file_access(uuid, token_from_query, request):
         logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
         return authorization_required
     elif response.status_code == 404:
-        logger.error(f"Dataset with uuid {dataset_uuid} not found")
+        logger.error(f"{entity_type} with uuid {dataset_uuid} not found")
         return not_found
     # All other cases with 500 response
     else:
