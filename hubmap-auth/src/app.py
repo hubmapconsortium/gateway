@@ -505,6 +505,9 @@ def get_file_access(uuid, token_from_query, request):
     # If the given uuid is actually an entity uuid, just return it
     try:
         entity_uuid, given_uuid_is_file_uuid = get_entity_uuid_by_file_uuid(uuid)
+
+        logger.debug(f"The given uuid {uuid} is a file uuid: {given_uuid_is_file_uuid}")
+        logger.debug(f"The resulting entity_uuid: {entity_uuid}")
     except requests.exceptions.RequestException:
         # We'll just hanle 400 and all other cases all together here as 500
         # because nginx auth_request only handles 200/401/403/500
