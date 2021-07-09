@@ -23,3 +23,7 @@ hubmap-auth/src/instance/app.cfg
 
 # indicator file of maintenance
 **/maintenance.on
+
+#ignore PyCharm files
+.idea/
+venv
