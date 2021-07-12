@@ -189,9 +189,10 @@ def api_auth():
 ####################################################################################################
 
 # Auth for assets file service
-# URL pattern: https://assets.dev.hubmapconsortium.org/<uuid>/<relative-file-path>[?token=<globus-token>]
-# The <uuid> could either be a real dataset uuid or 
-# a thumbnail.jpg image file uuid associated with the target dataset
+# URL pattern: https://assets.hubmapconsortium.org/<uuid>/<relative-file-path>[?token=<globus-token>]
+# The <uuid> could either be a 
+# - actual dataset entity uuid
+# - file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
 # The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
@@ -480,6 +481,8 @@ def create_request_headers_for_auth(token):
 # The uuid passed in could either be a real entity (Donor/Sample/Dataset) uuid or
 # a file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
 def get_file_access(uuid, token_from_query, request):
+	supported_entity_types = ['Donor', 'Sample', 'Dataset']
+
     # Returns one of the following codes
     allowed = 200
     bad_request = 400
@@ -534,9 +537,8 @@ def get_file_access(uuid, token_from_query, request):
     # Using the globus app secret as internal token should always return 200 supposely
     # If not, either technical issue 500 or something wrong with this internal token 401
     if response.status_code == 200:
+    	data_access_level = None
         entity_dict = response.json()
-        supported_entity_types = ['Donor', 'Sample', 'Dataset']
-        data_access_level = None
 
         # Won't happen in normal situations, but nice to check
         if 'entity_type' not in entity_dict:
@@ -567,7 +569,7 @@ def get_file_access(uuid, token_from_query, request):
 
         # Donor and Sample `data_access_level` value can only be either "public" or "consortium"
         # Dataset has the "protected" data_access_level due to PHI `contains_human_genetic_sequences`
-        # Use 'status' to determine the access of Dataset attached thumbnail file (metadata)
+        # Use `status` to determine the access of Dataset attached thumbnail file (considered as metadata)
         # But the data files contained within the dataset is determined by `data_access_level`
         # A dataset with `status` "Published" (thumbnail file is public accessible) can have 
         # "protected" `data_access_level` (data files within the dataset are protected)
