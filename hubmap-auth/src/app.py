@@ -481,7 +481,7 @@ def create_request_headers_for_auth(token):
 # The uuid passed in could either be a real entity (Donor/Sample/Dataset) uuid or
 # a file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
 def get_file_access(uuid, token_from_query, request):
-	supported_entity_types = ['Donor', 'Sample', 'Dataset']
+    supported_entity_types = ['Donor', 'Sample', 'Dataset']
 
     # Returns one of the following codes
     allowed = 200
