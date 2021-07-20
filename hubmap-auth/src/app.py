@@ -537,7 +537,7 @@ def get_file_access(uuid, token_from_query, request):
     # Using the globus app secret as internal token should always return 200 supposely
     # If not, either technical issue 500 or something wrong with this internal token 401
     if response.status_code == 200:
-    	data_access_level = None
+        data_access_level = None
         entity_dict = response.json()
 
         # Won't happen in normal situations, but nice to check
