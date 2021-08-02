@@ -3,13 +3,13 @@ import requests
 import requests_cache
 # Don't confuse urllib (Python native library) with urllib3 (3rd-party library, requests also uses urllib3)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-import json
-import logging
-from cachetools import cached, TTLCache
-import functools
 import re
 import os
 import time
+import json
+import logging
+import functools
+from cachetools import cached, TTLCache
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
@@ -52,6 +52,24 @@ requests_cache.install_cache(app.config['REQUESTS_CACHE_SQLITE_NAME'], backend='
 
 # Suppress InsecureRequestWarning warning when requesting status on https with ssl cert verify disabled
 requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
+
+####################################################################################################
+## AuthHelper initialization
+####################################################################################################
+
+# Initialize AuthHelper class and ensure singleton
+try:
+    if AuthHelper.isInitialized() == False:
+        auth_helper_instance = AuthHelper.create(app.config['GLOBUS_APP_ID'], 
+                                                 app.config['GLOBUS_APP_SECRET'])
+
+        logger.info("Initialized AuthHelper class successfully :)")
+    else:
+        auth_helper_instance = AuthHelper.instance()
+except Exception:
+    msg = "Failed to initialize the AuthHelper class"
+    # Log the full stack trace, prepend a line with our message
+    logger.exception(msg)
 
 
 ####################################################################################################
@@ -106,7 +124,7 @@ def api_auth():
     # We use body here only for direct visit to this endpoint
     response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
     response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
-    
+
     # In the json, we use authority as the key to differ each service section
     authority = None
     method = None
@@ -137,7 +155,7 @@ def api_auth():
                             return response_200
                         else:
                             return response_401
-                    
+
             # Second pass, loop through the list to do the wildcard match
             for item in data[authority]:
                 if (item['method'].upper() == method.upper()) and (wildcard_delimiter in item['endpoint']):
@@ -170,8 +188,11 @@ def api_auth():
 ## File Auth
 ####################################################################################################
 
-# Auth for file service
-# URL pattern: https://assets.dev.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>[?token=<globus-token>]
+# Auth for assets file service
+# URL pattern: https://assets.hubmapconsortium.org/<uuid>/<relative-file-path>[?token=<globus-token>]
+# The <uuid> could either be a 
+# - actual dataset entity uuid
+# - file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
 # The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
@@ -186,11 +207,12 @@ def file_auth():
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
     response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
 
-    # Note: 404 is not supported http://nginx.org/en/docs/http/ngx_http_auth_request_module.html
+    # Note: 400 and 404 are not supported http://nginx.org/en/docs/http/ngx_http_auth_request_module.html
     # Any response code other than 200/401/403 returned by the subrequest is considered an error 500
     # The end user or client will never see 404 but 500
+    response_400 = make_response(jsonify({"message": "ERROR: Bad Request"}), 400)
     response_404 = make_response(jsonify({"message": "ERROR: Not Found"}), 404)
-  
+
     method = None
     orig_uri = None
 
@@ -207,14 +229,16 @@ def file_auth():
         if method.upper() in ['GET', 'HEAD']:
             if orig_uri is not None:
                 parsed_uri = urlparse(orig_uri)
-                
+
                 logger.debug("======parsed_uri======")
                 logger.debug(parsed_uri)
 
-                # Parse the path to get the dataset UUID
                 # Remove the leading slash before split
                 path_list = parsed_uri.path.strip("/").split("/")
-                dataset_uuid = path_list[0]
+
+                # This parsed uuid couldbe either be the dataset uuid 
+                # or thumbnail.jpg image file uuid associated with the target dataset
+                uuid = path_list[0]
 
                 # Also get the "token" parameter from query string
                 # query is a dict, keys are the unique query variable names and the values are lists of values for each name
@@ -223,18 +247,21 @@ def file_auth():
 
                 if "token" in query:
                     token_from_query = query["token"][0]
-                
+
                 logger.debug("======token_from_query======")
                 logger.debug(token_from_query)
 
-                # Check if the globus token is valid for accessing this secured dataset
-                code = get_file_access(dataset_uuid, token_from_query, request)
+                # Check if the globus token is valid for accessing this secured file
+                code = get_file_access(uuid, token_from_query, request)
 
-                logger.debug("======get_file_access() result code======")
+                logger.debug("======get_file_access() resulting code======")
                 logger.debug(code)
 
                 if code == 200:
                     return response_200
+                # Returned 400 will be considered as 500 by nginx auth_request module
+                elif code == 400:
+                    return response_400
                 elif code == 401:
                     return response_401
                 elif code == 403:
@@ -245,7 +272,7 @@ def file_auth():
                     return response_404
                 elif code == 500:
                     return response_500
-            else: 
+            else:
                 # Missing dataset UUID in path
                 return response_401
         else:
@@ -264,16 +291,6 @@ def load_file(file):
     with open(file, "r") as f:
         data = json.load(f)
         return data
-
-# Initialize AuthHelper (AuthHelper from HuBMAP commons package)
-# HuBMAP commons AuthHelper handles "MAuthorization" or "Authorization"
-def init_auth_helper():
-    if AuthHelper.isInitialized() == False:
-        auth_helper = AuthHelper.create(app.config['GLOBUS_APP_ID'], app.config['GLOBUS_APP_SECRET'])
-    else:
-        auth_helper = AuthHelper.instance()
-    
-    return auth_helper
 
 # Make a call to the given target status URL
 def status_request(target_url):
@@ -412,7 +429,7 @@ def get_status_data():
         if ELASTICSEARCH_CONNECTION in response_json:
             # Add the elasticsearch connection status
             status_data[SEARCH_API][ELASTICSEARCH_CONNECTION] = response_json[ELASTICSEARCH_CONNECTION]
-        
+
         # Also check if the health status of elasticsearch cluster is available
         if ELASTICSEARCH_STATUS in response_json:
             # Add the elasticsearch cluster health status
@@ -437,8 +454,7 @@ def get_status_data():
 # Get user infomation dict based on the http request(headers)
 # `group_required` is a boolean, when True, 'hmgroupids' is in the output
 def get_user_info_for_access_check(request, group_required):
-    auth_helper = init_auth_helper()
-    return auth_helper.getUserInfoUsingRequest(request, group_required)
+    return auth_helper_instance.getUserInfoUsingRequest(request, group_required)
 
 # Due to Flask's EnvironHeaders is immutable
 # We create a new class with the headers property 
@@ -460,10 +476,16 @@ def create_request_headers_for_auth(token):
 
     return headers_dict
 
-# Check if a given dataset is accessible based on token and access level assigned to the dataset
-def get_file_access(dataset_uuid, token_from_query, request):
+# Check if the target file associated with this uuid is accessible 
+# based on token and access level assigned to the entity
+# The uuid passed in could either be a real entity (Donor/Sample/Dataset) uuid or
+# a file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
+def get_file_access(uuid, token_from_query, request):
+    supported_entity_types = ['Donor', 'Sample', 'Dataset']
+
     # Returns one of the following codes
     allowed = 200
+    bad_request = 400
     authentication_required = 401
     authorization_required = 403
     not_found = 404
@@ -473,41 +495,90 @@ def get_file_access(dataset_uuid, token_from_query, request):
     ACCESS_LEVEL_PUBLIC = 'public'
     ACCESS_LEVEL_CONSORTIUM = 'consortium'
     ACCESS_LEVEL_PROTECTED = 'protected'
+    DATASET_STATUS_PUBLISHED = 'published'
 
-    # Used by file assets status only
-    if dataset_uuid == 'status':
+    # Special case used by file assets status only
+    if uuid == 'status':
         return allowed
-
-    # Will need this to call getProcessSecret() and getUserDataAccessLevel()
-    auth_helper = init_auth_helper()
 
     # request.headers may or may not contain the 'Authorization' header
     final_request = request
 
-    # First check the dataset access level based on the uuid without taking the token into consideration
-    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + dataset_uuid + "?property=data_access_level"
+    # We'll get the parent entity uuid if the given uuid is indeed a file uuid
+    # If the given uuid is actually an entity uuid, just return it
+    try:
+        entity_uuid, given_uuid_is_file_uuid = get_entity_uuid_by_file_uuid(uuid)
+
+        logger.debug(f"The given uuid {uuid} is a file uuid: {given_uuid_is_file_uuid}")
+        logger.debug(f"The resulting entity_uuid: {entity_uuid}")
+    except requests.exceptions.RequestException:
+        # We'll just hanle 400 and all other cases all together here as 500
+        # because nginx auth_request only handles 200/401/403/500
+        return internal_error
+
+    # By now, the given uuid is either a real entity uuid
+    # or we found the parent entity uuid of the given file uuid
+    # Next to determine the data access level of the given uuid by 
+    # making a call to entity-api to retrieve the entity first
+    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + entity_uuid
+
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
-    request_headers = create_request_headers_for_auth(auth_helper.getProcessSecret())
-
-    # Verify if requests used the cached response from the SQLite database
-    now = time.ctime(int(time.time()))
+    request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
 
     # Disable ssl certificate verification
     # Possible response status codes: 200, 401, and 500 to be handled below
     response = requests.get(url = entity_api_full_url, headers = request_headers, verify = False) 
 
-    logger.debug(f"Time: {now} / GET request URL: {entity_api_full_url} / Used requests cache: {response.from_cache}")
+    # Verify if the cached response from the SQLite database being used
+    verify_request_cache(entity_api_full_url, response.from_cache)
 
     # Using the globus app secret as internal token should always return 200 supposely
-    # If not, either technical issue 500 or something wrong with this internal token 401 (even if the user doesn't provide a token, since we use the internal secret as token)
+    # If not, either technical issue 500 or something wrong with this internal token 401
     if response.status_code == 200:
-        # The call to entity-api returns string directly
-        data_access_level = (response.text).lower()
+        data_access_level = None
+        entity_dict = response.json()
 
-        logger.debug("======data_access_level returned by entity-api for given dataset uuid======")
+        # Won't happen in normal situations, but nice to check
+        if 'entity_type' not in entity_dict:
+            logger.error(f"Missing 'entity_type' from returned result of entity uuid {entity_uuid}")
+            return internal_error
+
+        entity_type = entity_dict['entity_type']
+
+        # The assets service only supports:
+        # - Data files contained within a Dataset
+        # - Thumbnail file (metadata) for Dataset 
+        # - Image and metadata files (metadata) for Sample
+        # - Image files (metadata) for Donor
+        if entity_type not in supported_entity_types:
+            logger.error(f"Unsupported 'entity_type' {entity_type} from returned result of entity uuid {entity_uuid}")
+            return bad_request
+
+        # Won't happen in normal situations, but nice to check
+        if 'data_access_level' not in entity_dict:
+            logger.error(f"Missing 'data_access_level' from returned result of entity uuid {entity_uuid}")
+            return internal_error
+
+        # Default
+        data_access_level = entity_dict['data_access_level']
+
+        logger.debug(f"======data_access_level returned by entity-api for {entity_type} uuid {entity_uuid}======")
         logger.debug(data_access_level)
+
+        # Donor and Sample `data_access_level` value can only be either "public" or "consortium"
+        # Dataset has the "protected" data_access_level due to PHI `contains_human_genetic_sequences`
+        # Use `status` to determine the access of Dataset attached thumbnail file (considered as metadata)
+        # But the data files contained within the dataset is determined by `data_access_level`
+        # A dataset with `status` "Published" (thumbnail file is public accessible) can have 
+        # "protected" `data_access_level` (data files within the dataset are protected)
+        if (entity_type == 'Dataset') and given_uuid_is_file_uuid and (entity_dict['status'].lower() == DATASET_STATUS_PUBLISHED):
+            # Overwrite the default value
+            data_access_level = ACCESS_LEVEL_PUBLIC
+
+            logger.debug(f"======determined data_access_level for dataset attached thumbnail file uuid {uuid}======")
+            logger.debug(data_access_level)
 
         # Throw error 500 if invalid access level value assigned to the dataset
         if data_access_level not in [ACCESS_LEVEL_PUBLIC, ACCESS_LEVEL_CONSORTIUM, ACCESS_LEVEL_PROTECTED]:
@@ -518,7 +589,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
         # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
         # Use the globus token from URL query string if present and set as the value of 'Authorization' header
         # If not found, default to the 'Authorization' header
-        # Because auth_helper.getUserDataAccessLevel() checks against the 'Authorization' or 'Mauthorization' header
+        # Because auth_helper_instance.getUserDataAccessLevel() checks against the 'Authorization' or 'Mauthorization' header
         if token_from_query is not None:
             # NOTE: request.headers is type 'EnvironHeaders', 
             # and it's immutable(read only version of the headers from a WSGI environment)
@@ -538,7 +609,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
         logger.debug(final_request.headers)
 
         # When Authorization is not present, return value is based on the data_access_level of the given dataset
-        # In this case we can't call auth_helper.getUserDataAccessLevel() because it returns HTTPException when Authorization header is missing
+        # In this case we can't call auth_helper_instance.getUserDataAccessLevel() because it returns HTTPException when Authorization header is missing
         if 'Authorization' not in final_request.headers:
             # Return 401 if the data access level is consortium or protected since they's require token but Authorization header missing
             if data_access_level != ACCESS_LEVEL_PUBLIC:
@@ -547,18 +618,18 @@ def get_file_access(dataset_uuid, token_from_query, request):
             return allowed
 
         # By now the Authorization is present and it's either provided directly from the request headers or query string (overwriting)
-        # Then we can call auth_helper.getUserDataAccessLevel() to find out the user's assigned access level
+        # Then we can call auth_helper_instance.getUserDataAccessLevel() to find out the user's assigned access level
         try:
             # The user_info contains HIGHEST access level of the user based on the token
             # Default to ACCESS_LEVEL_PUBLIC if none of the Authorization/Mauthorization header presents
             # This call raises an HTTPException with a 401 if any auth issues are found
-            user_info = auth_helper.getUserDataAccessLevel(final_request)
+            user_info = auth_helper_instance.getUserDataAccessLevel(final_request)
 
             logger.info("======user_info======")
             logger.info(user_info)
         # If returns HTTPException with a 401, invalid header format or expired/invalid token
         except HTTPException as e:
-            msg = "HTTPException from calling auth_helper.getUserDataAccessLevel() HTTP code: " + str(e.get_status_code()) + " " + e.get_description() 
+            msg = "HTTPException from calling auth_helper_instance.getUserDataAccessLevel() HTTP code: " + str(e.get_status_code()) + " " + e.get_description() 
 
             logger.warning(msg)
 
@@ -566,7 +637,7 @@ def get_file_access(dataset_uuid, token_from_query, request):
             # we'll return 401 so the end user knows something wrong with the token rather than allowing file access
             return authentication_required
 
-        # By now the user_info is returned and based on the logic of auth_helper.getUserDataAccessLevel(), 
+        # By now the user_info is returned and based on the logic of auth_helper_instance.getUserDataAccessLevel(), 
         # 'data_access_level' should always be found user_info and its value is always one of the 
         # ACCESS_LEVEL_PUBLIC, ACCESS_LEVEL_CONSORTIUM, or ACCESS_LEVEL_PROTECTED
         # So no need to check unknown value
@@ -576,37 +647,36 @@ def get_file_access(dataset_uuid, token_from_query, request):
         # Allow file access as long as data_access_level is public, no need to care about the user_access_level (since Authorization header presents with valid token)
         if data_access_level == ACCESS_LEVEL_PUBLIC:
             return allowed
-        
+
         # When data_access_level is comsortium, allow access only when the user_access_level (remember this is the highest level) is consortium or protected
         if (data_access_level == ACCESS_LEVEL_CONSORTIUM and
             (user_access_level == ACCESS_LEVEL_PROTECTED or user_access_level == ACCESS_LEVEL_CONSORTIUM)):
             return allowed
-        
+
         # When data_access_level is protected, allow access only when user_access_level is also protected
         if data_access_level == ACCESS_LEVEL_PROTECTED and user_access_level == ACCESS_LEVEL_PROTECTED:
             return allowed
-            
+
         # All other cases
         return authorization_required
     # Something wrong with fullfilling the request with secret as token
     # E.g., for some reason the gateway returns 401
-    elif response.status_code == 401:    
+    elif response.status_code == 401:
         logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
         return authorization_required
     elif response.status_code == 404:
-        logger.error(f"Dataset with uuid {dataset_uuid} not found")
+        logger.error(f"{entity_type} with uuid {dataset_uuid} not found")
         return not_found
     # All other cases with 500 response
-    else:  
+    else:
         logger.error("The server encountered an unexpected condition that prevented it from getting the access level of this dataset " + dataset_uuid)
         return internal_error
 
 # Always pass through the requests with using modified version of the globus app secret as internal token
 def is_secrect_token(request):
-    auth_helper = init_auth_helper()
-    internal_token = auth_helper.getProcessSecret()
+    internal_token = auth_helper_instance.getProcessSecret()
     parsed_token = None
-    
+
     if 'Authorization' in request.headers:
         auth_header = request.headers['Authorization']
         parsed_token = auth_header[6:].strip()
@@ -629,7 +699,7 @@ def api_access_allowed(item, request):
     # Check if using modified version of the globus app secret as internal token
     if is_secrect_token(request):
         return True
-    
+
     # When auth is required, we need to check if group access is also required
     group_required = True if 'groups' in item else False
 
@@ -653,3 +723,76 @@ def api_access_allowed(item, request):
     # When no group access requried and user_info dict gets returned
     return True
 
+# If the given uuid is a file uuid, get the parent entity uuid
+# If the given uuid itself is an entity uuid, just return it
+# The bool given_uuid_is_file_uuid is returned as a flag
+def get_entity_uuid_by_file_uuid(uuid):
+    entity_uuid = None
+    # Assume the given uuid is a file uuid by default
+    given_uuid_is_file_uuid = True
+
+    # First determine if the given uuid is whether an entity uuid or a file uuid
+    # by making a call to the uuid-api's /file-id endpoint
+    uuid_api_full_url = app.config['UUID_API_URL'] + '/file-id/' + uuid
+
+    # Use modified version of globus app secrect from configuration as the internal token
+    # All API endpoints specified in gateway regardless of auth is required or not, 
+    # will consider this internal token as valid and has the access to HuBMAP-Read group
+    request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
+
+    # Disable ssl certificate verification
+    response = requests.get(url = uuid_api_full_url, headers = request_headers, verify = False) 
+
+    # Verify if the cached response from the SQLite database being used
+    verify_request_cache(uuid_api_full_url, response.from_cache)
+
+    # 200: this given uuid is a file uuid
+    # 404: either the given uuid does not exist or it's not a file uuid
+    if response.status_code == 200:
+        file_uuid_dict = response.json()
+
+        if 'ancestor_uuid' in file_uuid_dict:
+            logger.debug(f"======The given uuid {uuid} is a file uuid======")
+
+            # For file uuid, its ancestor_uuid (the parent_id when generating this file uuid)
+            # is the actual entity uuid that can be used to get back the data_access_level
+            # Overwrite the default value
+            entity_uuid = file_uuid_dict['ancestor_uuid']
+        else:
+            logger.error(f"Missing 'ancestor_uuid' from resulting json for the given file_uuid {uuid}")
+
+            raise requests.exceptions.RequestException(response.text)
+    elif response.status_code == 404:
+        # It could be a regular entity uuid but will return 404 by /file-id/<uuid>
+        # We just log this and move forward
+        # The call to entity-api will tell us if this dataset uuid exists and valid
+        logger.debug(f"======Unable to find the file uuid: {uuid}, consider it as an entity uuid======")
+
+        # Treat the given uuid as an entity uuid
+        entity_uuid = uuid
+
+        # Overwrite the default value
+        given_uuid_is_file_uuid = False
+    else:
+        # uuid-api returns 400 if the given id is invalid
+        msg = f"Unable to make a request to query the uuid via uuid-api: {uuid}"
+        # Log the full stack trace, prepend a line with our message
+        logger.exception(msg)
+
+        logger.debug("======status code from uuid-api======")
+        logger.debug(response.status_code)
+
+        logger.debug("======response text from uuid-api======")
+        logger.debug(response.text)
+
+        # Also bubble up the error message from uuid-api
+        raise requests.exceptions.RequestException(response.text)
+
+    # Return the entity uuid string and 
+    # if the given uuid is a file uuid or not (bool)
+    return entity_uuid, given_uuid_is_file_uuid
+
+# Verify if the cached response from the SQLite database being used
+def verify_request_cache(url, response_from_cache):
+    now = time.ctime(int(time.time()))
+    logger.debug(f"Time: {now} / GET request URL: {url} / Used requests cache: {response_from_cache}")
