@@ -481,6 +481,7 @@ def create_request_headers_for_auth(token):
 # The uuid passed in could either be a real entity (Donor/Sample/Dataset) uuid or
 # a file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
 def get_file_access(uuid, token_from_query, request):
+    # AVR and AVR files are standalone, not stored in neo4j and won't be available via entity-api
     supported_entity_types = ['Donor', 'Sample', 'Dataset']
 
     # Returns one of the following codes
@@ -507,7 +508,7 @@ def get_file_access(uuid, token_from_query, request):
     # We'll get the parent entity uuid if the given uuid is indeed a file uuid
     # If the given uuid is actually an entity uuid, just return it
     try:
-        entity_uuid, given_uuid_is_file_uuid = get_entity_uuid_by_file_uuid(uuid)
+        entity_uuid, entity_is_avr, given_uuid_is_file_uuid = get_entity_uuid_by_file_uuid(uuid)
 
         logger.debug(f"The given uuid {uuid} is a file uuid: {given_uuid_is_file_uuid}")
         logger.debug(f"The resulting entity_uuid: {entity_uuid}")
@@ -517,7 +518,13 @@ def get_file_access(uuid, token_from_query, request):
         return internal_error
 
     # By now, the given uuid is either a real entity uuid
-    # or we found the parent entity uuid of the given file uuid
+    # or we found the associated parent entity uuid of the given file uuid
+    # For AVR record, it can only be retrieved from uuid-api
+    # And no token ever required to access the AVR files
+    if entity_is_avr:
+        return allowed
+
+    # For non-AVR entities:
     # Next to determine the data access level of the given uuid by 
     # making a call to entity-api to retrieve the entity first
     entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + entity_uuid
@@ -552,6 +559,7 @@ def get_file_access(uuid, token_from_query, request):
         # - Thumbnail file (metadata) for Dataset 
         # - Image and metadata files (metadata) for Sample
         # - Image files (metadata) for Donor
+        # - Standalone AVR files (PDF or word doc)
         if entity_type not in supported_entity_types:
             logger.error(f"Unsupported 'entity_type' {entity_type} from returned result of entity uuid {entity_uuid}")
             return bad_request
@@ -725,26 +733,29 @@ def api_access_allowed(item, request):
 
 # If the given uuid is a file uuid, get the parent entity uuid
 # If the given uuid itself is an entity uuid, just return it
+# The bool entity_is_avr is returned as a flag
 # The bool given_uuid_is_file_uuid is returned as a flag
 def get_entity_uuid_by_file_uuid(uuid):
     entity_uuid = None
+    # Assume the target entity is NOT AVR record by default
+    entity_is_avr = False
     # Assume the given uuid is a file uuid by default
     given_uuid_is_file_uuid = True
 
-    # First determine if the given uuid is whether an entity uuid or a file uuid
-    # by making a call to the uuid-api's /file-id endpoint
-    uuid_api_full_url = app.config['UUID_API_URL'] + '/file-id/' + uuid
+    uuid_api_base_url = app.config['UUID_API_URL']
 
     # Use modified version of globus app secrect from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
 
+    # First determine if the given uuid is whether an entity uuid or a file uuid
+    # by making a call to the uuid-api's /file-id endpoint
     # Disable ssl certificate verification
-    response = requests.get(url = uuid_api_full_url, headers = request_headers, verify = False) 
+    response = requests.get(url = uuid_api_base_url + '/file-id/' + uuid, headers = request_headers, verify = False) 
 
     # Verify if the cached response from the SQLite database being used
-    verify_request_cache(uuid_api_full_url, response.from_cache)
+    verify_request_cache(uuid_api_base_url + '/file-id/' + uuid, response.from_cache)
 
     # 200: this given uuid is a file uuid
     # 404: either the given uuid does not exist or it's not a file uuid
@@ -788,9 +799,30 @@ def get_entity_uuid_by_file_uuid(uuid):
         # Also bubble up the error message from uuid-api
         raise requests.exceptions.RequestException(response.text)
 
-    # Return the entity uuid string and 
+    # Further check the entity type to determine if it's AVR or not
+    if not given_uuid_is_file_uuid:
+        # Make the call against the /hmuuid endpoint
+        response = requests.get(url = uuid_api_base_url + '/hmuuid/' + entity_uuid, headers = request_headers, verify = False) 
+
+        # Verify if the cached response from the SQLite database being used
+        verify_request_cache(uuid_api_base_url + '/hmuuid/' + entity_uuid, response.from_cache)
+
+        if response.status_code == 200:
+            entity_uuid_dict = response.json()
+
+            if 'type' in entity_uuid_dict:
+                if entity_uuid_dict['type'].upper() == 'AVR':
+                    logger.debug(f"======The given entity_uuid {entity_uuid} is an AVR uuid======")
+
+                    entity_is_avr = True
+            else:
+                logger.error(f"Missing 'type' from resulting json for the given entity_uuid {entity_uuid}")
+
+                raise requests.exceptions.RequestException(response.text)
+
+    # Return the entity uuid string, if the entity is AVR, and 
     # if the given uuid is a file uuid or not (bool)
-    return entity_uuid, given_uuid_is_file_uuid
+    return entity_uuid, entity_is_avr, given_uuid_is_file_uuid
 
 # Verify if the cached response from the SQLite database being used
 def verify_request_cache(url, response_from_cache):
