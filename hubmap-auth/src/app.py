@@ -18,7 +18,7 @@ from hubmap_commons.exceptions import HTTPException
 
 
 # Set logging format and level (default is warning)
-# All the API logging is forwarded to the uWSGI server and gets written into the log file `uwsgo-entity-api.log`
+# All the API logging is forwarded to the uWSGI server and gets written into the log file `uwsgi-hubmap-auth.log`
 # Log rotation is handled via logrotate on the host system with a configuration file
 # Do NOT handle log file and rotation via the Python logging to avoid issues with multi-worker processes
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG, datefmt='%Y-%m-%d %H:%M:%S')
@@ -58,6 +58,7 @@ requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
 ## AuthHelper initialization
 ####################################################################################################
 
+
 # Initialize AuthHelper class and ensure singleton
 try:
     if AuthHelper.isInitialized() == False:
@@ -77,6 +78,7 @@ except Exception:
 ## Default route
 ####################################################################################################
 
+
 @app.route('/', methods = ['GET'])
 def home():
     return "This is HuBMAP Web Gateway :)"
@@ -85,10 +87,12 @@ def home():
 ## Status of API services and File service
 ####################################################################################################
 
+
 # JSON version of status
 @app.route('/status.json', methods = ['GET'])
 def status_json():
     return jsonify(get_status_data())
+
 
 # HTML rendering of the status
 @app.route('/status.html', methods = ['GET'])
@@ -99,6 +103,7 @@ def status_html():
 ####################################################################################################
 ## API Auth
 ####################################################################################################
+
 
 @app.route('/cache_clear', methods = ['GET'])
 def cache_clear():
@@ -114,7 +119,8 @@ def cache_clear():
 @app.route('/api_auth', methods = ['GET'])
 def api_auth():
     wildcard_delimiter = "<*>"
-    # The regular expression pattern takes any alphabetical and numerical characters, also other characters permitted in the URI
+    # The regular expression pattern takes any alphabetical and numerical characters,
+    # also other characters permitted in the URI
     regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
     logger.info("======api_auth request.headers======")
@@ -132,7 +138,8 @@ def api_auth():
     endpoint = None
 
     # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
-    # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
+    # This "Host" header is nginx `$http_host` which contains port number,
+    # unlike `$host` which doesn't include port number
     # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
     if ("X-Original-Request-Method" in request.headers) and ("Host" in request.headers) and ("X-Original-URI" in request.headers):
         authority = request.headers.get("Host")
@@ -220,7 +227,8 @@ def file_auth():
     orig_uri = None
 
     # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
-    # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
+    # This "Host" header is nginx `$http_host` which contains port number,
+    # unlike `$host` which doesn't include port number
     # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
     if ("X-Original-Request-Method" in request.headers) and ("X-Original-URI" in request.headers):
         method = request.headers.get("X-Original-Request-Method")
@@ -243,12 +251,13 @@ def file_auth():
                 uuid = path_list[0]
 
                 # Also get the "token" parameter from query string
-                # query is a dict, keys are the unique query variable names and the values are lists of values for each name
+                # query is a dict, keys are the unique query variable names
+                # and the values are lists of values for each name
                 token_from_query = None
                 query = parse_qs(parsed_uri.query)
 
-                if "token" in query:
-                    token_from_query = query["token"][0]
+                if 'token' in query:
+                    token_from_query = query['token'][0]
 
                 logger.debug("======token_from_query======")
                 logger.debug(token_from_query)
@@ -294,6 +303,7 @@ def load_file(file):
         data = json.load(f)
         return data
 
+
 # Make a call to the given target status URL
 def status_request(target_url):
     # Verify if requests used the cached response from the SQLite database
@@ -305,6 +315,7 @@ def status_request(target_url):
     logger.debug(f"Time: {now} / GET request URL: {target_url} / Used requests cache: {response.from_cache}")
 
     return response
+
 
 # Dict of API status data
 def get_status_data():
@@ -458,6 +469,7 @@ def get_status_data():
 def get_user_info_for_access_check(request, group_required):
     return auth_helper_instance.getUserInfoUsingRequest(request, group_required)
 
+
 # Due to Flask's EnvironHeaders is immutable
 # We create a new class with the headers property 
 # so AuthHelper can access it using the dot notation req.headers
@@ -465,6 +477,7 @@ class CustomRequest:
     # Constructor
     def __init__(self, headers):
         self.headers = headers
+
 
 # Create a dict with HTTP Authorization header with Bearer token
 def create_request_headers_for_auth(token):
@@ -477,6 +490,7 @@ def create_request_headers_for_auth(token):
     }
 
     return headers_dict
+
 
 # Check if the target file associated with this uuid is accessible 
 # based on token and access level assigned to the entity
@@ -553,7 +567,6 @@ def get_file_access(uuid, token_from_query, request):
     # Using the globus app secret as internal token should always return 200 supposedly
     # If not, either technical issue 500 or something wrong with this internal token 401
     if response.status_code == 200:
-        data_access_level = None
         entity_dict = response.json()
 
         # Won't happen in normal situations, but nice to check
@@ -606,7 +619,7 @@ def get_file_access(uuid, token_from_query, request):
         # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
         # Use the globus token from URL query string if present and set as the value of 'Authorization' header
         # If not found, default to the 'Authorization' header
-        # Because auth_helper_instance.getUserDataAccessLevel() checks against the 'Authorization' or 'Mauthorization' header
+        # Because auth_helper_instance.getUserDataAccessLevel() checks against the 'Authorization' header
         if token_from_query is not None:
             # NOTE: request.headers is type 'EnvironHeaders', 
             # and it's immutable(read only version of the headers from a WSGI environment)
@@ -617,7 +630,8 @@ def get_file_access(uuid, token_from_query, request):
             custom_headers_dict = create_request_headers_for_auth(token_from_query)
 
             # Overwrite the default final_request
-            # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
+            # CustomRequest and Flask's request are different types,
+            # but the Commons's AuthHelper only access the request.headers
             # So as long as headers from CustomRequest instance can be accessed with the dot notation
             final_request = CustomRequest(custom_headers_dict)
 
@@ -626,15 +640,18 @@ def get_file_access(uuid, token_from_query, request):
         logger.debug(final_request.headers)
 
         # When Authorization is not present, return value is based on the data_access_level of the given dataset
-        # In this case we can't call auth_helper_instance.getUserDataAccessLevel() because it returns HTTPException when Authorization header is missing
+        # In this case we can't call auth_helper_instance.getUserDataAccessLevel() because it returns HTTPException
+        # when Authorization header is missing
         if 'Authorization' not in final_request.headers:
-            # Return 401 if the data access level is consortium or protected since they's require token but Authorization header missing
+            # Return 401 if the data access level is consortium or protected since
+            # they require token but Authorization header missing
             if data_access_level != ACCESS_LEVEL_PUBLIC:
                 return authentication_required
             # Only return 200 since public dataset doesn't require token
             return allowed
 
-        # By now the Authorization is present and it's either provided directly from the request headers or query string (overwriting)
+        # By now the Authorization is present and it's either provided directly from the request headers or
+        # query string (overwriting)
         # Then we can call auth_helper_instance.getUserDataAccessLevel() to find out the user's assigned access level
         try:
             # The user_info contains HIGHEST access level of the user based on the token
@@ -661,11 +678,13 @@ def get_file_access(uuid, token_from_query, request):
         user_access_level = user_info['data_access_level'].lower()
 
         # By now we have both data_access_level and the user_access_level obtained with one of the valid values
-        # Allow file access as long as data_access_level is public, no need to care about the user_access_level (since Authorization header presents with valid token)
+        # Allow file access as long as data_access_level is public, no need to care about the
+        # user_access_level (since Authorization header presents with valid token)
         if data_access_level == ACCESS_LEVEL_PUBLIC:
             return allowed
 
-        # When data_access_level is comsortium, allow access only when the user_access_level (remember this is the highest level) is consortium or protected
+        # When data_access_level is consortium, allow access only when the user_access_level
+        # (remember this is the highest level) is consortium or protected
         if (data_access_level == ACCESS_LEVEL_CONSORTIUM and
             (user_access_level == ACCESS_LEVEL_PROTECTED or user_access_level == ACCESS_LEVEL_CONSORTIUM)):
             return allowed
@@ -679,15 +698,16 @@ def get_file_access(uuid, token_from_query, request):
     # Something wrong with fulfilling the request with secret as token
     # E.g., for some reason the gateway returns 401
     elif response.status_code == 401:
-        logger.error(f"Couldn't authenticate the request made to {entity_api_full_url} with internal token (modified globus app secrect)")
+        logger.error(f"Couldn't authenticate the request made to {entity_api_full_url} with internal token")
         return authorization_required
     elif response.status_code == 404:
         logger.error(f"Unable to find uuid {entity_uuid}")
         return not_found
     # All other cases with 500 response
     else:
-        logger.error(f"The server encountered an unexpected condition that prevented it from getting the access level of entity with uuid {entity_uuid}")
+        logger.error(f"Failed to get the access level of entity with uuid {entity_uuid}")
         return internal_error
+
 
 # Always pass through the requests with using modified version of the globus app secret as internal token
 def is_secrect_token(request):
@@ -702,6 +722,7 @@ def is_secrect_token(request):
         return True
 
     return False
+
 
 # Check if access to the given endpoint item is allowed
 # Also check if the globus token associated user is a member of the specified group associated with the endpoint item
@@ -727,7 +748,8 @@ def api_access_allowed(item, request):
     if isinstance(user_info, Response):
         return False
 
-    # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
+    # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found
+    # in user_info['hmgroupids'] list
     # Key 'hmgroupids' presents only when group_required is True
     if group_required:
         for group in user_info['hmgroupids']:
@@ -740,6 +762,7 @@ def api_access_allowed(item, request):
     # When no group access required and user_info dict gets returned
     return True
 
+
 # If the given uuid is a file uuid, get the parent entity uuid
 # If the given uuid itself is an entity uuid, just return it
 # The bool entity_is_avr is returned as a flag
@@ -751,7 +774,7 @@ def get_entity_uuid_by_file_uuid(uuid):
     # Assume the given uuid is a file uuid by default
     given_uuid_is_file_uuid = True
 
-    # Use modified version of globus app secrect from configuration as the internal token
+    # Use modified version of globus app secret from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
@@ -845,7 +868,9 @@ def get_entity_uuid_by_file_uuid(uuid):
     # if the given uuid is a file uuid or not (bool)
     return entity_uuid, entity_is_avr, given_uuid_is_file_uuid
 
+
 # Verify if the cached response from the SQLite database being used
 def verify_request_cache(url, response_from_cache):
     now = time.ctime(int(time.time()))
     logger.debug(f"Time: {now} / GET request URL: {url} / Used requests cache: {response_from_cache}")
+
