@@ -8,7 +8,6 @@ import os
 import time
 import json
 import logging
-import functools
 from cachetools import cached, TTLCache
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
@@ -18,7 +17,7 @@ from hubmap_commons.hm_auth import AuthHelper
 from hubmap_commons.exceptions import HTTPException
 
 
-# Set logging fromat and level (default is warning)
+# Set logging format and level (default is warning)
 # All the API logging is forwarded to the uWSGI server and gets written into the log file `uwsgo-entity-api.log`
 # Log rotation is handled via logrotate on the host system with a configuration file
 # Do NOT handle log file and rotation via the Python logging to avoid issues with multi-worker processes
@@ -30,9 +29,11 @@ app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname
 app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
+app.config['UUID_API_URL'] = app.config['UUID_API_URL'].strip('/')
 app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
-# Also remove trailing slash / for those status endpoints in case Flask takes / as a different endpoint
+# Also remove trailing slash / for those status endpoints 
+# because Flask treats urls with / as different endpoints
 app.config['UUID_API_STATUS_URL'] = app.config['UUID_API_STATUS_URL'].strip('/')
 app.config['ENTITY_API_STATUS_URL'] = app.config['ENTITY_API_STATUS_URL'].strip('/')
 app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip('/')
@@ -102,7 +103,7 @@ def status_html():
 @app.route('/cache_clear', methods = ['GET'])
 def cache_clear():
     cache.clear()
-    logger.info("All gatewat API Auth function cache cleared.")
+    logger.info("All gateway API Auth function cache cleared.")
     return "All function cache cleared."
 
 
@@ -196,7 +197,7 @@ def api_auth():
 # The query string with token is optional, but will be used by the portal-ui
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
-    logger.info("======file_auth Orginal request.headers======")
+    logger.info("======file_auth Original request.headers======")
     logger.info(request.headers)
 
     # Nginx auth_request only cares about the response status code
@@ -236,8 +237,7 @@ def file_auth():
                 # Remove the leading slash before split
                 path_list = parsed_uri.path.strip("/").split("/")
 
-                # This parsed uuid couldbe either be the dataset uuid 
-                # or thumbnail.jpg image file uuid associated with the target dataset
+                # This parsed uuid could either be the entity uuid or a file uuid
                 uuid = path_list[0]
 
                 # Also get the "token" parameter from query string
@@ -451,7 +451,7 @@ def get_status_data():
     return status_data
 
 
-# Get user infomation dict based on the http request(headers)
+# Get user information dict based on the http request(headers)
 # `group_required` is a boolean, when True, 'hmgroupids' is in the output
 def get_user_info_for_access_check(request, group_required):
     return auth_helper_instance.getUserInfoUsingRequest(request, group_required)
@@ -492,7 +492,7 @@ def get_file_access(uuid, token_from_query, request):
     not_found = 404
     internal_error = 500
 
-    # All lowercase for easy comparision
+    # All lowercase for easy comparison
     ACCESS_LEVEL_PUBLIC = 'public'
     ACCESS_LEVEL_CONSORTIUM = 'consortium'
     ACCESS_LEVEL_PROTECTED = 'protected'
@@ -514,7 +514,7 @@ def get_file_access(uuid, token_from_query, request):
         logger.debug(f"The resulting entity_uuid: {entity_uuid}")
         logger.debug(f"The entity is AVR: {entity_is_avr}")
     except requests.exceptions.RequestException:
-        # We'll just hanle 400 and all other cases all together here as 500
+        # We'll just handle 400 and all other cases all together here as 500
         # because nginx auth_request only handles 200/401/403/500
         return internal_error
 
@@ -530,7 +530,7 @@ def get_file_access(uuid, token_from_query, request):
     # making a call to entity-api to retrieve the entity first
     entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + entity_uuid
 
-    # Use modified version of globus app secrect from configuration as the internal token
+    # Use modified version of globus app secret from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
@@ -542,7 +542,7 @@ def get_file_access(uuid, token_from_query, request):
     # Verify if the cached response from the SQLite database being used
     verify_request_cache(entity_api_full_url, response.from_cache)
 
-    # Using the globus app secret as internal token should always return 200 supposely
+    # Using the globus app secret as internal token should always return 200 supposedly
     # If not, either technical issue 500 or something wrong with this internal token 401
     if response.status_code == 200:
         data_access_level = None
@@ -668,10 +668,10 @@ def get_file_access(uuid, token_from_query, request):
 
         # All other cases
         return authorization_required
-    # Something wrong with fullfilling the request with secret as token
+    # Something wrong with fulfilling the request with secret as token
     # E.g., for some reason the gateway returns 401
     elif response.status_code == 401:
-        logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
+        logger.error(f"Couldn't authenticate the request made to {entity_api_full_url} with internal token (modified globus app secrect)")
         return authorization_required
     elif response.status_code == 404:
         logger.error(f"Unable to find uuid {entity_uuid}")
@@ -695,8 +695,8 @@ def is_secrect_token(request):
 
     return False
 
-# Chceck if access to the given endpoint item is allowed
-# Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
+# Check if access to the given endpoint item is allowed
+# Also check if the globus token associated user is a member of the specified group associated with the endpoint item
 def api_access_allowed(item, request):
     logger.info("======Matched endpoint======")
     logger.info(item)
@@ -729,7 +729,7 @@ def api_access_allowed(item, request):
         # None of the assigned groups match the group ID specified in item['groups']
         return False
 
-    # When no group access requried and user_info dict gets returned
+    # When no group access required and user_info dict gets returned
     return True
 
 # If the given uuid is a file uuid, get the parent entity uuid
