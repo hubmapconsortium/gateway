@@ -673,11 +673,11 @@ def get_file_access(uuid, token_from_query, request):
         logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
         return authorization_required
     elif response.status_code == 404:
-        logger.error(f"{entity_type} with uuid {entity_uuid} not found")
+        logger.error(f"Unable to find uuid {entity_uuid}")
         return not_found
     # All other cases with 500 response
     else:
-        logger.error(f"The server encountered an unexpected condition that prevented it from getting the access level of this {entity_type} with uuid {entity_uuid}")
+        logger.error(f"The server encountered an unexpected condition that prevented it from getting the access level of entity with uuid {entity_uuid}")
         return internal_error
 
 # Always pass through the requests with using modified version of the globus app secret as internal token
