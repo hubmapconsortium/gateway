@@ -8,7 +8,6 @@ import os
 import time
 import json
 import logging
-import functools
 from cachetools import cached, TTLCache
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
@@ -18,8 +17,8 @@ from hubmap_commons.hm_auth import AuthHelper
 from hubmap_commons.exceptions import HTTPException
 
 
-# Set logging fromat and level (default is warning)
-# All the API logging is forwarded to the uWSGI server and gets written into the log file `uwsgo-entity-api.log`
+# Set logging format and level (default is warning)
+# All the API logging is forwarded to the uWSGI server and gets written into the log file `uwsgi-hubmap-auth.log`
 # Log rotation is handled via logrotate on the host system with a configuration file
 # Do NOT handle log file and rotation via the Python logging to avoid issues with multi-worker processes
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG, datefmt='%Y-%m-%d %H:%M:%S')
@@ -30,9 +29,11 @@ app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname
 app.config.from_pyfile('app.cfg')
 
 # Remove trailing slash / from URL base to avoid "//" caused by config with trailing slash
+app.config['UUID_API_URL'] = app.config['UUID_API_URL'].strip('/')
 app.config['ENTITY_API_URL'] = app.config['ENTITY_API_URL'].strip('/')
 
-# Also remove trailing slash / for those status endpoints in case Flask takes / as a different endpoint
+# Also remove trailing slash / for those status endpoints 
+# because Flask treats urls with / as different endpoints
 app.config['UUID_API_STATUS_URL'] = app.config['UUID_API_STATUS_URL'].strip('/')
 app.config['ENTITY_API_STATUS_URL'] = app.config['ENTITY_API_STATUS_URL'].strip('/')
 app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip('/')
@@ -57,6 +58,7 @@ requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
 ## AuthHelper initialization
 ####################################################################################################
 
+
 # Initialize AuthHelper class and ensure singleton
 try:
     if AuthHelper.isInitialized() == False:
@@ -76,6 +78,7 @@ except Exception:
 ## Default route
 ####################################################################################################
 
+
 @app.route('/', methods = ['GET'])
 def home():
     return "This is HuBMAP Web Gateway :)"
@@ -84,10 +87,12 @@ def home():
 ## Status of API services and File service
 ####################################################################################################
 
+
 # JSON version of status
 @app.route('/status.json', methods = ['GET'])
 def status_json():
     return jsonify(get_status_data())
+
 
 # HTML rendering of the status
 @app.route('/status.html', methods = ['GET'])
@@ -99,10 +104,11 @@ def status_html():
 ## API Auth
 ####################################################################################################
 
+
 @app.route('/cache_clear', methods = ['GET'])
 def cache_clear():
     cache.clear()
-    logger.info("All gatewat API Auth function cache cleared.")
+    logger.info("All gateway API Auth function cache cleared.")
     return "All function cache cleared."
 
 
@@ -113,7 +119,8 @@ def cache_clear():
 @app.route('/api_auth', methods = ['GET'])
 def api_auth():
     wildcard_delimiter = "<*>"
-    # The regular expression pattern takes any alphabetical and numerical characters, also other characters permitted in the URI
+    # The regular expression pattern takes any alphabetical and numerical characters,
+    # also other characters permitted in the URI
     regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
 
     logger.info("======api_auth request.headers======")
@@ -131,7 +138,8 @@ def api_auth():
     endpoint = None
 
     # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
-    # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
+    # This "Host" header is nginx `$http_host` which contains port number,
+    # unlike `$host` which doesn't include port number
     # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
     if ("X-Original-Request-Method" in request.headers) and ("Host" in request.headers) and ("X-Original-URI" in request.headers):
         authority = request.headers.get("Host")
@@ -190,13 +198,15 @@ def api_auth():
 
 # Auth for assets file service
 # URL pattern: https://assets.hubmapconsortium.org/<uuid>/<relative-file-path>[?token=<globus-token>]
-# The <uuid> could either be a 
-# - actual dataset entity uuid
-# - file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
+# The <uuid> could be one of the following:
+# - the actual dataset entity uuid
+# - the file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
+# - the AVR file uuid (handling of the AVR entity uuid is via uuid-api only)
 # The query string with token is optional, but will be used by the portal-ui
+# No token is required for accessing AVR files
 @app.route('/file_auth', methods = ['GET'])
 def file_auth():
-    logger.info("======file_auth Orginal request.headers======")
+    logger.info("======file_auth Original request.headers======")
     logger.info(request.headers)
 
     # Nginx auth_request only cares about the response status code
@@ -217,7 +227,8 @@ def file_auth():
     orig_uri = None
 
     # URI = scheme:[//authority]path[?query][#fragment] where authority = [userinfo@]host[:port]
-    # This "Host" header is nginx `$http_host` which contains port number, unlike `$host` which doesn't include port number
+    # This "Host" header is nginx `$http_host` which contains port number,
+    # unlike `$host` which doesn't include port number
     # Here we don't parse the "X-Forwarded-Proto" header because the scheme is either HTTP or HTTPS
     if ("X-Original-Request-Method" in request.headers) and ("X-Original-URI" in request.headers):
         method = request.headers.get("X-Original-Request-Method")
@@ -236,17 +247,17 @@ def file_auth():
                 # Remove the leading slash before split
                 path_list = parsed_uri.path.strip("/").split("/")
 
-                # This parsed uuid couldbe either be the dataset uuid 
-                # or thumbnail.jpg image file uuid associated with the target dataset
+                # This parsed uuid could either be the entity uuid or a file uuid
                 uuid = path_list[0]
 
                 # Also get the "token" parameter from query string
-                # query is a dict, keys are the unique query variable names and the values are lists of values for each name
+                # query is a dict, keys are the unique query variable names
+                # and the values are lists of values for each name
                 token_from_query = None
                 query = parse_qs(parsed_uri.query)
 
-                if "token" in query:
-                    token_from_query = query["token"][0]
+                if 'token' in query:
+                    token_from_query = query['token'][0]
 
                 logger.debug("======token_from_query======")
                 logger.debug(token_from_query)
@@ -292,6 +303,7 @@ def load_file(file):
         data = json.load(f)
         return data
 
+
 # Make a call to the given target status URL
 def status_request(target_url):
     # Verify if requests used the cached response from the SQLite database
@@ -303,6 +315,7 @@ def status_request(target_url):
     logger.debug(f"Time: {now} / GET request URL: {target_url} / Used requests cache: {response.from_cache}")
 
     return response
+
 
 # Dict of API status data
 def get_status_data():
@@ -451,10 +464,11 @@ def get_status_data():
     return status_data
 
 
-# Get user infomation dict based on the http request(headers)
+# Get user information dict based on the http request(headers)
 # `group_required` is a boolean, when True, 'hmgroupids' is in the output
 def get_user_info_for_access_check(request, group_required):
     return auth_helper_instance.getUserInfoUsingRequest(request, group_required)
+
 
 # Due to Flask's EnvironHeaders is immutable
 # We create a new class with the headers property 
@@ -463,6 +477,7 @@ class CustomRequest:
     # Constructor
     def __init__(self, headers):
         self.headers = headers
+
 
 # Create a dict with HTTP Authorization header with Bearer token
 def create_request_headers_for_auth(token):
@@ -476,11 +491,14 @@ def create_request_headers_for_auth(token):
 
     return headers_dict
 
+
 # Check if the target file associated with this uuid is accessible 
 # based on token and access level assigned to the entity
 # The uuid passed in could either be a real entity (Donor/Sample/Dataset) uuid or
 # a file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
+# AVR file uuid is handled via uuid-api only and no token is required
 def get_file_access(uuid, token_from_query, request):
+    # AVR and AVR files are standalone, not stored in neo4j and won't be available via entity-api
     supported_entity_types = ['Donor', 'Sample', 'Dataset']
 
     # Returns one of the following codes
@@ -491,7 +509,7 @@ def get_file_access(uuid, token_from_query, request):
     not_found = 404
     internal_error = 500
 
-    # All lowercase for easy comparision
+    # All lowercase for easy comparison
     ACCESS_LEVEL_PUBLIC = 'public'
     ACCESS_LEVEL_CONSORTIUM = 'consortium'
     ACCESS_LEVEL_PROTECTED = 'protected'
@@ -507,22 +525,34 @@ def get_file_access(uuid, token_from_query, request):
     # We'll get the parent entity uuid if the given uuid is indeed a file uuid
     # If the given uuid is actually an entity uuid, just return it
     try:
-        entity_uuid, given_uuid_is_file_uuid = get_entity_uuid_by_file_uuid(uuid)
+        entity_uuid, entity_is_avr, given_uuid_is_file_uuid = get_entity_uuid_by_file_uuid(uuid)
 
         logger.debug(f"The given uuid {uuid} is a file uuid: {given_uuid_is_file_uuid}")
-        logger.debug(f"The resulting entity_uuid: {entity_uuid}")
+
+        if given_uuid_is_file_uuid:
+            logger.debug(f"The parent entity_uuid: {entity_uuid}")
+            logger.debug(f"The entity is AVR: {entity_is_avr}")
     except requests.exceptions.RequestException:
-        # We'll just hanle 400 and all other cases all together here as 500
+        # We'll just handle 400 and all other cases all together here as 500
         # because nginx auth_request only handles 200/401/403/500
         return internal_error
 
     # By now, the given uuid is either a real entity uuid
-    # or we found the parent entity uuid of the given file uuid
+    # or we found the associated parent entity uuid of the given file uuid
+    # If the given uuid is an AVR entity uuid (should not happen in normal situation), 
+    # it'll go through but 404 returned by the assets nginx 
+    # since we don't have any files for this AVR entity
+    # If an AVR file uuid, we'll allow the access too and send back the file content
+    # No token ever required regardless the given uuid is an AVR entity uuid or AVR file uuid
+    if entity_is_avr:
+        return allowed
+
+    # For non-AVR entities:
     # Next to determine the data access level of the given uuid by 
     # making a call to entity-api to retrieve the entity first
     entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + entity_uuid
 
-    # Use modified version of globus app secrect from configuration as the internal token
+    # Use modified version of globus app secret from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
@@ -534,10 +564,9 @@ def get_file_access(uuid, token_from_query, request):
     # Verify if the cached response from the SQLite database being used
     verify_request_cache(entity_api_full_url, response.from_cache)
 
-    # Using the globus app secret as internal token should always return 200 supposely
+    # Using the globus app secret as internal token should always return 200 supposedly
     # If not, either technical issue 500 or something wrong with this internal token 401
     if response.status_code == 200:
-        data_access_level = None
         entity_dict = response.json()
 
         # Won't happen in normal situations, but nice to check
@@ -552,6 +581,7 @@ def get_file_access(uuid, token_from_query, request):
         # - Thumbnail file (metadata) for Dataset 
         # - Image and metadata files (metadata) for Sample
         # - Image files (metadata) for Donor
+        # - Standalone AVR files (PDF or word doc)
         if entity_type not in supported_entity_types:
             logger.error(f"Unsupported 'entity_type' {entity_type} from returned result of entity uuid {entity_uuid}")
             return bad_request
@@ -589,7 +619,7 @@ def get_file_access(uuid, token_from_query, request):
         # The globus token can be specified in the 'Authorization' header OR through a "token" query string in the URL
         # Use the globus token from URL query string if present and set as the value of 'Authorization' header
         # If not found, default to the 'Authorization' header
-        # Because auth_helper_instance.getUserDataAccessLevel() checks against the 'Authorization' or 'Mauthorization' header
+        # Because auth_helper_instance.getUserDataAccessLevel() checks against the 'Authorization' header
         if token_from_query is not None:
             # NOTE: request.headers is type 'EnvironHeaders', 
             # and it's immutable(read only version of the headers from a WSGI environment)
@@ -600,7 +630,8 @@ def get_file_access(uuid, token_from_query, request):
             custom_headers_dict = create_request_headers_for_auth(token_from_query)
 
             # Overwrite the default final_request
-            # CustomRequest and Flask's request are different types, but the Commons's AuthHelper only access the request.headers
+            # CustomRequest and Flask's request are different types,
+            # but the Commons's AuthHelper only access the request.headers
             # So as long as headers from CustomRequest instance can be accessed with the dot notation
             final_request = CustomRequest(custom_headers_dict)
 
@@ -609,15 +640,18 @@ def get_file_access(uuid, token_from_query, request):
         logger.debug(final_request.headers)
 
         # When Authorization is not present, return value is based on the data_access_level of the given dataset
-        # In this case we can't call auth_helper_instance.getUserDataAccessLevel() because it returns HTTPException when Authorization header is missing
+        # In this case we can't call auth_helper_instance.getUserDataAccessLevel() because it returns HTTPException
+        # when Authorization header is missing
         if 'Authorization' not in final_request.headers:
-            # Return 401 if the data access level is consortium or protected since they's require token but Authorization header missing
+            # Return 401 if the data access level is consortium or protected since
+            # they require token but Authorization header missing
             if data_access_level != ACCESS_LEVEL_PUBLIC:
                 return authentication_required
             # Only return 200 since public dataset doesn't require token
             return allowed
 
-        # By now the Authorization is present and it's either provided directly from the request headers or query string (overwriting)
+        # By now the Authorization is present and it's either provided directly from the request headers or
+        # query string (overwriting)
         # Then we can call auth_helper_instance.getUserDataAccessLevel() to find out the user's assigned access level
         try:
             # The user_info contains HIGHEST access level of the user based on the token
@@ -644,11 +678,13 @@ def get_file_access(uuid, token_from_query, request):
         user_access_level = user_info['data_access_level'].lower()
 
         # By now we have both data_access_level and the user_access_level obtained with one of the valid values
-        # Allow file access as long as data_access_level is public, no need to care about the user_access_level (since Authorization header presents with valid token)
+        # Allow file access as long as data_access_level is public, no need to care about the
+        # user_access_level (since Authorization header presents with valid token)
         if data_access_level == ACCESS_LEVEL_PUBLIC:
             return allowed
 
-        # When data_access_level is comsortium, allow access only when the user_access_level (remember this is the highest level) is consortium or protected
+        # When data_access_level is consortium, allow access only when the user_access_level
+        # (remember this is the highest level) is consortium or protected
         if (data_access_level == ACCESS_LEVEL_CONSORTIUM and
             (user_access_level == ACCESS_LEVEL_PROTECTED or user_access_level == ACCESS_LEVEL_CONSORTIUM)):
             return allowed
@@ -659,18 +695,19 @@ def get_file_access(uuid, token_from_query, request):
 
         # All other cases
         return authorization_required
-    # Something wrong with fullfilling the request with secret as token
+    # Something wrong with fulfilling the request with secret as token
     # E.g., for some reason the gateway returns 401
     elif response.status_code == 401:
-        logger.error("Couldn't authenticate the request made to " + entity_api_full_url + " with internal token (modified globus app secrect)")
+        logger.error(f"Couldn't authenticate the request made to {entity_api_full_url} with internal token")
         return authorization_required
     elif response.status_code == 404:
-        logger.error(f"{entity_type} with uuid {entity_uuid} not found")
+        logger.error(f"Unable to find uuid {entity_uuid}")
         return not_found
     # All other cases with 500 response
     else:
-        logger.error(f"The server encountered an unexpected condition that prevented it from getting the access level of this {entity_type} with uuid {entity_uuid}")
+        logger.error(f"Failed to get the access level of entity with uuid {entity_uuid}")
         return internal_error
+
 
 # Always pass through the requests with using modified version of the globus app secret as internal token
 def is_secrect_token(request):
@@ -686,8 +723,9 @@ def is_secrect_token(request):
 
     return False
 
-# Chceck if access to the given endpoint item is allowed
-# Also check if the globus token associated user is a member of the specified group assocaited with the endpoint item
+
+# Check if access to the given endpoint item is allowed
+# Also check if the globus token associated user is a member of the specified group associated with the endpoint item
 def api_access_allowed(item, request):
     logger.info("======Matched endpoint======")
     logger.info(item)
@@ -710,7 +748,8 @@ def api_access_allowed(item, request):
     if isinstance(user_info, Response):
         return False
 
-    # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found in user_info['hmgroupids'] list
+    # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found
+    # in user_info['hmgroupids'] list
     # Key 'hmgroupids' presents only when group_required is True
     if group_required:
         for group in user_info['hmgroupids']:
@@ -720,31 +759,34 @@ def api_access_allowed(item, request):
         # None of the assigned groups match the group ID specified in item['groups']
         return False
 
-    # When no group access requried and user_info dict gets returned
+    # When no group access required and user_info dict gets returned
     return True
+
 
 # If the given uuid is a file uuid, get the parent entity uuid
 # If the given uuid itself is an entity uuid, just return it
+# The bool entity_is_avr is returned as a flag
 # The bool given_uuid_is_file_uuid is returned as a flag
 def get_entity_uuid_by_file_uuid(uuid):
     entity_uuid = None
+    # Assume the target entity is NOT AVR record by default
+    entity_is_avr = False
     # Assume the given uuid is a file uuid by default
     given_uuid_is_file_uuid = True
 
-    # First determine if the given uuid is whether an entity uuid or a file uuid
-    # by making a call to the uuid-api's /file-id endpoint
-    uuid_api_full_url = app.config['UUID_API_URL'] + '/file-id/' + uuid
-
-    # Use modified version of globus app secrect from configuration as the internal token
+    # Use modified version of globus app secret from configuration as the internal token
     # All API endpoints specified in gateway regardless of auth is required or not, 
     # will consider this internal token as valid and has the access to HuBMAP-Read group
     request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
 
+    # First determine if the given uuid is whether an entity uuid or a file uuid
+    # by making a call to the uuid-api's /file-id endpoint
     # Disable ssl certificate verification
-    response = requests.get(url = uuid_api_full_url, headers = request_headers, verify = False) 
+    uuid_api_file_url = f"{app.config['UUID_API_URL']}/file-id/{uuid}"
+    response = requests.get(url = uuid_api_file_url, headers = request_headers, verify = False) 
 
     # Verify if the cached response from the SQLite database being used
-    verify_request_cache(uuid_api_full_url, response.from_cache)
+    verify_request_cache(uuid_api_file_url, response.from_cache)
 
     # 200: this given uuid is a file uuid
     # 404: either the given uuid does not exist or it's not a file uuid
@@ -788,11 +830,47 @@ def get_entity_uuid_by_file_uuid(uuid):
         # Also bubble up the error message from uuid-api
         raise requests.exceptions.RequestException(response.text)
 
-    # Return the entity uuid string and 
+    # Further check the entity type registered with uuid-api to determine if it's AVR or not
+    # Make the call against the /hmuuid endpoint
+    uuid_api_entity_url = f"{app.config['UUID_API_URL']}/hmuuid/{entity_uuid}"
+    response = requests.get(url = uuid_api_entity_url, headers = request_headers, verify = False) 
+
+    # Verify if the cached response from the SQLite database being used
+    verify_request_cache(uuid_api_entity_url, response.from_cache)
+
+    if response.status_code == 200:
+        entity_uuid_dict = response.json()
+
+        if 'type' in entity_uuid_dict:
+            if entity_uuid_dict['type'].upper() == 'AVR':
+                logger.debug(f"======The target entity_uuid {entity_uuid} is an AVR uuid======")
+
+                entity_is_avr = True
+        else:
+            logger.error(f"Missing 'type' from resulting json for the target entity_uuid {entity_uuid}")
+
+            raise requests.exceptions.RequestException(response.text)
+    else:
+        msg = f"Unable to make a request to query the target entity uuid via uuid-api: {entity_uuid}"
+        # Log the full stack trace, prepend a line with our message
+        logger.exception(msg)
+
+        logger.debug("======status code from uuid-api======")
+        logger.debug(response.status_code)
+
+        logger.debug("======response text from uuid-api======")
+        logger.debug(response.text)
+
+        # Also bubble up the error message from uuid-api
+        raise requests.exceptions.RequestException(response.text)
+
+    # Return the entity uuid string, if the entity is AVR, and 
     # if the given uuid is a file uuid or not (bool)
-    return entity_uuid, given_uuid_is_file_uuid
+    return entity_uuid, entity_is_avr, given_uuid_is_file_uuid
+
 
 # Verify if the cached response from the SQLite database being used
 def verify_request_cache(url, response_from_cache):
     now = time.ctime(int(time.time()))
     logger.debug(f"Time: {now} / GET request URL: {url} / Used requests cache: {response_from_cache}")
+
