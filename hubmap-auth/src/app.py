@@ -512,6 +512,7 @@ def get_file_access(uuid, token_from_query, request):
 
         logger.debug(f"The given uuid {uuid} is a file uuid: {given_uuid_is_file_uuid}")
         logger.debug(f"The resulting entity_uuid: {entity_uuid}")
+        logger.debug(f"The entity is AVR: {entity_is_avr}")
     except requests.exceptions.RequestException:
         # We'll just hanle 400 and all other cases all together here as 500
         # because nginx auth_request only handles 200/401/403/500
@@ -799,26 +800,38 @@ def get_entity_uuid_by_file_uuid(uuid):
         # Also bubble up the error message from uuid-api
         raise requests.exceptions.RequestException(response.text)
 
-    # Further check the entity type to determine if it's AVR or not
-    if not given_uuid_is_file_uuid:
-        # Make the call against the /hmuuid endpoint
-        response = requests.get(url = uuid_api_base_url + '/hmuuid/' + entity_uuid, headers = request_headers, verify = False) 
+    # Further check the entity type registered with uuid-api to determine if it's AVR or not
+    # Make the call against the /hmuuid endpoint
+    response = requests.get(url = uuid_api_base_url + '/hmuuid/' + entity_uuid, headers = request_headers, verify = False) 
 
-        # Verify if the cached response from the SQLite database being used
-        verify_request_cache(uuid_api_base_url + '/hmuuid/' + entity_uuid, response.from_cache)
+    # Verify if the cached response from the SQLite database being used
+    verify_request_cache(uuid_api_base_url + '/hmuuid/' + entity_uuid, response.from_cache)
 
-        if response.status_code == 200:
-            entity_uuid_dict = response.json()
+    if response.status_code == 200:
+        entity_uuid_dict = response.json()
 
-            if 'type' in entity_uuid_dict:
-                if entity_uuid_dict['type'].upper() == 'AVR':
-                    logger.debug(f"======The given entity_uuid {entity_uuid} is an AVR uuid======")
+        if 'type' in entity_uuid_dict:
+            if entity_uuid_dict['type'].upper() == 'AVR':
+                logger.debug(f"======The given entity_uuid {entity_uuid} is an AVR uuid======")
 
-                    entity_is_avr = True
-            else:
-                logger.error(f"Missing 'type' from resulting json for the given entity_uuid {entity_uuid}")
+                entity_is_avr = True
+        else:
+            logger.error(f"Missing 'type' from resulting json for the given entity_uuid {entity_uuid}")
 
-                raise requests.exceptions.RequestException(response.text)
+            raise requests.exceptions.RequestException(response.text)
+    else:
+        msg = f"Unable to make a request to query the uuid via uuid-api: {entity_uuid}"
+        # Log the full stack trace, prepend a line with our message
+        logger.exception(msg)
+
+        logger.debug("======status code from uuid-api======")
+        logger.debug(response.status_code)
+
+        logger.debug("======response text from uuid-api======")
+        logger.debug(response.text)
+
+        # Also bubble up the error message from uuid-api
+        raise requests.exceptions.RequestException(response.text)
 
     # Return the entity uuid string, if the entity is AVR, and 
     # if the given uuid is a file uuid or not (bool)
