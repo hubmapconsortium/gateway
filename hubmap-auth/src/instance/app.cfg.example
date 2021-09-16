@@ -36,6 +36,6 @@ FILE_ASSETS_STATUS_URL = 'https://assets.dev.hubmapconsortium.org/status/file_as
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
 # Expire the cache after the time-to-live (seconds)
-CACHE_TTL = 7200
+CACHE_TTL = 1800
 
 
