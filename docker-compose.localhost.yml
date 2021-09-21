@@ -27,8 +27,6 @@ services:
       # search-api
       - "8686:8686"
       # ontology-api
-      - "8686:8686"
-      # ontology-api
       - "8787:8787"
     volumes:
       # Mount the VERSION file and BUILD file
