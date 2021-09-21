@@ -712,7 +712,7 @@
     },
     {
       "method": "POST",
-      "endpoint": "/assayname",=
+      "endpoint": "/assayname",
       "auth": false
     }
   ],
