@@ -120,8 +120,8 @@ def cache_clear():
 def api_auth():
     wildcard_delimiter = "<*>"
     # The regular expression pattern takes any alphabetical and numerical characters,
-    # also other characters permitted in the URI
-    regex_pattern = "[a-zA-Z0-9_.:#@!&=+*-]+"
+    # % used in URL encoding, and other characters permitted in the URI
+    regex_pattern = r"[a-zA-Z0-9_.:%#@!&=+*-]+"
 
     logger.info("======api_auth request.headers======")
     logger.info(request.headers)
