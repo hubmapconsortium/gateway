@@ -73,6 +73,14 @@
       "auth": false
     },
     {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/retract",
+      "auth": true,
+      "groups": [
+        "89a69625-99d7-11ea-9366-0e98982705c1"
+      ]
+    },
+    {
       "method": "GET",
       "endpoint": "/favicon.ico",
       "auth": false
