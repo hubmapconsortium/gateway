@@ -69,6 +69,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/datasets/<*>/revisions",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/favicon.ico",
       "auth": false
     },
