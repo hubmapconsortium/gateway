@@ -466,6 +466,14 @@
     },
     {
       "method": "PUT",
+      "endpoint": "/uploads/<*>/submit",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },      
+    {
+      "method": "PUT",
       "endpoint": "/uploads/<*>/arrange-into-datasets",
       "auth": true,
       "groups": [
@@ -733,114 +741,72 @@
     {
       "method": "GET",
       "endpoint": "/codes/<*>/codes",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/codes/<*>/concepts",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/codes/<*>/description",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/codes/<*>/terms",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/concepts/<*>/codes",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/concepts/<*>/concepts",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/concepts/<*>/definitions",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/concepts/<*>/semantics",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/concepts/<*>/terms",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/semantics/<*>/semantics",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/terms/<*>/codes",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/terms/<*>/concepts",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/terms/<*>/concepts/terms",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     },
     {
       "method": "GET",
       "endpoint": "/tui/<*>/semantics",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "auth": false
     }
   ]
 }
