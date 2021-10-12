@@ -812,6 +812,11 @@
       "method": "GET",
       "endpoint": "/tui/<*>/semantics",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/fullCapacityParameterizedTerm/<*>",
+      "auth": false
     }
   ]
 }
