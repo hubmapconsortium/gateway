@@ -322,6 +322,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/uploads/<*>/file-system-abs-path",
+      "auth": false
+    },
+    {
       "method": "POST",
       "endpoint": "/datasets/ingest",
       "auth": true,
@@ -806,6 +811,11 @@
     {
       "method": "GET",
       "endpoint": "/tui/<*>/semantics",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/fullCapacityParameterizedTerm/<*>",
       "auth": false
     }
   ]
