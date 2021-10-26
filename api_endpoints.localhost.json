@@ -246,6 +246,11 @@
       "method": "GET",
       "endpoint": "/datasets/<*>/revision",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/organs",
+      "auth": false
     }
  ],
   "localhost:8484": [
