@@ -817,6 +817,16 @@
       "method": "GET",
       "endpoint": "/fullCapacityParameterizedTerm/<*>",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/terms/<*>/terms",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/indexes/<*>/terms",
+      "auth": false
     }
   ]
 }
