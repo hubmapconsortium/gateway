@@ -39,6 +39,7 @@ app.config['ENTITY_API_STATUS_URL'] = app.config['ENTITY_API_STATUS_URL'].strip(
 app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip('/')
 app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip('/')
 app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
+app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -328,12 +329,16 @@ def get_status_data():
     INGEST_API = 'ingest_api'
     SEARCH_API = 'search_api'
     FILE_ASSETS = 'file_assets'
+    CELLS_API = 'cells_api'
     API_AUTH = 'api_auth'
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
     ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
     ELASTICSEARCH_STATUS = 'elasticsearch_status'
     FILE_ASSETS_STATUS = 'file_assets_status'
+    BRANCH = 'branch'
+    COMMIT = 'commit'
+    POSTGRES_CONNECTION = 'Postgress connection'
 
     # All API services have api_auth status (meaning the gateway's API auth is working)
     # We won't get other status if api_auth fails
@@ -359,6 +364,9 @@ def get_status_data():
             API_AUTH: False
         },
         FILE_ASSETS: {
+            API_AUTH: False
+        },
+        CELLS_API: {
             API_AUTH: False
         }
     }
@@ -459,6 +467,29 @@ def get_status_data():
         if FILE_ASSETS_STATUS in response_json:
             # Add the file assets status since file is accessible via nginx
             status_data[FILE_ASSETS][FILE_ASSETS_STATUS] = response_json[FILE_ASSETS_STATUS]
+
+    # cells api
+    cells_api_response = status_request(app.config['CELLS_API_STATUS_URL'])
+    if cells_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data[CELLS_API][API_AUTH] = True
+
+        response_json = cells_api_response.json()
+        if BRANCH in response_json:
+            # Set branch
+            status_data[CELLS_API][BRANCH] = response_json[BRANCH]
+
+        if COMMIT in response_json:
+            # Set commit
+            status_data[CELLS_API][COMMIT] = response_json[COMMIT]
+
+        if VERSION in response_json:
+            # Set version
+            status_data[CELLS_API][VERSION] = response_json[VERSION]
+
+        if POSTGRES_CONNECTION in response_json:
+            # Set Postgress connection
+            status_data[CELLS_API][POSTGRES_CONNECTION] = response_json[POSTGRES_CONNECTION]
 
     # Final result
     return status_data
