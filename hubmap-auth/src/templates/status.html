@@ -29,6 +29,28 @@
 
 {% endif %}
 
+{% if data.cells_api %}
+
+<h2>CELLS API</h2>
+
+{% if data.cells_api.branch %}
+<p class="pl-4">Branch: {{  data.cells_api.branch }}</p>
+{% endif %}
+
+{% if data.cells_api.commit %}
+<p class="pl-4">Commit: {{ data.cells_api.commit }}</p>
+{% endif %}
+
+{% if data.cells_api.version %}
+<p class="pl-4">Version: {{ data.cells_api.version }}</p>
+{% endif %}
+
+{% if data.cells_api.postgres_connection %}
+<p class="pl-4">Postgres Connection {{ data.cells_api.postgres_connection }}</p>
+{% endif %}
+
+{% endif %}
+
 
 {% if data.uuid_api %}
 
