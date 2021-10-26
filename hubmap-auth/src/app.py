@@ -338,7 +338,7 @@ def get_status_data():
     FILE_ASSETS_STATUS = 'file_assets_status'
     BRANCH = 'branch'
     COMMIT = 'commit'
-    POSTGRES_CONNECTION = 'Postgress connection'
+    POSTGRES_CONNECTION = 'Postgres connection'
 
     # All API services have api_auth status (meaning the gateway's API auth is working)
     # We won't get other status if api_auth fails
@@ -488,7 +488,7 @@ def get_status_data():
             status_data[CELLS_API][VERSION] = response_json[VERSION]
 
         if POSTGRES_CONNECTION in response_json:
-            # Set Postgress connection
+            # Set Postgres connection
             status_data[CELLS_API][POSTGRES_CONNECTION] = response_json[POSTGRES_CONNECTION]
 
     # Final result
