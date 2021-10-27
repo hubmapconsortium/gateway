@@ -29,6 +29,8 @@
 
 {% endif %}
 
+{% if data.cells_api %}
+
 
 {% if data.uuid_api %}
 
@@ -136,6 +138,27 @@
 
 {% if data.file_assets.file_assets_status %}
 <p class="pl-4">File Assets Status: {{ data.file_assets.file_assets_status }}</p>
+{% endif %}
+
+{% endif %}
+  
+<h2>CELLS API</h2>
+
+{% if data.cells_api.branch %}
+<p class="pl-4">Branch: {{  data.cells_api.branch }}</p>
+{% endif %}
+
+{% if data.cells_api.commit %}
+<p class="pl-4">Commit: {{ data.cells_api.commit }}</p>
+{% endif %}
+
+{% if data.cells_api.version %}
+<p class="pl-4">Version: {{ data.cells_api.version }}</p>
+{% endif %}
+
+<!-- Need to update this to use "cells_api.postgres_connection" once Matt redeploys the corresponding tweaks -->
+{% if data.cells_api["Postgres connection"] %}
+<p class="pl-4">Postgres Connection: {{ data.cells_api["Postgres connection"] }}</p>
 {% endif %}
 
 {% endif %}
