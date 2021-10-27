@@ -830,7 +830,7 @@
     },
     {
       "method": "GET",
-      "endpoint": "/indexes/<*>/terms",
+      "endpoint": "/nodes/<*>/terms",
       "auth": false
     }
   ]
