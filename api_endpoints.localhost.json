@@ -246,6 +246,11 @@
       "method": "GET",
       "endpoint": "/datasets/<*>/revision",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/organs",
+      "auth": false
     }
  ],
   "localhost:8484": [
@@ -816,6 +821,16 @@
     {
       "method": "GET",
       "endpoint": "/fullCapacityParameterizedTerm/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/terms/<*>/terms",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/nodes/<*>/terms",
       "auth": false
     }
   ]

@@ -32,6 +32,7 @@ ENTITY_API_STATUS_URL = 'https://entity-api.dev.hubmapconsortium.org/status'
 INGEST_API_STATUS_URL = 'https://ingest-api.dev.hubmapconsortium.org/status'
 SEARCH_API_STATUS_URL = 'https://search-api.dev.hubmapconsortium.org/status'
 FILE_ASSETS_STATUS_URL = 'https://assets.dev.hubmapconsortium.org/status/file_assets_status.json'
+CELLS_API_STATUS_URL = 'https://cells.dev.hubmapconsortium.org/api/status'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 128
