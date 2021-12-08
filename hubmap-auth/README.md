@@ -69,9 +69,9 @@ GET http://localhost:8080/cache_clear
 
 ### File assets service
 
-URI pattern: `https://assets.dev.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>?token=<globus-token>`
+The File Assets service allows direct http(s) access to files located in HuBMAP datasets with access control via passing an auth token via a header in the standard `Authorization: Bearer <token>` mechanism or by adding the token directy as a URL parameter.
 
-The file auth supports both token from the above query string or the HTTP `Authorization` header field. When both are provided, the token from query string will be the winner.
+  URL pattern: `https://assets.hubmapconsortium.org/<dataset-uuid>/<relative-file-path>?token=<globus-token>`
 
 #### File assets status
 
