@@ -73,6 +73,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/entities/<*>/revisions",
+      "auth": false
+    },
+    {
       "method": "PUT",
       "endpoint": "/datasets/<*>/retract",
       "auth": true,
