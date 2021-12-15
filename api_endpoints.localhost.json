@@ -82,6 +82,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/entities/<*>/revisions",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/favicon.ico",
       "auth": false
     },
