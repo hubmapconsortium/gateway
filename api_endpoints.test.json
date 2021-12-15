@@ -73,6 +73,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/entities/<*>/revisions",
+      "auth": false
+    },
+    {
       "method": "PUT",
       "endpoint": "/datasets/<*>/retract",
       "auth": true,
@@ -250,6 +255,19 @@
     {
       "method": "GET",
       "endpoint": "/datasets/<*>/organs",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/prov-info",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/prov-info",
       "auth": false
     }
   ],
