@@ -5,13 +5,13 @@ The HuBMAP Gateway serves as an authentication and authorization gateway for som
 HTTP requests to the following APIs will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. 
 
 - [Ingest API](https://github.com/hubmapconsortium/ingest-api)
-- [Ontology API](https://github.com/hubmapconsortium/ontology-api)
+- [Ontology API](https://github.com/hubmapconsortium/ontology-api) (currently only deployed on DEV and PROD)
 
 And following are the APIs and UI applications that only use this gateway as reverse proxy without any authentication/authoriztion involved:
 
-- [Antibody API](https://github.com/hubmapconsortium/antibody-api)
+- [Antibody API](https://github.com/hubmapconsortium/antibody-api) (not for PROD)
 - [Ingest UI](https://github.com/hubmapconsortium/ingest-ui)
-- [Portal UI](https://github.com/hubmapconsortium/portal-ui)
+- [Portal UI](https://github.com/hubmapconsortium/portal-ui) (not for localhost build)
 
 The file assets service is not an API per se, the gateway only does the auth cehck for requests made to
 
