@@ -1,6 +1,6 @@
 # HuBMAP Hybrid Gateway Overview
 
-The HuBMAP Gateway serves as an authentication and authorization gateway for some of the HuBMAP API services and File assets service, it also proxies the requests to the UI applications. 
+This HuBMAP Gateway serves as an authentication and authorization gateway for some of the HuBMAP API services and File assets service, it also proxies the requests to the UI applications. 
 
 HTTP requests to the following APIs will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. 
 
@@ -22,6 +22,8 @@ Different from the above use cases, the following APIs are protected by AWS API 
 - [Entity API](https://github.com/hubmapconsortium/entity-api)
 - [Search API](https://github.com/hubmapconsortium/search-api)
 - [UUID API](https://github.com/hubmapconsortium/uuid-api)
+
+More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
 
 ## Localhost development and remote deployment environments
 
@@ -257,7 +259,6 @@ You can also stop the running container and remove it by:
 ````
 source ./hubmap-auth-docker.sh dev down
 ````
-
 
 ## Update base image
 
