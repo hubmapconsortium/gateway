@@ -1,6 +1,29 @@
-# HuBMAP Gateway With Multi-Container Stack
+# HuBMAP Hybrid Gateway Overview
 
-The HuBMAP Web Gateway serves as an authentication and authorization gateway for the HuBMAP API services and File service. All API requests will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. As a result of this design, the API services and File service no longer need to handle the authentication and authorization.
+This HuBMAP Gateway serves as an authentication and authorization gateway for some of the HuBMAP API services and File assets service, it also proxies the requests to the UI applications. 
+
+HTTP requests to the following APIs will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. 
+
+- [Ingest API](https://github.com/hubmapconsortium/ingest-api)
+- [Ontology API](https://github.com/hubmapconsortium/ontology-api) (currently only deployed on DEV and PROD)
+
+And following are the APIs and UI applications that only use this gateway as reverse proxy without any authentication/authoriztion involved:
+
+- [Antibody API](https://github.com/hubmapconsortium/antibody-api) (not for PROD)
+- [Ingest UI](https://github.com/hubmapconsortium/ingest-ui)
+- [Portal UI](https://github.com/hubmapconsortium/portal-ui) (not for localhost build)
+
+The file assets service is not an API per se, the gateway only does the auth cehck for requests made to
+
+- `https://assets.hubmapconsortium.org/<uuid>/<relative-file-path>[?token=<globus-token>]`
+
+Different from the above use cases, the following APIs are protected by AWS API Gateway with using Lambda Authorizors:
+
+- [Entity API](https://github.com/hubmapconsortium/entity-api)
+- [Search API](https://github.com/hubmapconsortium/search-api)
+- [UUID API](https://github.com/hubmapconsortium/uuid-api)
+
+More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
 
 ## Localhost development and remote deployment environments
 
@@ -85,7 +108,7 @@ Currently, you can deploy the following projects with the `gateway`. Git clone t
 - [Search API](https://github.com/hubmapconsortium/search-api)
 - [Ingest API](https://github.com/hubmapconsortium/ingest-api)
 - [Ingest UI](https://github.com/hubmapconsortium/ingest-ui)
-- [Ingest Pipeline](https://github.com/hubmapconsortium/ingest-pipeline) (used for localhost build)
+- [Ingest Pipeline](https://github.com/hubmapconsortium/ingest-pipeline) (used for localhost build only)
 
 ### Step 2: add configuration files for each project
 
@@ -236,7 +259,6 @@ You can also stop the running container and remove it by:
 ````
 source ./hubmap-auth-docker.sh dev down
 ````
-
 
 ## Update base image
 

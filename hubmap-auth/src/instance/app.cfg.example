@@ -17,12 +17,14 @@ GLOBUS_HUBMAP_READ_GROUP_UUID = '5777527e-ec11-11e8-ab41-0af86edb4424'
 # Don't use localhost since uuid-api is running on a different container
 # Point to remote URL for non-docker development
 # Works regardless of the trailing slash
-UUID_API_URL = 'http://hubmap-auth:9999'
+# Use 'http://hubmap-auth:9999' for localhost docker deployment
+UUID_API_URL = 'http://uuid-api:8080'
 
 # URL base to entity-api for getting file access level of a given dataset UUID
 # Default value works for docker localhost
 # Works regardless the trailing slash /
-ENTITY_API_URL = 'http://localhost:3333'
+# Use 'http://hubmap-auth:3333' for localhost docker deployment
+ENTITY_API_URL = 'http://entity-api:8080'
 
 # For service status 
 # Use URLs (shown for DEV) that go through the gateway API auth instead of the ones 
