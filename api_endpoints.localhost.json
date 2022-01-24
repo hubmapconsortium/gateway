@@ -345,6 +345,11 @@
       "auth": false
     },
     {
+      "method": "POST",
+      "endpoint": "/entities/file-system-rel-path",
+      "auth": false
+    },
+    {
       "method": "GET",
       "endpoint": "/uploads/<*>/file-system-abs-path",
       "auth": false
