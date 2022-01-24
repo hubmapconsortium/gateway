@@ -79,6 +79,11 @@
     },
     {
       "method": "POST",
+      "endpoint": "/entities/file-system-rel-path",
+      "auth": false
+    },
+    {
+      "method": "POST",
       "endpoint": "/datasets/ingest",
       "auth": true,
       "groups": [
