@@ -338,7 +338,7 @@ def get_status_data():
     FILE_ASSETS_STATUS = 'file_assets_status'
     BRANCH = 'branch'
     COMMIT = 'commit'
-    POSTGRES_CONNECTION = 'Postgres connection'
+    POSTGRES_CONNECTION = 'postgres_connection'
 
     # All API services have api_auth status (meaning the gateway's API auth is working)
     # We won't get other status if api_auth fails
