@@ -14,6 +14,13 @@ services:
     image: hubmap-auth:${HUBMAP_AUTH_VERSION:?err}
     hostname: hubmap-auth
     container_name: hubmap-auth
+    # Avoid accidentally creating zombie processes
+    init: true
+    # Specifying a restart policy to avoid downtime
+    restart: always
+    environment:
+      - HOST_GID=${HOST_GID:-1000}
+      - HOST_UID=${HOST_UID:-1000}
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080"]
       interval: 1m30s
@@ -27,7 +34,7 @@ services:
       - "./hubmap-auth/requests_cache:/usr/src/app/requests_cache"
       # Make the uwsgi/nginx log files generated on container available through from host
       - "./hubmap-auth/log:/usr/src/app/log"
-      # favicon.ico
+      # favicon.ico and portal/ingest UI maintenance page
       - "./nginx/html:/usr/share/nginx/html"
 
 networks:
