@@ -157,7 +157,7 @@
 {% endif %}
 
 <!-- Need to update this to use "cells_api.postgres_connection" once Matt redeploys the corresponding tweaks -->
-{% if data.cells_api["Postgres connection"] %}
+{% if data.cells_api.postgres_connection %}
 <p class="pl-4">Postgres Connection: {{ data.cells_api.postgres_connection }}</p>
 {% endif %}
 
