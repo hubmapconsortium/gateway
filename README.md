@@ -9,7 +9,7 @@ HTTP requests to the following APIs will be proxied to this gateway service for 
 
 And following are the APIs and UI applications that only use this gateway as reverse proxy without any authentication/authoriztion involved:
 
-- [Antibody API](https://github.com/hubmapconsortium/antibody-api) (not for PROD)
+- [Antibody API](https://github.com/hubmapconsortium/antibody-api)
 - [Ingest UI](https://github.com/hubmapconsortium/ingest-ui)
 - [Portal UI](https://github.com/hubmapconsortium/portal-ui) (not for localhost build)
 

@@ -13,6 +13,8 @@ services:
       - "443:4430"
       # 8443 is used by ingest-api running on another machine
       - "8443:8443"
+      # 5555 for antibody-api
+      - "5555:5555"
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
