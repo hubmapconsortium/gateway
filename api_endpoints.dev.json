@@ -518,7 +518,12 @@
     },
     {
       "method": "GET",
-      "endpoint": "/favicon.ico",
+      "endpoint": "/static/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/css/<*>",
       "auth": false
     },
     {
