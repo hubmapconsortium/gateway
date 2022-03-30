@@ -523,6 +523,11 @@
     },
     {
       "method": "GET",
+      "endpoint": "/static/dist/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
       "endpoint": "/css/<*>",
       "auth": false
     },
