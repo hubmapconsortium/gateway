@@ -550,6 +550,6 @@
       "method": "POST",
       "endpoint": "/_search",
       "auth": false
-    },
+    }
   ]
 }
