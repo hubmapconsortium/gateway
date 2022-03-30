@@ -510,7 +510,17 @@
       "auth": false
     }
   ],
-    "avr.dev.hubmapconsortium.org": [
+  "avr.dev.hubmapconsortium.org": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/favicon.ico",
+      "auth": false
+    },
     {
       "method": "GET",
       "endpoint": "/login",
