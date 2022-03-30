@@ -510,7 +510,27 @@
       "auth": false
     }
   ],
-    "avr.dev.hubmapconsortium.org": [
+  "avr.dev.hubmapconsortium.org": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/static/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/static/dist/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/css/<*>",
+      "auth": false
+    },
     {
       "method": "GET",
       "endpoint": "/login",
@@ -550,6 +570,6 @@
       "method": "POST",
       "endpoint": "/_search",
       "auth": false
-    },
+    }
   ]
 }
