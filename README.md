@@ -4,12 +4,11 @@ This HuBMAP Gateway serves as an authentication and authorization gateway for so
 
 HTTP requests to the following APIs will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. 
 
-- [Ingest API](https://github.com/hubmapconsortium/ingest-api)
+- [AVR (Antibody API)](https://github.com/hubmapconsortium/antibody-api)
 - [Ontology API](https://github.com/hubmapconsortium/ontology-api) (currently only deployed on DEV and PROD)
 
 And following are the APIs and UI applications that only use this gateway as reverse proxy without any authentication/authoriztion involved:
 
-- [Antibody API](https://github.com/hubmapconsortium/antibody-api)
 - [Ingest UI](https://github.com/hubmapconsortium/ingest-ui)
 - [Portal UI](https://github.com/hubmapconsortium/portal-ui) (not for localhost build)
 
@@ -17,11 +16,12 @@ The file assets service is not an API per se, the gateway only does the auth ceh
 
 - `https://assets.hubmapconsortium.org/<uuid>/<relative-file-path>[?token=<globus-token>]`
 
-Different from the above use cases, the following APIs are protected by AWS API Gateway with using Lambda Authorizors:
+Different from the above use cases, the following APIs are handled through AWS API Gateway with Lambda Authorizors being used for Auth check (when needed):
 
 - [Entity API](https://github.com/hubmapconsortium/entity-api)
 - [Search API](https://github.com/hubmapconsortium/search-api)
 - [UUID API](https://github.com/hubmapconsortium/uuid-api)
+- [Ingest API](https://github.com/hubmapconsortium/ingest-api)
 
 More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
 
