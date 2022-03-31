@@ -11,8 +11,10 @@ services:
     ports:
       - "80:8080"
       - "443:4430"
-      # 8443 is used by ingest-api running on another machine
-      - "8443:8443" 
+      # 8443 is used by assets service on PSC VM
+      - "8443:8443"
+      # Proxy pass to ingest-api on PSC VM
+      - "6666:6666"
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
