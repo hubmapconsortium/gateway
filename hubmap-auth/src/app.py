@@ -774,6 +774,9 @@ def api_access_allowed(item, request):
 
     # Get user info and do further parsing
     user_info = get_user_info_for_access_check(request, group_required)
+    
+    logger.info("======user_info======")
+    logger.info(user_info)
 
     # If returns error response, invalid header or token
     if isinstance(user_info, Response):

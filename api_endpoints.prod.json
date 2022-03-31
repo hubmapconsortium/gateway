@@ -85,5 +85,76 @@
       "endpoint": "/nodes/<*>/terms",
       "auth": false
     }
+  ],
+  "avr.hubmapconsortium.org": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/static/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/static/dist/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/css/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/login",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/logout",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/antibodies",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/antibodies",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/antibodies/import",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/restore_elasticsearch",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/upload",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/_search",
+      "auth": false
+    }
   ]
 }
