@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify, make_response, Response, render_template
 import requests
-import requests_cache
 # Don't confuse urllib (Python native library) with urllib3 (3rd-party library, requests also uses urllib3)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 import re
@@ -46,11 +45,6 @@ app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/
 # with a per-item time-to-live (TTL) value
 # Here we use two hours, 7200 seconds for ttl
 cache = TTLCache(maxsize=app.config['CACHE_MAXSIZE'], ttl=app.config['CACHE_TTL'])
-
-# Requests cache generates the sqlite file
-# File path defined in app.config['REQUESTS_CACHE_SQLITE_NAME'] without the .sqlite extension
-# Use the same CACHE_TTL from configuration
-requests_cache.install_cache(app.config['REQUESTS_CACHE_SQLITE_NAME'], backend='sqlite', expire_after=app.config['CACHE_TTL'])
 
 # Suppress InsecureRequestWarning warning when requesting status on https with ssl cert verify disabled
 requests.packages.urllib3.disable_warnings(category = InsecureRequestWarning)
@@ -592,9 +586,6 @@ def get_file_access(uuid, token_from_query, request):
     # Possible response status codes: 200, 401, and 500 to be handled below
     response = requests.get(url = entity_api_full_url, headers = request_headers, verify = False) 
 
-    # Verify if the cached response from the SQLite database being used
-    verify_request_cache(entity_api_full_url, response.from_cache)
-
     # Using the globus app secret as internal token should always return 200 supposedly
     # If not, either technical issue 500 or something wrong with this internal token 401
     if response.status_code == 200:
@@ -819,9 +810,6 @@ def get_entity_uuid_by_file_uuid(uuid):
     uuid_api_file_url = f"{app.config['UUID_API_URL']}/file-id/{uuid}"
     response = requests.get(url = uuid_api_file_url, headers = request_headers, verify = False) 
 
-    # Verify if the cached response from the SQLite database being used
-    verify_request_cache(uuid_api_file_url, response.from_cache)
-
     # 200: this given uuid is a file uuid
     # 404: either the given uuid does not exist or it's not a file uuid
     if response.status_code == 200:
@@ -869,9 +857,6 @@ def get_entity_uuid_by_file_uuid(uuid):
     uuid_api_entity_url = f"{app.config['UUID_API_URL']}/hmuuid/{entity_uuid}"
     response = requests.get(url = uuid_api_entity_url, headers = request_headers, verify = False) 
 
-    # Verify if the cached response from the SQLite database being used
-    verify_request_cache(uuid_api_entity_url, response.from_cache)
-
     if response.status_code == 200:
         entity_uuid_dict = response.json()
 
@@ -901,10 +886,3 @@ def get_entity_uuid_by_file_uuid(uuid):
     # Return the entity uuid string, if the entity is AVR, and 
     # if the given uuid is a file uuid or not (bool)
     return entity_uuid, entity_is_avr, given_uuid_is_file_uuid
-
-
-# Verify if the cached response from the SQLite database being used
-def verify_request_cache(url, response_from_cache):
-    now = time.ctime(int(time.time()))
-    logger.debug(f"Time: {now} / GET request URL: {url} / Used requests cache: {response_from_cache}")
-
