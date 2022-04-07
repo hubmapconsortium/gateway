@@ -1,6 +1,5 @@
 cachetools==4.2.1
 Flask==1.1.2
-requests_cache==0.5.2
 
 # The commons package requires requests>=2.22.0
 requests==2.25.1
