@@ -298,16 +298,27 @@ def load_file(file):
         data = json.load(f)
         return data
 
-
-# Make a call to the given target status URL
-def status_request(target_url):
-    # Verify if requests used the cached response from the SQLite database
+# Cache the request response for the given URL with using function cache (memoization)
+@cached(cache)
+def make_api_request_get(target_url):
     now = time.ctime(int(time.time()))
 
+    # Log the first non-cache call, the subsequent requests will juse use the function cache unless it's expired
+    logger.info(f'Making a fresh non-cache HTTP request to GET {target_url} at time {now}')
+
+    # Use modified version of globus app secret from configuration as the internal token
+    request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
+
+    # Disable ssl certificate verification
+    response = requests.get(url = target_url, headers = request_headers, verify = False)
+
+    return response
+
+# Make a call to the given target status URL
+# We don't want to cache the status request
+def status_request(target_url):
     # Disable ssl certificate verification
     response = requests.get(url = target_url, verify = False) 
-
-    logger.debug(f"Time: {now} / GET request URL: {target_url} / Used requests cache: {response.from_cache}")
 
     return response
 
@@ -577,14 +588,9 @@ def get_file_access(uuid, token_from_query, request):
     # making a call to entity-api to retrieve the entity first
     entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + entity_uuid
 
-    # Use modified version of globus app secret from configuration as the internal token
-    # All API endpoints specified in gateway regardless of auth is required or not, 
-    # will consider this internal token as valid and has the access to HuBMAP-Read group
-    request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
-
-    # Disable ssl certificate verification
+    # Function cache to improve performance
     # Possible response status codes: 200, 401, and 500 to be handled below
-    response = requests.get(url = entity_api_full_url, headers = request_headers, verify = False) 
+    response = make_api_request_get(entity_api_full_url)
 
     # Using the globus app secret as internal token should always return 200 supposedly
     # If not, either technical issue 500 or something wrong with this internal token 401
@@ -799,16 +805,12 @@ def get_entity_uuid_by_file_uuid(uuid):
     # Assume the given uuid is a file uuid by default
     given_uuid_is_file_uuid = True
 
-    # Use modified version of globus app secret from configuration as the internal token
-    # All API endpoints specified in gateway regardless of auth is required or not, 
-    # will consider this internal token as valid and has the access to HuBMAP-Read group
-    request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
-
     # First determine if the given uuid is whether an entity uuid or a file uuid
     # by making a call to the uuid-api's /file-id endpoint
-    # Disable ssl certificate verification
     uuid_api_file_url = f"{app.config['UUID_API_URL']}/file-id/{uuid}"
-    response = requests.get(url = uuid_api_file_url, headers = request_headers, verify = False) 
+
+    # Function cache to improve performance
+    response = make_api_request_get(uuid_api_file_url)
 
     # 200: this given uuid is a file uuid
     # 404: either the given uuid does not exist or it's not a file uuid
@@ -855,7 +857,9 @@ def get_entity_uuid_by_file_uuid(uuid):
     # Further check the entity type registered with uuid-api to determine if it's AVR or not
     # Make the call against the /hmuuid endpoint
     uuid_api_entity_url = f"{app.config['UUID_API_URL']}/hmuuid/{entity_uuid}"
-    response = requests.get(url = uuid_api_entity_url, headers = request_headers, verify = False) 
+
+    # Function cache to improve performance
+    response = make_api_request_get(uuid_api_entity_url)
 
     if response.status_code == 200:
         entity_uuid_dict = response.json()
