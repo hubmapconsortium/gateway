@@ -301,8 +301,10 @@ def load_file(file):
 # Cache the request response for the given URL with using function cache (memoization)
 @cached(cache)
 def make_api_request_get(target_url):
+    now = time.ctime(int(time.time()))
+
     # Log the first non-cache call, the subsequent requests will juse use the function cache unless it's expired
-    logger.info(f'Making a fresh non-cache HTTP request to GET {target_url}')
+    logger.info(f'Making a fresh non-cache HTTP request to GET {target_url} at time {now}')
 
     # Use modified version of globus app secret from configuration as the internal token
     request_headers = create_request_headers_for_auth(auth_helper_instance.getProcessSecret())
@@ -315,9 +317,6 @@ def make_api_request_get(target_url):
 # Make a call to the given target status URL
 # We don't want to cache the status request
 def status_request(target_url):
-    # Verify if requests used the cached response from the SQLite database
-    now = time.ctime(int(time.time()))
-
     # Disable ssl certificate verification
     response = requests.get(url = target_url, verify = False) 
 
