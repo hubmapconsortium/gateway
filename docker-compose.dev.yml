@@ -13,8 +13,10 @@ services:
       - "443:4430"
       # 8443 is used by ingest-api running on another machine
       - "8443:8443"
-      # Proxy pass to workspaces-api on PSC VM
+      # Proxy pass to workspaces REST API on PSC VM
       - "7777:7777"
+      # Proxy pass to workspaces Websocket API on PSC VM
+      - "7878:7878"
     volumes:
       # Mount the VERSION file and BUILD file
       - "./VERSION:/usr/src/app/VERSION"
