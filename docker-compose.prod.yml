@@ -13,6 +13,8 @@ services:
       - "443:4430"
       # 8443 is used by ingest-api running on another machine
       - "8443:8443"
+      # Proxy pass to workspaces REST API on PSC VM
+      - "7777:7777"
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
