@@ -508,6 +508,26 @@
       "method": "GET",
       "endpoint": "/nodes/<*>/terms",
       "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/concepts/expand",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/concepts/paths",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/concepts/shortestpaths",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/concepts/trees",
+      "auth": false
     }
   ],
   "avr.hubmapconsortium.org": [
