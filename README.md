@@ -259,19 +259,3 @@ You can also stop the running container and remove it by:
 ````
 source ./hubmap-auth-docker.sh dev down
 ````
-
-## Update base image
-
-The `entity-api`, `uuid-api`, `ingest-api`, and `hubmap-auth` docker images are based on the `hubmap/api-base-image:latest` image. If you need to update the base image, go to the `api-base-image` directory and recrerate it with:
-
-````
-cd api-base-image
-docker build -t hubmap/api-base-image:latest .
-````
-
-Then publish it to the DockerHub:
-
-````
-docker login
-docker push hubmap/api-base-image:latest
-````
