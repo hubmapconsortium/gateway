@@ -3,16 +3,10 @@ version: "3.7"
 services:
   
   hubmap-auth:
+    # Use the published image and tag from DockerHub
+    image: hubmap/hubmap-auth:${HUBMAP_AUTH_VERSION:?err}
     environment:
       - DEPLOY_MODE=test
-    # Map host machine port 80, 443, and 8443 to container ports
-    # Only root can listen on ports below 1024, we use higher-numbered ports
-    # since nginx is running under non-root user hubmap
-    ports:
-      - "80:8080"
-      - "443:4430"
-      # 8443 is used by ingest-api running on another machine
-      - "8443:8443" 
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
