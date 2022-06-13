@@ -15,6 +15,8 @@ services:
       - "8443:8443"
       # Proxy pass to workspaces REST API on PSC VM
       - "7777:7777"
+      # spatial-api
+      - "8888:8888"
     volumes:
       # Mount the VERSION file and BUILD file
       - "./VERSION:/usr/src/app/VERSION"
