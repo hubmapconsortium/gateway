@@ -46,7 +46,7 @@ Then log out and log back in so that your group membership is re-evaluated. If t
 
 Note: the following instructions with docker commands are based on managing Docker as a non-root user.
 
-## Docker build for local/DEV development
+## Docker build for DEV development
 
 There are a few configurable environment variables to keep in mind:
 
