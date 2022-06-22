@@ -11,6 +11,11 @@ itsdangerous==2.0.1
 # but Flask v1.1.2 that we are using still depends on the older version
 Jinja2==3.0.3
 
+# 6/22/2022
+# Note: pin version of Werkzeug to 2.0.3 to avoid import error 
+# possibly caused by Python 3.9.7?
+Werkzeug==2.0.3
+
 cachetools==4.2.1
 Flask==1.1.2
 
