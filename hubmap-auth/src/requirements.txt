@@ -1,3 +1,8 @@
+# 6/22/2022
+# Note: pin version of Jinja2 to 3.0.3 because escape function was removed from newer release 
+# but Flask v1.1.2 that we are using still depends on the older version
+Jinja2==3.0.3
+
 cachetools==4.2.1
 Flask==1.1.2
 
