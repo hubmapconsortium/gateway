@@ -22,6 +22,7 @@ Different from the above use cases, the following APIs are protected by AWS API 
 - [Entity API](https://github.com/hubmapconsortium/entity-api)
 - [Search API](https://github.com/hubmapconsortium/search-api)
 - [UUID API](https://github.com/hubmapconsortium/uuid-api)
+- [Workspaces API](https://github.com/hubmapconsortium/user_workspaces_server) (only the REST API part on DEV and PROD)
 
 More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
 
