@@ -41,55 +41,46 @@ function get_dir_of_this_script () {
     echo 'DIR of script:' $DIR
 }
 
-if [[ "$1" != "localhost" && "$1" != "dev" && "$1" != "test" && "$1" != "stage" && "$1" != "prod" ]]; then
-    echo "Unknown build environment '$1', specify one of the following: localhost|dev|test|stage|prod"
+
+if [[ "$1" != "check" && "$1" != "config" && "$1" != "build" && "$1" != "start" && "$1" != "stop" && "$1" != "down" ]]; then
+    echo "Unknown command '$1', specify one of the following: check|config|build|start|stop|down"
 else
-    if [[ "$2" != "check" && "$2" != "config" && "$2" != "build" && "$2" != "start" && "$2" != "stop" && "$2" != "down" ]]; then
-        echo "Unknown command '$2', specify one of the following: check|config|build|start|stop|down"
-    else
-        # Always show the script dir
-        get_dir_of_this_script
+    # Always show the script dir
+    get_dir_of_this_script
 
-        # Always export and show the version
-        export_version
+    # Always export and show the version
+    export_version
 
-        # Always show the build in case branch changed or new commits
-        generate_build_version
+    # Always show the build in case branch changed or new commits
+    generate_build_version
 
-        # Print empty line
-        echo
+    # Print empty line
+    echo
 
-        if [ "$2" = "check" ]; then
-            # Bash array
-            config_paths=(
-                'hubmap-auth/src/instance/app.cfg'
-            )
+    if [ "$1" = "check" ]; then
+        # Bash array
+        config_paths=(
+            'hubmap-auth/src/instance/app.cfg'
+        )
 
-            for pth in "${config_paths[@]}"; do
-                if [ ! -e $pth ]; then
-                    echo "Missing file (relative path to DIR of script) :$pth"
-                    exit -1
-                fi
-            done
-
-            echo 'Checks complete, all good :)'
-        elif [ "$2" = "config" ]; then
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway config
-        elif [ "$2" = "build" ]; then
-            # Only mount the VERSION file and BUILD file for localhost and dev
-            # On test/stage/prod, copy the VERSION file and BUILD file to image
-            if [[ "$1" != "localhost" && "$1" != "dev" ]]; then
-                cp VERSION hubmap-auth
-                cp BUILD hubmap-auth
+        for pth in "${config_paths[@]}"; do
+            if [ ! -e $pth ]; then
+                echo "Missing file (relative path to DIR of script) :$pth"
+                exit -1
             fi
+        done
 
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway build
-        elif [ "$2" = "start" ]; then
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway up -d
-        elif [ "$2" = "stop" ]; then
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway stop
-        elif [ "$2" = "down" ]; then
-            docker-compose -f docker-compose.yml -f docker-compose.$1.yml -p gateway down
-        fi
+        echo 'Checks complete, all good :)'
+    elif [ "$1" = "config" ]; then
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway config
+    elif [ "$1" = "build" ]; then
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway build
+    elif [ "$1" = "start" ]; then
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway up -d
+    elif [ "$1" = "stop" ]; then
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway stop
+    elif [ "$1" = "down" ]; then
+        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway down
     fi
 fi
+
