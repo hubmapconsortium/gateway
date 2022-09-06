@@ -74,6 +74,19 @@ else
     elif [ "$1" = "config" ]; then
         docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway config
     elif [ "$1" = "build" ]; then
+        # Delete old VERSION and BUILD files if found
+        if [ -f "hubmap-auth/VERSION" ]; then
+            rm -rf hubmap-auth/VERSION
+        fi
+        
+        if [ -f "hubmap-auth/BUILD" ]; then
+            rm -rf hubmap-auth/BUILD
+        fi
+        
+        # Copy over the VERSION and BUILD files
+        cp ./VERSION hubmap-auth
+        cp ./BUILD hubmap-auth
+
         docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway build
     elif [ "$1" = "start" ]; then
         docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway up -d
