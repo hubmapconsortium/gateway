@@ -39,6 +39,7 @@ app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip(
 app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip('/')
 app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
 app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/')
+app.config['WORKSPACES_API_STATUS_URL'] = app.config['WORKSPACES_API_STATUS_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -335,6 +336,7 @@ def get_status_data():
     SEARCH_API = 'search_api'
     FILE_ASSETS = 'file_assets'
     CELLS_API = 'cells_api'
+    WORKSPACES_API = 'workspaces_api'
     API_AUTH = 'api_auth'
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
@@ -372,6 +374,9 @@ def get_status_data():
             API_AUTH: False
         },
         CELLS_API: {
+            API_AUTH: False
+        },
+        WORKSPACES_API: {
             API_AUTH: False
         }
     }
@@ -495,6 +500,21 @@ def get_status_data():
         if POSTGRES_CONNECTION in response_json:
             # Set Postgres connection
             status_data[CELLS_API][POSTGRES_CONNECTION] = response_json[POSTGRES_CONNECTION]
+
+    # workspaces REST api
+    workspaces_api_response = status_request(app.config['WORKSPACES_API_STATUS_URL'])
+    if cells_api_response.status_code == 200:
+        # Overwrite the default value
+        status_data[WORKSPACES_API][API_AUTH] = True
+
+        response_json = workspaces_api_response.json()
+        if VERSION in response_json:
+            # Set version
+            status_data[WORKSPACES_API][VERSION] = response_json[VERSION]
+
+        if BUILD in response_json:
+            # Set build
+            status_data[WORKSPACES_API][BUILD] = response_json[BUILD]
 
     # Final result
     return status_data
