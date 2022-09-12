@@ -337,7 +337,7 @@ def get_status_data():
     FILE_ASSETS = 'file_assets'
     CELLS_API = 'cells_api'
     WORKSPACES_API = 'workspaces_api'
-    API_AUTH = 'api_auth'
+
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
     ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
@@ -347,9 +347,6 @@ def get_status_data():
     COMMIT = 'commit'
     POSTGRES_CONNECTION = 'postgres_connection'
 
-    # All API services have api_auth status (meaning the gateway's API auth is working)
-    # We won't get other status if api_auth fails
-    # Add additional API-specific status to the dict when API auth check passes
     # Gateway version and build are parsed from VERSION and BUILD files directly
     # instead of making API calls. So they alwasy present
     status_data = {
@@ -357,7 +354,14 @@ def get_status_data():
             # Use strip() to remove leading and trailing spaces, newlines, and tabs
             VERSION: (Path(__file__).absolute().parent.parent / 'VERSION').read_text().strip(),
             BUILD: (Path(__file__).absolute().parent.parent / 'BUILD').read_text().strip()
-        }
+        },
+        UUID_API: {},
+        ENTITY_API: {},
+        INGEST_API: {},
+        SEARCH_API: {},
+        FILE_ASSETS: {},
+        CELLS_API: {},
+        WORKSPACES_API: {}
     }
 
     # uuid-api
