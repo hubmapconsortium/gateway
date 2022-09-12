@@ -357,36 +357,12 @@ def get_status_data():
             # Use strip() to remove leading and trailing spaces, newlines, and tabs
             VERSION: (Path(__file__).absolute().parent.parent / 'VERSION').read_text().strip(),
             BUILD: (Path(__file__).absolute().parent.parent / 'BUILD').read_text().strip()
-        },
-        UUID_API: {
-            API_AUTH: False
-        },
-        ENTITY_API: {
-            API_AUTH: False
-        },
-        INGEST_API: {
-            API_AUTH: False
-        },
-        SEARCH_API: {
-            API_AUTH: False
-        },
-        FILE_ASSETS: {
-            API_AUTH: False
-        },
-        CELLS_API: {
-            API_AUTH: False
-        },
-        WORKSPACES_API: {
-            API_AUTH: False
         }
     }
 
     # uuid-api
     uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'])
     if uuid_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[UUID_API][API_AUTH] = True
-
         # Then parse the response json to determine if neo4j connection is working
         response_json = uuid_api_response.json()
         if VERSION in response_json:
@@ -404,9 +380,6 @@ def get_status_data():
     # entity-api
     entity_api_response = status_request(app.config['ENTITY_API_STATUS_URL'])
     if entity_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[ENTITY_API][API_AUTH] = True
-
         # Then parse the response json to determine if neo4j connection is working
         response_json = entity_api_response.json()
         if VERSION in response_json:
@@ -424,9 +397,6 @@ def get_status_data():
     # ingest-api
     ingest_api_response = status_request(app.config['INGEST_API_STATUS_URL'])
     if ingest_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[INGEST_API][API_AUTH] = True
-
         # Then parse the response json to determine if neo4j connection is working
         response_json = ingest_api_response.json()
         if VERSION in response_json:
@@ -444,9 +414,6 @@ def get_status_data():
     # search-api
     search_api_response = status_request(app.config['SEARCH_API_STATUS_URL'])
     if search_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[SEARCH_API][API_AUTH] = True
-
         # Then parse the response json to determine if elasticsearch cluster is connected
         response_json = search_api_response.json()
         if VERSION in response_json:
@@ -469,9 +436,6 @@ def get_status_data():
     # file assets, no need to send headers
     file_assets_response = status_request(app.config['FILE_ASSETS_STATUS_URL'])
     if file_assets_response.status_code == 200:
-        # Overwrite the default value
-        status_data[FILE_ASSETS][API_AUTH] = True
-
         # Then parse the response json to determine if neo4j connection is working
         response_json = file_assets_response.json()
         if FILE_ASSETS_STATUS in response_json:
@@ -481,9 +445,6 @@ def get_status_data():
     # cells api
     cells_api_response = status_request(app.config['CELLS_API_STATUS_URL'])
     if cells_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[CELLS_API][API_AUTH] = True
-
         response_json = cells_api_response.json()
         if BRANCH in response_json:
             # Set branch
@@ -504,9 +465,6 @@ def get_status_data():
     # workspaces REST api
     workspaces_api_response = status_request(app.config['WORKSPACES_API_STATUS_URL'])
     if cells_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[WORKSPACES_API][API_AUTH] = True
-
         response_json = workspaces_api_response.json()
         if VERSION in response_json:
             # Set version
