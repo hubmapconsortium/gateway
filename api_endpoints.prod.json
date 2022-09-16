@@ -84,6 +84,16 @@
     },
     {
       "method": "POST",
+      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/dataset/extract-cell-count-from-secondary-analysis-files",
+      "auth": false
+    },
+    {
+      "method": "POST",
       "endpoint": "/datasets/ingest",
       "auth": true,
       "groups": [
