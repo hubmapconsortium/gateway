@@ -162,6 +162,18 @@
 {% endif %}
 
 {% endif %}
+  
+<h2>Workspaces REST API</h2>
+
+{% if data.workspacess_api.build %}
+<p class="pl-4">Build: {{ data.workspacess_api.build }}</p>
+{% endif %}
+
+{% if data.workspacess_api.version %}
+<p class="pl-4">Version: {{ data.workspacess_api.version }}</p>
+{% endif %}
+
+{% endif %}
 
 </div>
 
