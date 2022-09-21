@@ -468,7 +468,7 @@ def get_status_data():
 
     # workspaces REST api
     workspaces_api_response = status_request(app.config['WORKSPACES_API_STATUS_URL'])
-    if cells_api_response.status_code == 200:
+    if workspaces_api_response.status_code == 200:
         response_json = workspaces_api_response.json()
         if VERSION in response_json:
             # Set version
