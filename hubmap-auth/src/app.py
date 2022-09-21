@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, Response, render_template
+from flask import Flask, request, jsonify, make_response, Response
 import requests
 # Don't confuse urllib (Python native library) with urllib3 (3rd-party library, requests also uses urllib3)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -89,12 +89,6 @@ def home():
 def status_json():
     return jsonify(get_status_data())
 
-
-# HTML rendering of the status
-@app.route('/status.html', methods = ['GET'])
-def status_html():
-    resp = make_response(render_template('status.html', data = get_status_data()))
-    return resp
 
 ####################################################################################################
 ## API Auth
