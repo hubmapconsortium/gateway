@@ -11,8 +11,9 @@ services:
     # Specifying a restart policy to avoid downtime
     restart: always
     environment:
-      - HOST_GID=${HOST_GID:-1000}
-      - HOST_UID=${HOST_UID:-1000}
+      # UID and GID 1001 to match the hive user by default
+      - HOST_GID=${HOST_GID:-1001}
+      - HOST_UID=${HOST_UID:-1001}
     # Map host machine port 80, 443, and 8443 to container ports
     # Only root can listen on ports below 1024, we use higher-numbered ports
     # since nginx is running under non-root user hubmap

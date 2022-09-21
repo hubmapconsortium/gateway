@@ -39,6 +39,7 @@ app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip(
 app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip('/')
 app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
 app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/')
+app.config['WORKSPACES_API_STATUS_URL'] = app.config['WORKSPACES_API_STATUS_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -335,7 +336,8 @@ def get_status_data():
     SEARCH_API = 'search_api'
     FILE_ASSETS = 'file_assets'
     CELLS_API = 'cells_api'
-    API_AUTH = 'api_auth'
+    WORKSPACES_API = 'workspaces_api'
+
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
     ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
@@ -345,9 +347,6 @@ def get_status_data():
     COMMIT = 'commit'
     POSTGRES_CONNECTION = 'postgres_connection'
 
-    # All API services have api_auth status (meaning the gateway's API auth is working)
-    # We won't get other status if api_auth fails
-    # Add additional API-specific status to the dict when API auth check passes
     # Gateway version and build are parsed from VERSION and BUILD files directly
     # instead of making API calls. So they alwasy present
     status_data = {
@@ -356,32 +355,18 @@ def get_status_data():
             VERSION: (Path(__file__).absolute().parent.parent / 'VERSION').read_text().strip(),
             BUILD: (Path(__file__).absolute().parent.parent / 'BUILD').read_text().strip()
         },
-        UUID_API: {
-            API_AUTH: False
-        },
-        ENTITY_API: {
-            API_AUTH: False
-        },
-        INGEST_API: {
-            API_AUTH: False
-        },
-        SEARCH_API: {
-            API_AUTH: False
-        },
-        FILE_ASSETS: {
-            API_AUTH: False
-        },
-        CELLS_API: {
-            API_AUTH: False
-        }
+        UUID_API: {},
+        ENTITY_API: {},
+        INGEST_API: {},
+        SEARCH_API: {},
+        FILE_ASSETS: {},
+        CELLS_API: {},
+        WORKSPACES_API: {}
     }
 
     # uuid-api
     uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'])
     if uuid_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[UUID_API][API_AUTH] = True
-
         # Then parse the response json to determine if neo4j connection is working
         response_json = uuid_api_response.json()
         if VERSION in response_json:
@@ -399,9 +384,6 @@ def get_status_data():
     # entity-api
     entity_api_response = status_request(app.config['ENTITY_API_STATUS_URL'])
     if entity_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[ENTITY_API][API_AUTH] = True
-
         # Then parse the response json to determine if neo4j connection is working
         response_json = entity_api_response.json()
         if VERSION in response_json:
@@ -419,9 +401,6 @@ def get_status_data():
     # ingest-api
     ingest_api_response = status_request(app.config['INGEST_API_STATUS_URL'])
     if ingest_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[INGEST_API][API_AUTH] = True
-
         # Then parse the response json to determine if neo4j connection is working
         response_json = ingest_api_response.json()
         if VERSION in response_json:
@@ -439,9 +418,6 @@ def get_status_data():
     # search-api
     search_api_response = status_request(app.config['SEARCH_API_STATUS_URL'])
     if search_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[SEARCH_API][API_AUTH] = True
-
         # Then parse the response json to determine if elasticsearch cluster is connected
         response_json = search_api_response.json()
         if VERSION in response_json:
@@ -464,9 +440,6 @@ def get_status_data():
     # file assets, no need to send headers
     file_assets_response = status_request(app.config['FILE_ASSETS_STATUS_URL'])
     if file_assets_response.status_code == 200:
-        # Overwrite the default value
-        status_data[FILE_ASSETS][API_AUTH] = True
-
         # Then parse the response json to determine if neo4j connection is working
         response_json = file_assets_response.json()
         if FILE_ASSETS_STATUS in response_json:
@@ -476,9 +449,6 @@ def get_status_data():
     # cells api
     cells_api_response = status_request(app.config['CELLS_API_STATUS_URL'])
     if cells_api_response.status_code == 200:
-        # Overwrite the default value
-        status_data[CELLS_API][API_AUTH] = True
-
         response_json = cells_api_response.json()
         if BRANCH in response_json:
             # Set branch
@@ -495,6 +465,18 @@ def get_status_data():
         if POSTGRES_CONNECTION in response_json:
             # Set Postgres connection
             status_data[CELLS_API][POSTGRES_CONNECTION] = response_json[POSTGRES_CONNECTION]
+
+    # workspaces REST api
+    workspaces_api_response = status_request(app.config['WORKSPACES_API_STATUS_URL'])
+    if cells_api_response.status_code == 200:
+        response_json = workspaces_api_response.json()
+        if VERSION in response_json:
+            # Set version
+            status_data[WORKSPACES_API][VERSION] = response_json[VERSION]
+
+        if BUILD in response_json:
+            # Set build
+            status_data[WORKSPACES_API][BUILD] = response_json[BUILD]
 
     # Final result
     return status_data
