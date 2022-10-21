@@ -83,11 +83,6 @@
       "auth": false
     },
     {
-      "method": "POST",
-      "endpoint": "/dataset/extract-cell-count-from-secondary-analysis-files",
-      "auth": false
-    },
-    {
       "method": "GET",
       "endpoint": "/uploads/<*>/file-system-abs-path",
       "auth": false
