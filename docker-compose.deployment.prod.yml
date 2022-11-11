@@ -10,6 +10,8 @@ services:
     ports:
       # Proxy pass to workspaces REST API on PSC VM
       - "7777:7777"
+      # spatial-api
+      - "8888:8888"
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
