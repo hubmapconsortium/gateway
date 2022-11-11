@@ -620,6 +620,11 @@
       "method": "POST",
       "endpoint": "/_search",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status",
+      "auth": false
     }
   ]
 }
