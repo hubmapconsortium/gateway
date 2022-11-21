@@ -10,6 +10,7 @@ HTTP requests to the following APIs will be proxied to this gateway service for 
 And following are the APIs and UI applications that only use this gateway as reverse proxy without any authentication/authoriztion involved:
 
 - [Antibody API](https://github.com/hubmapconsortium/antibody-api)
+- [Ontology API](https://github.com/hubmapconsortium/ontology-api)
 - [Ingest UI](https://github.com/hubmapconsortium/ingest-ui)
 - [Portal UI](https://github.com/hubmapconsortium/portal-ui) (not for localhost build)
 
@@ -23,6 +24,8 @@ Different from the above use cases, the following APIs are protected by AWS API 
 - [Search API](https://github.com/hubmapconsortium/search-api)
 - [UUID API](https://github.com/hubmapconsortium/uuid-api)
 - [Workspaces API](https://github.com/hubmapconsortium/user_workspaces_server) (only the REST API part on DEV and PROD)
+- [Spatial API](https://github.com/hubmapconsortium/spatial-api)
+- [Files API](https://github.com/hubmapconsortium/files-api)
 
 More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
 
@@ -50,9 +53,9 @@ Note: the following instructions with docker commands are based on managing Dock
 
 There are a few configurable environment variables to keep in mind:
 
-- `COMMONS_BRANCH`: build argument only to be used during image creation when we need to use a branch of commons from github rather than the published PyPI package. Default to master branch if not set or null.
-- `HOST_UID`: the user id on the host machine to be mapped to the container. Default to 1000 if not set or null.
-- `HOST_GID`: the user's group id on the host machine to be mapped to the container. Default to 1000 if not set or null.
+- `COMMONS_BRANCH`: build argument only to be used during image creation when we need to use a branch of commons from github rather than the published PyPI package. Default to main branch if not set or null.
+- `HOST_UID`: the user id on the host machine to be mapped to the container. Default to 1001 if not set or null.
+- `HOST_GID`: the user's group id on the host machine to be mapped to the container. Default to 1001 if not set or null.
 
 We can set and verify the environment variable like below:
 
