@@ -17,8 +17,10 @@ services:
     environment:
       - DEPLOY_MODE=dev
     ports:
-      # Proxy pass to workspaces REST API on PSC VM
+      # Proxy pass to workspaces REST API on PSC VM hivevm191.psc.edu
       - "7777:7777"
+      # Proxy pass to workspaces REST API on PSC VM hivevm198.psc.edu, for testing use
+      - "7778:7778"
       # spatial-api
       - "8888:8888"
     volumes:
