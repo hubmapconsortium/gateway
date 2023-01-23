@@ -12,6 +12,10 @@ services:
       - "7777:7777"
       # spatial-api
       - "8888:8888"
+      # HuBMAP ubkg-api
+      - "6666:6666"
+      # Data Distillery ubkg-api
+      - "6667:6667"
     volumes:
       # Mount the app config to container in order to keep it outside of the image
       - "./hubmap-auth/src/instance:/usr/src/app/src/instance"
