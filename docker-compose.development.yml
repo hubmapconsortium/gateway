@@ -19,6 +19,8 @@ services:
     ports:
       # Proxy pass to workspaces REST API on PSC VM
       - "7777:7777"
+      # Proxy pass to user-templates-api REST API on PSC VM
+      - "9999:9999"
       # spatial-api
       - "8888:8888"
       # HuBMAP ubkg-api
