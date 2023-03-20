@@ -511,7 +511,7 @@ def create_request_headers_for_auth(token):
 # AVR file uuid is handled via uuid-api only and no token is required
 def get_file_access(uuid, token_from_query, request):
     # AVR and AVR files are standalone, not stored in neo4j and won't be available via entity-api
-    supported_entity_types = ['Donor', 'Sample', 'Dataset']
+    supported_entity_types = ['Donor', 'Sample', 'Dataset', 'Publication']
 
     # Returns one of the following codes
     allowed = 200
