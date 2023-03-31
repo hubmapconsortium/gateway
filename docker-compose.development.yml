@@ -23,8 +23,6 @@ services:
       - "7778:7778"
       # spatial-api
       - "8888:8888"
-      # HuBMAP ubkg-api
-      - "6666:6666"
     volumes:
       # Mount the VERSION file and BUILD file
       - "./VERSION:/usr/src/app/VERSION"
