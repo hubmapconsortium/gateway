@@ -458,16 +458,6 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/datasets/data-status",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "uploads/data-status",
-      "auth": false
     }
   ],
   "avr.dev.hubmapconsortium.org": [
