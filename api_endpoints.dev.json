@@ -462,12 +462,18 @@
     {
       "method": "GET",
       "endpoint": "/datasets/data-status",
-      "auth": true
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "GET",
       "endpoint": "/uploads/data-status",
-      "auth": true
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     },
     {
       "method": "GET",
