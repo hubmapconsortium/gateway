@@ -462,11 +462,21 @@
     {
       "method": "GET",
       "endpoint": "/datasets/data-status",
+      "auth": true
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uploads/data-status",
+      "auth": true
+    },
+    {
+      "method": "GET",
+      "endpoint": "/data-ingest-board-login",
       "auth": false
     },
     {
       "method": "GET",
-      "endpoint": "uploads/data-status",
+      "endpoint": "/data-ingest-board-logout",
       "auth": false
     }
   ],
