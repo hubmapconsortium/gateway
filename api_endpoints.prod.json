@@ -458,6 +458,32 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/data-status",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uploads/data-status",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/data-ingest-board-login",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/data-ingest-board-logout",
+      "auth": false
     }
   ],
   "avr.hubmapconsortium.org": [
@@ -489,32 +515,6 @@
     {
       "method": "GET",
       "endpoint": "/logout",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/datasets/data-status",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/uploads/data-status",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/data-ingest-board-login",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/data-ingest-board-logout",
       "auth": false
     },
     {
