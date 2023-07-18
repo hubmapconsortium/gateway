@@ -506,7 +506,7 @@ def create_request_headers_for_auth(token):
 
 # Check if the target file associated with this uuid is accessible 
 # based on token and access level assigned to the entity
-# The uuid passed in could either be a real entity (Donor/Sample/Dataset) uuid or
+# The uuid passed in could either be a real entity (Donor/Sample/Dataset/Publication) uuid or
 # a file uuid (Dataset: thumbnail image or Donor/Sample: metadata/image file)
 # AVR file uuid is handled via uuid-api only and no token is required
 def get_file_access(uuid, token_from_query, request):
@@ -607,7 +607,7 @@ def get_file_access(uuid, token_from_query, request):
         # But the data files contained within the dataset is determined by `data_access_level`
         # A dataset with `status` "Published" (thumbnail file is public accessible) can have 
         # "protected" `data_access_level` (data files within the dataset are protected)
-        if (entity_type == 'Dataset') and given_uuid_is_file_uuid and (entity_dict['status'].lower() == DATASET_STATUS_PUBLISHED):
+        if (entity_type in ['Dataset', 'Publication']) and given_uuid_is_file_uuid and (entity_dict['status'].lower() == DATASET_STATUS_PUBLISHED):
             # Overwrite the default value
             data_access_level = ACCESS_LEVEL_PUBLIC
 
