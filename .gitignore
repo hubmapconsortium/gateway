@@ -28,3 +28,4 @@ venv
 #ignore Eclipse files
 .project
 .pydevproject
+gateway.code-workspace
