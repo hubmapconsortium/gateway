@@ -298,7 +298,7 @@
     },
     {
       "method": "GET",
-      "endpoint": "/metadata/allgroups",
+      "endpoint": "/metadata/data-provider-groups",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
