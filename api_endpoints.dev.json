@@ -134,7 +134,7 @@
     },
     {
       "method": "PUT",
-      "endpoint": "/datasets/metadata-json",
+      "endpoint": "/datasets/<*>/metadata-json",
       "auth": true,
       "groups": [
         "89a69625-99d7-11ea-9366-0e98982705c1"
