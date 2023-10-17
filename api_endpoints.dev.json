@@ -94,13 +94,13 @@
       "auth": false
     },
     {
-      "method": "POST",
-      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async",
+      "method": "GET",
+      "endpoint": "/uploads/<*>/file-system-abs-path",
       "auth": false
     },
     {
-      "method": "GET",
-      "endpoint": "/uploads/<*>/file-system-abs-path",
+      "method": "POST",
+      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async",
       "auth": false
     },
     {
@@ -147,7 +147,7 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },
+    },      
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/unpublish",
@@ -260,7 +260,7 @@
       "auth": true,
       "groups": [
         "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]	
+      ] 
     },
     {
       "method": "PUT",
@@ -402,7 +402,7 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },    
+    },
     {
       "method": "GET",
       "endpoint": "/specimens/<*>",
@@ -494,6 +494,30 @@
       "method": "GET",
       "endpoint": "/data-ingest-board-logout",
       "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/assaytype",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/assaytype/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reload",
+      "auth": true,
+      "groups": [
+        "89a69625-99d7-11ea-9366-0e98982705c1"
+      ]
     }
   ],
   "avr.dev.hubmapconsortium.org": [
