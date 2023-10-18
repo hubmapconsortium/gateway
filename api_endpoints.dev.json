@@ -504,7 +504,7 @@
       ]
     },
     {
-      "method": "POST",
+      "method": "GET",
       "endpoint": "/assaytype/<*>",
       "auth": true,
       "groups": [
