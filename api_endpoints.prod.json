@@ -518,6 +518,14 @@
       "groups": [
         "89a69625-99d7-11ea-9366-0e98982705c1"
       ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/components",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     }
   ],
   "avr.hubmapconsortium.org": [
