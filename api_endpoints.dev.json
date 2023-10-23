@@ -513,7 +513,7 @@
     },
     {
       "method": "PUT",
-      "endpoint": "/reload",
+      "endpoint": "/reload-assaytypes",
       "auth": true,
       "groups": [
         "89a69625-99d7-11ea-9366-0e98982705c1"
