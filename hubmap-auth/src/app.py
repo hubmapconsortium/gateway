@@ -357,7 +357,7 @@ def get_status_data():
         SEARCH_API: {},
         FILE_ASSETS: {},
         CELLS_API: {},
-        WORKSPACES_API: {}
+        WORKSPACES_API: {},
         ONTOLOGY_API: {}
     }
 
