@@ -358,6 +358,7 @@ def get_status_data():
         FILE_ASSETS: {},
         CELLS_API: {},
         WORKSPACES_API: {}
+        ONTOLOGY_API: {}
     }
 
     # uuid-api
