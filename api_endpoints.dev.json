@@ -94,13 +94,13 @@
       "auth": false
     },
     {
-      "method": "GET",
-      "endpoint": "/uploads/<*>/file-system-abs-path",
+      "method": "POST",
+      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async",
       "auth": false
     },
     {
-      "method": "POST",
-      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async",
+      "method": "GET",
+      "endpoint": "/uploads/<*>/file-system-abs-path",
       "auth": false
     },
     {
@@ -147,7 +147,7 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },      
+    },
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/unpublish",
@@ -216,14 +216,6 @@
     },
     {
       "method": "POST",
-      "endpoint": "/datasets/components",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "POST",
       "endpoint": "/file-upload",
       "auth": true,
       "groups": [
@@ -268,7 +260,7 @@
       "auth": true,
       "groups": [
         "89a69625-99d7-11ea-9366-0e98982705c1"
-      ] 
+      ]	
     },
     {
       "method": "PUT",
@@ -418,7 +410,7 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },
+    },    
     {
       "method": "GET",
       "endpoint": "/specimens/<*>",
@@ -513,26 +505,10 @@
     },
     {
       "method": "POST",
-      "endpoint": "/assaytype",
+      "endpoint": "/datasets/components",
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "GET",
-      "endpoint": "/assaytype/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
-      "method": "PUT",
-      "endpoint": "/reload-assaytypes",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
       ]
     }
   ],

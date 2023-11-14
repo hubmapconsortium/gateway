@@ -40,7 +40,6 @@ app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip(
 app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
 app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/')
 app.config['WORKSPACES_API_STATUS_URL'] = app.config['WORKSPACES_API_STATUS_URL'].strip('/')
-app.config['ONTOLOGY_API_STATUS_URL'] = app.config['ONTOLOGY_API_STATUS_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -332,7 +331,6 @@ def get_status_data():
     FILE_ASSETS = 'file_assets'
     CELLS_API = 'cells_api'
     WORKSPACES_API = 'workspaces_api'
-    ONTOLOGY_API = 'ontology_api'
 
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
@@ -357,8 +355,7 @@ def get_status_data():
         SEARCH_API: {},
         FILE_ASSETS: {},
         CELLS_API: {},
-        WORKSPACES_API: {},
-        ONTOLOGY_API: {}
+        WORKSPACES_API: {}
     }
 
     # uuid-api
@@ -475,19 +472,6 @@ def get_status_data():
             # Set build
             status_data[WORKSPACES_API][BUILD] = response_json[BUILD]
 
-    # ontology API
-    ontology_api_response = status_request(app.config["ONTOLOGY_API_STATUS_URL"])
-    if ontology_api_response.status_code == 200:
-        response_json = ontology_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[ONTOLOGY_API][VERSION] = response_json[VERSION]
-        if BUILD in response_json:
-            # Set build
-            status_data[ONTOLOGY_API][BUILD] = response_json[BUILD]
-        if NEO4J_CONNECTION in response_json:
-            # Set Neo4j connection
-            status_data[ONTOLOGY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
     # Final result
     return status_data
 
