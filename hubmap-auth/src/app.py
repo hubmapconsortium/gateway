@@ -477,7 +477,7 @@ def get_status_data():
 
     # ontology API
     ontology_api_response = status_request(app.config["ONTOLOGY_API_STATUS_URL"])
-    if ontology_api_response == 200:
+    if ontology_api_response.status_code == 200:
         response_json = ontology_api_response.json()
         if VERSION in response_json:
             # Set version
