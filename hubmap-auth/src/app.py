@@ -40,6 +40,7 @@ app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip(
 app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
 app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/')
 app.config['WORKSPACES_API_STATUS_URL'] = app.config['WORKSPACES_API_STATUS_URL'].strip('/')
+app.config['ONTOLOGY_API_STATUS_URL'] = app.config['ONTOLOGY_API_STATUS_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -331,6 +332,7 @@ def get_status_data():
     FILE_ASSETS = 'file_assets'
     CELLS_API = 'cells_api'
     WORKSPACES_API = 'workspaces_api'
+    ONTOLOGY_API = 'ontology_api'
 
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
@@ -472,6 +474,11 @@ def get_status_data():
             # Set build
             status_data[WORKSPACES_API][BUILD] = response_json[BUILD]
 
+    # ontology API
+    ontology_api_response = status_request(f'{app.config["ONTOLOGY_API_STATUS_URL"]}/status')
+    if ontology_api_response == 200:
+        response_json = ontology_api_response.json()
+        status_data[ONTOLOGY_API] = response_json
     # Final result
     return status_data
 

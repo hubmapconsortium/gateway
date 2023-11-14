@@ -33,10 +33,9 @@ SEARCH_API_STATUS_URL = 'https://search-api.dev.hubmapconsortium.org/status'
 FILE_ASSETS_STATUS_URL = 'https://assets.dev.hubmapconsortium.org/status/file_assets_status.json'
 CELLS_API_STATUS_URL = 'https://cells.dev.hubmapconsortium.org/api/status'
 WORKSPACES_API_STATUS_URL = 'https://workspaces-api.dev.hubmapconsortium.org/status'
+ONTOLOGY_API_STATUS_URL = 'https://ontology-api.dev.hubmapconsortium.org/'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 1024
 # Expire the cache after the time-to-live (seconds)
 CACHE_TTL = 7200
-
-
