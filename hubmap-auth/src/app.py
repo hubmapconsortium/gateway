@@ -478,7 +478,15 @@ def get_status_data():
     ontology_api_response = status_request(f'{app.config["ONTOLOGY_API_STATUS_URL"]}/status')
     if ontology_api_response == 200:
         response_json = ontology_api_response.json()
-        status_data[ONTOLOGY_API] = response_json
+        if VERSION in response_json:
+            # Set version
+            status_data[ONTOLOGY_API][VERSION] = response_json[VERSION]
+        if BUILD in response_json:
+            # Set build
+            status_data[ONTOLOGY_API][BUILD] = response_json[BUILD]
+        if NEO4J_CONNECTION in response_json:
+            # Set Neo4j connection
+            status_data[ONTOLOGY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
     # Final result
     return status_data
 
