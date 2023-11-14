@@ -475,7 +475,7 @@ def get_status_data():
             status_data[WORKSPACES_API][BUILD] = response_json[BUILD]
 
     # ontology API
-    ontology_api_response = status_request(f'{app.config["ONTOLOGY_API_STATUS_URL"]}/status')
+    ontology_api_response = status_request(app.config["ONTOLOGY_API_STATUS_URL"])
     if ontology_api_response == 200:
         response_json = ontology_api_response.json()
         if VERSION in response_json:
