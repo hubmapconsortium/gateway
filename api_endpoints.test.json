@@ -89,13 +89,13 @@
       "auth": false
     },
     {
-      "method": "GET",
-      "endpoint": "/uploads/<*>/file-system-abs-path",
+      "method": "POST",
+      "endpoint": "/entities/file-system-rel-path",
       "auth": false
     },
     {
-      "method": "POST",
-      "endpoint": "/entities/file-system-rel-path",
+      "method": "GET",
+      "endpoint": "/uploads/<*>/file-system-abs-path",
       "auth": false
     },
     {
@@ -215,34 +215,6 @@
       "auth": false
     },
     {
-      "method": "GET",
-      "endpoint": "/datasets/data-status",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/uploads/data-status",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/data-ingest-board-login",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/data-ingest-board-logout",
-      "auth": false
-    },
-    {
-      "method": "POST",
-      "endpoint": "/datasets/components",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
-    },
-    {
       "method": "POST",
       "endpoint": "/file-upload",
       "auth": true,
@@ -288,7 +260,7 @@
       "auth": true,
       "groups": [
         "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]	
+      ] 
     },
     {
       "method": "PUT",
@@ -509,6 +481,58 @@
       "auth": true,
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/data-status",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uploads/data-status",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/data-ingest-board-login",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/data-ingest-board-logout",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/components",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/assaytype",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/assaytype/<*>",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reload-assaytypes",
+      "auth": true,
+      "groups": [
+        "89a69625-99d7-11ea-9366-0e98982705c1"
       ]
     }
   ]
