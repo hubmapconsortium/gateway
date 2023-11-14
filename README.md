@@ -10,7 +10,6 @@ HTTP requests to the following APIs will be proxied to this gateway service for 
 And following are the APIs and UI applications that only use this gateway as reverse proxy without any authentication/authoriztion involved:
 
 - [Antibody API](https://github.com/hubmapconsortium/antibody-api)
-- [Ontology API](https://github.com/hubmapconsortium/ontology-api)
 - [Ingest UI](https://github.com/hubmapconsortium/ingest-ui)
 - [Portal UI](https://github.com/hubmapconsortium/portal-ui) (not for localhost build)
 
@@ -24,8 +23,10 @@ Different from the above use cases, the following APIs are protected by AWS API 
 - [Search API](https://github.com/hubmapconsortium/search-api)
 - [UUID API](https://github.com/hubmapconsortium/uuid-api)
 - [Workspaces API](https://github.com/hubmapconsortium/user_workspaces_server) (only the REST API part on DEV and PROD)
+- [User Templates API](https://github.com/hubmapconsortium/user-templates-api)
 - [Spatial API](https://github.com/hubmapconsortium/spatial-api)
 - [Files API](https://github.com/hubmapconsortium/files-api)
+- [UBKG Ontology API](https://github.com/x-atlas-consortia/hs-ontology-api)
 
 More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
 
@@ -60,7 +61,7 @@ There are a few configurable environment variables to keep in mind:
 We can set and verify the environment variable like below:
 
 ````
-export COMMONS_BRANCH=master
+export COMMONS_BRANCH=main
 echo $COMMONS_BRANCH
 ````
 
