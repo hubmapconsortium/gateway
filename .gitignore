@@ -9,6 +9,8 @@ hubmap-auth/VERSION
 hubmap-auth/src/BUILD
 hubmap-auth/src/VERSION
 
+**/.DS_Store
+
 # log files in any path
 **/*.log
 
