@@ -1,6 +1,8 @@
 # __pycache__ directories in any path
 **/__pycache__
 
+**/.DS_Store
+
 BUILD
 
 # the copied
