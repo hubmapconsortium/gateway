@@ -522,6 +522,11 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/assaytype/metadata/<*>",
+      "auth": false
+    },
+    {
       "method": "PUT",
       "endpoint": "/reload-assaytypes",
       "auth": true,
