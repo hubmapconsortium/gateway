@@ -533,6 +533,11 @@
       "groups": [
         "89a69625-99d7-11ea-9366-0e98982705c1"
       ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/privs/has-data-admin",
+      "auth": false
     }
   ],
   "avr.dev.hubmapconsortium.org": [
