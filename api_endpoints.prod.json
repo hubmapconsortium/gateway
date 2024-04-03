@@ -90,6 +90,16 @@
     },
     {
       "method": "POST",
+      "endpoint": "/datasets/file-system-abs-path",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/uploads/file-system-abs-path",
+      "auth": false
+    },
+    {
+      "method": "POST",
       "endpoint": "/entities/file-system-rel-path",
       "auth": false
     },
