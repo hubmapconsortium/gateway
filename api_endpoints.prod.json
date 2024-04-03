@@ -134,6 +134,14 @@
     },
     {
       "method": "PUT",
+      "endpoint": "/datasets/bulk/submit",
+      "auth": true,
+      "groups": [
+        "89a69625-99d7-11ea-9366-0e98982705c1"
+      ]
+    },
+    {
+      "method": "PUT",
       "endpoint": "/datasets/<*>/metadata-json",
       "auth": true,
       "groups": [
@@ -147,7 +155,7 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
-    },      
+    },
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/unpublish",
