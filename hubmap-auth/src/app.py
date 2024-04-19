@@ -297,19 +297,12 @@ def umls_auth():
     response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
     response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
 
-    # Note: 400 and 404 are not supported http://nginx.org/en/docs/http/ngx_http_auth_request_module.html
-    # Any response code other than 200/401/403 returned by the subrequest is considered an error 500
-    # The end user or client will never see 404 but 500
-    response_400 = make_response(jsonify({"message": "ERROR: Bad Request"}), 400)
-    response_404 = make_response(jsonify({"message": "ERROR: Not Found"}), 404)
-
     orig_uri = None
 
     if "X-Original-URI" in request.headers:
         orig_uri = request.headers.get("X-Original-URI")
 
-    if orig_uri is None:
-        return response_400
+
     parsed_uri = urlparse(orig_uri)
 
     logger.debug("======parsed_uri======")
@@ -318,7 +311,7 @@ def umls_auth():
     query = parse_qs(parsed_uri.query)
 
     if 'umls-key' not in query:
-        return response_400
+        return response_401
     is_authorized = validate_umls_key(query['umls-key'][0])
     if not is_authorized:
         return response_403
