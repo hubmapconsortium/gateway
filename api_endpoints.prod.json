@@ -504,6 +504,16 @@
       "auth": false
     },
     {
+      "method": "GET",
+      "endpoint": "/umls-auth",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/ubkg-download-file-list",
+      "auth": false
+    },
+    {
       "method": "POST",
       "endpoint": "/datasets/components",
       "auth": true,
