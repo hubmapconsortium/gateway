@@ -40,4 +40,8 @@ CACHE_MAXSIZE = 1024
 # Expire the cache after the time-to-live (seconds)
 CACHE_TTL = 7200
 
+# Umls key authentication
+UMLS_KEY = ''
+UMLS_VALIDATE_URL = ''
+
 

@@ -284,6 +284,40 @@ def file_auth():
     return response_401
 
 
+@app.route('/umls_auth', methods = ['GET'])
+def umls_auth():
+    logger.info("======umls_auth Original request.headers======")
+    logger.info(request.headers)
+
+    # Nginx auth_request only cares about the response status code
+    # it ignores the response body
+    # We use body here only for description purposes and direct visit to this endpoint
+    response_200 = make_response(jsonify({"message": "OK: Authorized"}), 200)
+    response_401 = make_response(jsonify({"message": "ERROR: Unauthorized"}), 401)
+    response_403 = make_response(jsonify({"message": "ERROR: Forbidden"}), 403)
+    response_500 = make_response(jsonify({"message": "ERROR: Internal Server Error"}), 500)
+
+    orig_uri = None
+
+    if "X-Original-URI" in request.headers:
+        orig_uri = request.headers.get("X-Original-URI")
+
+
+    parsed_uri = urlparse(orig_uri)
+
+    logger.debug("======parsed_uri======")
+    logger.debug(parsed_uri)
+
+    query = parse_qs(parsed_uri.query)
+
+    if 'umls-key' not in query:
+        return response_401
+    is_authorized = validate_umls_key(query['umls-key'][0])
+    if not is_authorized:
+        return response_403
+    return response_200
+
+
 ####################################################################################################
 ## Internal Functions Used By API Auth and File Auth
 ####################################################################################################
@@ -727,6 +761,17 @@ def get_file_access(uuid, token_from_query, request):
     else:
         logger.error(f"Failed to get the access level of entity with uuid {entity_uuid}")
         return internal_error
+
+
+def validate_umls_key(umls_key):
+    validator_key = app.config['UMLS_KEY']
+    base_url = app.config['UMLS_VALIDATE_URL']
+    url = base_url + '?validatorApiKey=' + validator_key + '&apiKey=' + umls_key
+    result = requests.get(url=url)
+    if result.json() == True:
+        return True
+    else:
+        return False
 
 
 # Always pass through the requests with using modified version of the globus app secret as internal token
