@@ -64,11 +64,6 @@
       ]
     },
     {
-      "method": "PUT",
-      "endpoint": "/datasets/status",
-      "auth": false
-    },
-    {
       "method": "GET",
       "endpoint": "/entities/<*>",
       "auth": false
