@@ -139,6 +139,14 @@
     },
     {
       "method": "PUT",
+      "endpoint": "/collections/<*>/register-doi",
+      "auth": true,
+      "groups": [
+        "89a69625-99d7-11ea-9366-0e98982705c1"
+      ]
+    },
+    {
+      "method": "PUT",
       "endpoint": "/datasets/bulk/submit",
       "auth": true,
       "groups": [
