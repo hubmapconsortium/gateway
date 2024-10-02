@@ -72,7 +72,7 @@ else
 
         echo 'Checks complete, all good :)'
     elif [ "$1" = "config" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway config
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway config
     elif [ "$1" = "build" ]; then
         # Delete old VERSION and BUILD files if found
         if [ -f "hubmap-auth/VERSION" ]; then
@@ -87,13 +87,13 @@ else
         cp ./VERSION hubmap-auth
         cp ./BUILD hubmap-auth
 
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway build
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway build
     elif [ "$1" = "start" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway up -d
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway up -d
     elif [ "$1" = "stop" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway stop
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway stop
     elif [ "$1" = "down" ]; then
-        docker-compose -f docker-compose.yml -f docker-compose.development.yml -p gateway down
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway down
     fi
 fi
 

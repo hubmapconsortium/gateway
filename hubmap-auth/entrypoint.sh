@@ -34,7 +34,7 @@ if [ $DEPLOY_MODE != "localhost"  ]; then
     chown -R hubmap:hubmap /etc/letsencrypt
 fi
 
-# Lastly we use gosu to execute our process "$@" as that user
+# Lastly we use su-exec to execute our process "$@" as that user
 # Remember CMD from a Dockerfile of child image gets passed to the entrypoint.sh as command line arguments
 # "$@" is a shell variable that means "all the arguments"
-exec /usr/local/bin/gosu hubmap "$@"
+exec /usr/local/bin/su-exec hubmap "$@"
