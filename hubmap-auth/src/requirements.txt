@@ -1,5 +1,5 @@
 Flask==3.0.3
-Werkzeug==3.0.3
+Werkzeug==3.0.6
 cachetools==4.2.1
 
 # The commons package requires requests>=2.22.0
