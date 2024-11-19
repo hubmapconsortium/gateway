@@ -35,7 +35,6 @@ module_hotfixes=true\n'\
 RUN yum install -y yum-utils && \
     yum-config-manager --enable nginx-mainline && \
     yum install -y nginx && \
-    rm /etc/nginx/conf.d/default.conf && \
     mv nginx.conf /etc/nginx/nginx.conf && \
     pip install -r src/requirements.txt && \
     chmod +x start.sh && \
