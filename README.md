@@ -4,14 +4,14 @@ This HuBMAP Gateway serves as an authentication and authorization gateway for so
 
 HTTP requests to the following APIs will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. 
 
-- [Ingest API](https://github.com/hubmapconsortium/ingest-api)
-- [Ontology API](https://github.com/hubmapconsortium/ontology-api) (currently only deployed on DEV and PROD)
+- Ingest API
+- AVR Antibody API
 
 And following are the APIs and UI applications that only use this gateway as reverse proxy without any authentication/authoriztion involved:
 
-- [Antibody API](https://github.com/hubmapconsortium/antibody-api)
-- [Ingest UI](https://github.com/hubmapconsortium/ingest-ui)
-- [Portal UI](https://github.com/hubmapconsortium/portal-ui) (not for localhost build)
+- AVR UI
+- Ingest Portal UI
+- Data Portal UI
 
 The file assets service is not an API per se, the gateway only does the auth cehck for requests made to
 
@@ -19,14 +19,14 @@ The file assets service is not an API per se, the gateway only does the auth ceh
 
 Different from the above use cases, the following APIs are protected by AWS API Gateway with using Lambda Authorizors:
 
-- [Entity API](https://github.com/hubmapconsortium/entity-api)
-- [Search API](https://github.com/hubmapconsortium/search-api)
-- [UUID API](https://github.com/hubmapconsortium/uuid-api)
-- [Workspaces API](https://github.com/hubmapconsortium/user_workspaces_server) (only the REST API part on DEV and PROD)
-- [User Templates API](https://github.com/hubmapconsortium/user-templates-api)
-- [Spatial API](https://github.com/hubmapconsortium/spatial-api)
-- [Files API](https://github.com/hubmapconsortium/files-api)
-- [UBKG Ontology API](https://github.com/x-atlas-consortia/hs-ontology-api)
+- Entity API
+- Search API
+- UUID API
+- Workspaces API (only the REST API part on DEV and PROD)
+- User Templates API
+- Spatial API
+- Files API
+- UBKG Ontology API
 
 More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
 
@@ -72,9 +72,9 @@ cd docker
 ./docker-development.sh [check|config|build|start|stop|down]
 ```
 
-## Docker build for deployment on TEST/STAGE/PROD
+## Docker build for deployment on TEST/PROD
 
 ```
 cd docker
-./docker-deployment.sh [test|stage|prod] [start|stop|down]
+./docker-deployment.sh [test|prod] [start|stop|down]
 ```
