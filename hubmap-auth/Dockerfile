@@ -27,17 +27,19 @@ module_hotfixes=true\n'\
 # 1 - Install the prerequisites
 # 2 - By default, the repository for stable nginx packages is used. We would like to use mainline nginx packages
 # 3 - Install nginx (using the custom yum repo specified earlier)
-# 4 - Overwrite the nginx.conf with ours to run nginx as non-root
-# 5 - Install flask app dependencies with pip (pip3 also works)
-# 6 - Make the start script executable
-# 7 - Clean all yum cache
+# 4 - Remove the default nginx config file
+# 5 - Overwrite the nginx.conf with ours to run nginx as non-root
+# 6 - Install flask app dependencies with pip (pip3 also works)
+# 7 - Make the start script executable
+# 8 - Clean all yum cache
 RUN yum install -y yum-utils && \
     yum-config-manager --enable nginx-mainline && \
     yum install -y nginx && \
+    rm /etc/nginx/conf.d/default.conf && \
     mv nginx.conf /etc/nginx/nginx.conf && \
     pip install -r src/requirements.txt && \
     chmod +x start.sh && \
-    yum clean all
+    yum clean all 
 
 # The EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime. 
 # EXPOSE does not make the ports of the container accessible to the host.
