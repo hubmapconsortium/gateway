@@ -21,14 +21,13 @@ if [ $? -ne 0 ]; then
 fi
 
 # When running Nginx as a non-root user, we need to create the pid file
-# and give read and write access to a few directories
+# and give read and write access to /var/run/nginx.pid, /var/cache/nginx, and /var/log/nginx
 # In individual nginx *.conf, also don't listen on ports 80 or 443 because 
 # only root processes can listen to ports below 1024
 touch /var/run/nginx.pid
 chown -R hive:hive /var/run/nginx.pid
 chown -R hive:hive /var/cache/nginx
 chown -R hive:hive /var/log/nginx
-chown -R hive:hive /var/lib/nginx
 
 # No SSL in localhost mode
 if [ $DEPLOY_MODE != "localhost"  ]; then
