@@ -481,6 +481,20 @@
       "method": "GET",
       "endpoint": "/privs/has-data-admin",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/has-pipeline-test-privs",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/<*>/submit-for-pipeline-testing",
+      "auth": true,
+      "groups": [
+        "3e5bc7c0-d292-11ef-8694-9f2bd25b4aac",
+        "89a69625-99d7-11ea-9366-0e98982705c1"
+      ]
     }
   ],
   "avr.dev.hubmapconsortium.org": [
@@ -557,20 +571,6 @@
       "method": "GET",
       "endpoint": "/status",
       "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/has-pipeline-test-privs",
-      "auth": false
-    },
-    {
-      "method": "POST",
-      "endpoint": "/datasets/<*>/submit-for-pipeline-testing",
-      "auth": true,
-      "groups": [
-        "3e5bc7c0-d292-11ef-8694-9f2bd25b4aac",
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
     }
   ]
 }
