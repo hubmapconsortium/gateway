@@ -34,6 +34,7 @@ FILE_ASSETS_STATUS_URL = 'https://assets.dev.hubmapconsortium.org/status/file_as
 CELLS_API_STATUS_URL = 'https://cells.dev.hubmapconsortium.org/api/status'
 WORKSPACES_API_STATUS_URL = 'https://workspaces-api.dev.hubmapconsortium.org/status'
 ONTOLOGY_API_STATUS_URL = 'https://ontology-api.dev.hubmapconsortium.org/status'
+UKV_API_STATUS_URL = 'https://ukv-api.dev.hubmapconsortium.org/status'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 1024

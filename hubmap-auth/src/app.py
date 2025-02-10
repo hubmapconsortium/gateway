@@ -41,6 +41,7 @@ app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].stri
 app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/')
 app.config['WORKSPACES_API_STATUS_URL'] = app.config['WORKSPACES_API_STATUS_URL'].strip('/')
 app.config['ONTOLOGY_API_STATUS_URL'] = app.config['ONTOLOGY_API_STATUS_URL'].strip('/')
+app.config['UKV_API_STATUS_URL'] = app.config['UKV_API_STATUS_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -367,6 +368,7 @@ def get_status_data():
     CELLS_API = 'cells_api'
     WORKSPACES_API = 'workspaces_api'
     ONTOLOGY_API = 'ontology_api'
+    UKV_API = 'ukv_api'
 
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
@@ -393,6 +395,7 @@ def get_status_data():
         CELLS_API: {},
         WORKSPACES_API: {},
         ONTOLOGY_API: {}
+        UKV_API: {},
     }
 
     # uuid-api
@@ -522,6 +525,20 @@ def get_status_data():
         if NEO4J_CONNECTION in response_json:
             # Set Neo4j connection
             status_data[ONTOLOGY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
+
+    # ukv API
+    ukv_api_response = status_request(app.config["UKV_API_STATUS_URL"])
+    if ukv_api_response.status_code == 200:
+        response_json = ukv_api_response.json()
+        if VERSION in response_json:
+            # Set version
+            status_data[UKV_API][VERSION] = response_json[VERSION]
+        if BUILD in response_json:
+            # Set build
+            status_data[UKV_API][BUILD] = response_json[BUILD]
+        if MYSQL_CONNECTION in response_json:
+            # Add the mysql connection status
+            status_data[UKV_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
     # Final result
     return status_data
 
