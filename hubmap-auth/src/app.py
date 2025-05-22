@@ -42,6 +42,8 @@ app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/
 app.config['WORKSPACES_API_STATUS_URL'] = app.config['WORKSPACES_API_STATUS_URL'].strip('/')
 app.config['ONTOLOGY_API_STATUS_URL'] = app.config['ONTOLOGY_API_STATUS_URL'].strip('/')
 app.config['UKV_API_STATUS_URL'] = app.config['UKV_API_STATUS_URL'].strip('/')
+app.config['DATA_PRODUCTS_API_STATUS_URL'] = app.config['DATA_PRODUCTS_API_STATUS_URL'].strip('/')
+app.config['SCFIND_API_STATUS_URL'] = app.config['SCFIND_API_STATUS_URL'].strip('/')
 
 # LRU Cache implementation with per-item time-to-live (TTL) value
 # with a memoizing callable that saves up to maxsize results based on a Least Frequently Used (LFU) algorithm
@@ -369,6 +371,8 @@ def get_status_data():
     WORKSPACES_API = 'workspaces_api'
     ONTOLOGY_API = 'ontology_api'
     UKV_API = 'ukv_api'
+    DATA_PRODUCTS_API = 'data_products_api'
+    SCFIND_API = 'scfind_api'
 
     MYSQL_CONNECTION = 'mysql_connection'
     NEO4J_CONNECTION = 'neo4j_connection'
@@ -396,6 +400,8 @@ def get_status_data():
         WORKSPACES_API: {},
         ONTOLOGY_API: {},
         UKV_API: {}
+        DATA_PRODUCTS_API: {}
+        SCFIND_API: {}
     }
 
     # uuid-api
@@ -539,6 +545,32 @@ def get_status_data():
         if MYSQL_CONNECTION in response_json:
             # Add the mysql connection status
             status_data[UKV_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
+
+    # data products API
+    data_products_api_response = status_request(app.config["DATA_PRODUCTS_API_STATUS_URL"])
+    if data_products_api_response.status_code == 200:
+        response_json = data_products_api_response.json()
+        if VERSION in response_json:
+            # Set version
+            status_data[DATA_PRODUCTS_API][VERSION] = response_json[VERSION]
+        if BUILD in response_json:
+            # Set build
+            status_data[DATA_PRODUCTS_API][BUILD] = response_json[BUILD]
+        if MYSQL_CONNECTION in response_json:
+            # Add the mysql connection status
+            status_data[DATA_PRODUCTS_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
+
+    # ScFind API
+    scfind_api_response = status_request(app.config["SCFIND_API_STATUS_URL"])
+    if scfind_api_response.status_code == 200:
+        response_json = scfind_api_response.json()
+        datasets = response_json.get("datasets")
+        if isinstance(datasets, list) and len(datasets) > 1:
+            status_data[SCFIND_API][STATUS] = True
+        else:
+            status_data[SCFIND_API][STATUS] = False
+
+
     # Final result
     return status_data
 
