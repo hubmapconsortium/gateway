@@ -564,6 +564,8 @@ def get_status_data():
     scfind_api_response = status_request(app.config["SCFIND_API_STATUS_URL"])
     if scfind_api_response.status_code == 200:
         response_json = scfind_api_response.json()
+
+        # Check a lightweight endpoint to see if the API is up
         datasets = response_json.get("datasets")
         if isinstance(datasets, list) and len(datasets) > 1:
             status_data[SCFIND_API][STATUS] = True
