@@ -379,6 +379,7 @@ def get_status_data():
     ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
     ELASTICSEARCH_STATUS = 'elasticsearch_status'
     FILE_ASSETS_STATUS = 'file_assets_status'
+    SCFIND_STATUS = 'scfind_status'
     BRANCH = 'branch'
     COMMIT = 'commit'
     POSTGRES_CONNECTION = 'postgres_connection'
@@ -399,8 +400,8 @@ def get_status_data():
         CELLS_API: {},
         WORKSPACES_API: {},
         ONTOLOGY_API: {},
-        UKV_API: {}
-        DATA_PRODUCTS_API: {}
+        UKV_API: {},
+        DATA_PRODUCTS_API: {},
         SCFIND_API: {}
     }
 
@@ -563,14 +564,9 @@ def get_status_data():
     # ScFind API
     scfind_api_response = status_request(app.config["SCFIND_API_STATUS_URL"])
     if scfind_api_response.status_code == 200:
-        response_json = scfind_api_response.json()
-
-        # Check a lightweight endpoint to see if the API is up
-        datasets = response_json.get("datasets")
-        if isinstance(datasets, list) and len(datasets) > 1:
-            status_data[SCFIND_API][STATUS] = True
-        else:
-            status_data[SCFIND_API][STATUS] = False
+        status_data[SCFIND_API][SCFIND_STATUS] = True
+    else:
+        status_data[SCFIND_API][SCFIND_STATUS] = False
 
 
     # Final result
