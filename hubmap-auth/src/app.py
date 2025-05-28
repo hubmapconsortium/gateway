@@ -568,7 +568,6 @@ def get_status_data():
     else:
         status_data[SCFIND_API][SCFIND_STATUS] = False
 
-
     # Final result
     return status_data
 
