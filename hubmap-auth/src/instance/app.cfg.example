@@ -26,17 +26,17 @@ ENTITY_API_URL = 'http://entity-api:8080'
 # For service status 
 # Use URLs (shown for DEV) that go through the gateway API auth instead of the ones 
 # designed for direct communication between containers
-UUID_API_STATUS_URL =       'https://uuid-api.dev.hubmapconsortium.org/status'
-ENTITY_API_STATUS_URL =     'https://entity-api.dev.hubmapconsortium.org/status'
-INGEST_API_STATUS_URL =     'https://ingest-api.dev.hubmapconsortium.org/status'
-SEARCH_API_STATUS_URL =     'https://search-api.dev.hubmapconsortium.org/status'
-FILE_ASSETS_STATUS_URL =    'https://assets.dev.hubmapconsortium.org/status/file_assets_status.json'
-CELLS_API_STATUS_URL =      'https://cells.dev.hubmapconsortium.org/api/status'
-WORKSPACES_API_STATUS_URL = 'https://workspaces-api.dev.hubmapconsortium.org/status'
-ONTOLOGY_API_STATUS_URL =   'https://ontology-api.dev.hubmapconsortium.org/status'
-UKV_API_STATUS_URL =        'https://ukv-api.dev.hubmapconsortium.org/status'
-DATA_PRODUCTS_STATUS_URL =  'https://data-products.cmu.hubmapconsortium.org/api/status'
-SCFIND_STATUS_URL =         'https://scfind.dev.hubmapconsortium.org/health'
+UUID_API_STATUS_URL =           'https://uuid-api.dev.hubmapconsortium.org/status'
+ENTITY_API_STATUS_URL =         'https://entity-api.dev.hubmapconsortium.org/status'
+INGEST_API_STATUS_URL =         'https://ingest-api.dev.hubmapconsortium.org/status'
+SEARCH_API_STATUS_URL =         'https://search-api.dev.hubmapconsortium.org/status'
+FILE_ASSETS_STATUS_URL =        'https://assets.dev.hubmapconsortium.org/status/file_assets_status.json'
+CELLS_API_STATUS_URL =          'https://cells.dev.hubmapconsortium.org/api/status'
+WORKSPACES_API_STATUS_URL =     'https://workspaces-api.dev.hubmapconsortium.org/status'
+ONTOLOGY_API_STATUS_URL =       'https://ontology-api.dev.hubmapconsortium.org/status'
+UKV_API_STATUS_URL =            'https://ukv-api.dev.hubmapconsortium.org/status'
+DATA_PRODUCTS_API_STATUS_URL =  'https://data-products.cmu.hubmapconsortium.org/api/status'
+SCFIND_API_STATUS_URL =         'https://scfind.dev.hubmapconsortium.org/health'
 
 # The maximum integer number of entries in the cache queue
 CACHE_MAXSIZE = 1024
