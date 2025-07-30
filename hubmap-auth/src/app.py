@@ -886,59 +886,65 @@ def get_entity_uuid_by_file_uuid(uuid):
     # Assume the target entity is NOT AVR record by default
     entity_is_avr = False
     # Assume the given uuid is a file uuid by default
-    given_uuid_is_file_uuid = True
-
     # First determine if the given uuid is whether an entity uuid or a file uuid
-    # by making a call to the uuid-api's /file-id endpoint
-    uuid_api_file_url = f"{app.config['UUID_API_URL']}/file-id/{uuid}"
+    # All file uuids start with ffff
+    # TODO: add a new endpoint in uuid-api for this file id check instead of hardcoding
+    given_uuid_is_file_uuid = uuid.startswith("ffff")
 
-    # Function cache to improve performance
-    response = make_api_request_get(uuid_api_file_url)
+    # Make a call to the uuid-api's /file-id endpoint to get `ancestor_uuid`
+    if given_uuid_is_file_uuid:
+        uuid_api_file_url = f"{app.config['UUID_API_URL']}/file-id/{uuid}"
 
-    # 200: this given uuid is a file uuid
-    # 404: either the given uuid does not exist or it's not a file uuid
-    if response.status_code == 200:
-        file_uuid_dict = response.json()
+        # Function cache to improve performance
+        response = make_api_request_get(uuid_api_file_url)
 
-        if 'ancestor_uuid' in file_uuid_dict:
-            logger.debug(f"======The given uuid {uuid} is a file uuid======")
+        # 200: this given uuid is indeed a valid file uuid
+        # 400: invalid file uuid format
+        # 404: this given uuid does not exist in the files table
+        if response.status_code == 200:
+            file_uuid_dict = response.json()
 
-            # For file uuid, its ancestor_uuid (the parent_id when generating this file uuid)
-            # is the actual entity uuid that can be used to get back the data_access_level
+            if 'ancestor_uuid' in file_uuid_dict:
+                logger.debug(f"======The given uuid {uuid} is a file uuid======")
+
+                # For file uuid, its ancestor_uuid (the parent_id when generating this file uuid)
+                # is the actual entity uuid that can be used to get back the data_access_level
+                # Overwrite the default value
+                entity_uuid = file_uuid_dict['ancestor_uuid']
+            else:
+                logger.error(f"Missing 'ancestor_uuid' from resulting json for the given file_uuid {uuid}")
+
+                raise requests.exceptions.RequestException(response.text)
+        elif response.status_code == 404:
+            # It could be a regular entity uuid but will return 404 by /file-id/<uuid>
+            # We just log this and move forward
+            # The call to entity-api will tell us if this dataset uuid exists and valid
+            logger.debug(f"======Unable to find the file uuid: {uuid}, consider it as an entity uuid======")
+
+            # Treat the given uuid as an entity uuid
+            entity_uuid = uuid
+
             # Overwrite the default value
-            entity_uuid = file_uuid_dict['ancestor_uuid']
+            given_uuid_is_file_uuid = False
         else:
-            logger.error(f"Missing 'ancestor_uuid' from resulting json for the given file_uuid {uuid}")
+            # uuid-api returns 400 if the given id is invalid
+            msg = f"Invalid file uuid sent to uuid-api: {uuid}"
+            # Log the full stack trace, prepend a line with our message
+            logger.exception(msg)
 
+            logger.debug("======status code from uuid-api======")
+            logger.debug(response.status_code)
+
+            logger.debug("======response text from uuid-api======")
+            logger.debug(response.text)
+
+            # Also bubble up the error message from uuid-api
             raise requests.exceptions.RequestException(response.text)
-    elif response.status_code == 404:
-        # It could be a regular entity uuid but will return 404 by /file-id/<uuid>
-        # We just log this and move forward
-        # The call to entity-api will tell us if this dataset uuid exists and valid
-        logger.debug(f"======Unable to find the file uuid: {uuid}, consider it as an entity uuid======")
-
+    else:
         # Treat the given uuid as an entity uuid
         entity_uuid = uuid
 
-        # Overwrite the default value
-        given_uuid_is_file_uuid = False
-    else:
-        # uuid-api returns 400 if the given id is invalid
-        msg = f"Unable to make a request to query the uuid via uuid-api: {uuid}"
-        # Log the full stack trace, prepend a line with our message
-        logger.exception(msg)
-
-        logger.debug("======status code from uuid-api======")
-        logger.debug(response.status_code)
-
-        logger.debug("======response text from uuid-api======")
-        logger.debug(response.text)
-
-        # Also bubble up the error message from uuid-api
-        raise requests.exceptions.RequestException(response.text)
-
     # Further check the entity type registered with uuid-api to determine if it's AVR or not
-    # Make the call against the /hmuuid endpoint
     uuid_api_entity_url = f"{app.config['UUID_API_URL']}/hmuuid/{entity_uuid}"
 
     # Function cache to improve performance
@@ -973,3 +979,5 @@ def get_entity_uuid_by_file_uuid(uuid):
     # Return the entity uuid string, if the entity is AVR, and 
     # if the given uuid is a file uuid or not (bool)
     return entity_uuid, entity_is_avr, given_uuid_is_file_uuid
+
+
