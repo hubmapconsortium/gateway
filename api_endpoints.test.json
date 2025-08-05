@@ -504,6 +504,22 @@
         "3e5bc7c0-d292-11ef-8694-9f2bd25b4aac",
         "89a69625-99d7-11ea-9366-0e98982705c1"
       ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/validate",
+      "auth": true,
+      "groups": [
+        "89a69625-99d7-11ea-9366-0e98982705c1"
+      ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/uploads/validate",
+      "auth": true,
+      "groups": [
+        "89a69625-99d7-11ea-9366-0e98982705c1"
+      ]
     }
   ]
 }
