@@ -67,7 +67,6 @@ echo $COMMONS_BRANCH
 Note: Environment variables set like this are only stored temporally. When you exit the running instance of bash by exiting the terminal, they get discarded. So for rebuilding the docker image, we'll need to make sure to set the environment variables again if necessary.
 
 ```
-cd docker
 ./docker-development.sh [check|config|build|start|stop|down]
 ```
 
