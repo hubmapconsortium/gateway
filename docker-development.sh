@@ -87,7 +87,7 @@ else
         cp ./VERSION hubmap-auth
         cp ./BUILD hubmap-auth
 
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway build
+        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway build --no-cache
     elif [ "$1" = "start" ]; then
         docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway up -d
     elif [ "$1" = "stop" ]; then
