@@ -76,3 +76,99 @@ The File Assets service allows direct http(s) access to files located in HuBMAP 
 #### File assets status
 
 There's a json filed named `file_assets_status.json` under `src/static` will need to be placed on the file system where the file assets runs for the status check.
+
+## PyTest tests
+
+### Structure
+
+Basic PyTests tests are configured in the `tests` directory following expected conventions.
+```
+gateway/
+├── src/
+│   └── app.py
+├── tests/
+│   └── test_get_status_info.py
+├── requirements.txt
+└── README.md
+```
+
+### Writing and Importing Tests
+
+1. Test files must have valid Python names (e.g., `test_get_status_info.py`).  
+2. Use correct imports for Flask-style project layout:
+
+```python
+# In tests/test_get_status_info.py
+from app import get_status_info  # app.py is in /src, marked as Sources Root
+```
+
+> This ensures that `app.py` is importable as `app` and that a test runner (such as PyCharm) can resolve the function definitions correctly.
+
+3. Use `unittest.mock.patch` to mock external calls:
+
+```python
+from unittest.mock import patch
+```
+
+4. Define a helper for mock responses:
+
+```python
+def make_response(status, headers, text):
+    from unittest.mock import MagicMock
+    import json
+
+    mock = MagicMock()
+    mock.status_code = status
+    mock.headers = headers
+    mock.text = text
+    mock.json.side_effect = lambda: json.loads(text)
+    return mock
+```
+
+## Execution in PyCharm
+
+This section explains how to configure  and run the test suite in PyCharm, using app.py's `get_status_info()` method as
+an example.  This assumes the GitHub repository content is set up as a PyCharm project, which executes the `wsgi.py`
+entrypoint as a Run Configuration.
+
+These directions align with **PyCharm 2025.2.5 (Community Edition)**
+
+- `src/` contains the Flask application code, including `app.py`, with `gateway` endpoint `@route` methods.
+- `tests/` contains all pytest test files.
+
+### Configure PyCharm Sources and Test Roots
+
+1. Right-click the `/src` directory → **Mark Directory As → Sources Root**  
+   - This ensures `app.py` becomes importable as `app` throughout the project, so tests can import methods from it.
+
+2. Right-click the `/tests` directory → **Mark Directory As → Test Sources Root**  
+   - This allows PyCharm to discover pytest/unittest files correctly.
+
+### Configure PyCharm Test Runner
+
+1. Open **Settings → Python → Integrated Tools → Testing → Default test runner**  
+2. Select **pytest** as the default test runner.
+
+
+### Running Tests in PyCharm
+
+1. Right-click `/tests` directory → **Run 'pytest in tests'**  
+2. Or open an individual test file → **Run 'pytest in test_get_status_info.py'**  
+3. PyCharm will show test progress and results in the Test Runner pane.
+
+Example output:
+
+```
+============================= test session starts =============================
+collected 9 items
+
+test_get_status_info.py .........
+============================== 9 passed in 0.12s =============================
+```
+
+### Notes & Tips
+
+- Always keep `/src` marked as **Sources Root** to avoid import errors.  
+- Always keep `/tests` marked as **Test Sources Root** for pytest to discover tests.  
+- Using `from app import get_status_info` ensures that the test code is aligned with your Flask project layout.  
+- Use `mock_get.side_effect` inside test functions to simulate exceptions such as `ConnectTimeout` or `ReadTimeout`.
