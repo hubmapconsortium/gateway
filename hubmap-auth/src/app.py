@@ -393,15 +393,6 @@ def _get_status_info(target_url:str, connection_timeout_in_secs:int=3, read_time
         return {'error': str(re)}
     # "Never" reach here :)
 
-# Make a call to the given target status URL
-# We don't want to cache the status request
-def status_request(target_url):
-    # Disable ssl certificate verification
-    response = requests.get(url = target_url, verify = False) 
-
-    return response
-
-
 # Dict of API status data
 def get_status_data():
     # Some constants
@@ -419,16 +410,7 @@ def get_status_data():
     UKV_API = 'ukv_api'
     DATA_PRODUCTS_API = 'data_products_api'
     SCFIND_API = 'scfind_api'
-
-    MYSQL_CONNECTION = 'mysql_connection'
-    NEO4J_CONNECTION = 'neo4j_connection'
-    ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
-    ELASTICSEARCH_STATUS = 'elasticsearch_status'
-    FILE_ASSETS_STATUS = 'file_assets_status'
     SCFIND_STATUS = 'scfind_status'
-    BRANCH = 'branch'
-    COMMIT = 'commit'
-    POSTGRES_CONNECTION = 'postgres_connection'
 
     # Gateway version and build are parsed from VERSION and BUILD files directly
     # instead of making API calls. So they alwasy present
