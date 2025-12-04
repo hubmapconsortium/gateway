@@ -1,7 +1,10 @@
+from json import JSONDecodeError
+
 from flask import Flask, request, jsonify, make_response, Response
 import requests
 # Don't confuse urllib (Python native library) with urllib3 (3rd-party library, requests also uses urllib3)
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from http import HTTPStatus
 import re
 import os
 import time
@@ -347,14 +350,48 @@ def make_api_request_get(target_url):
 
     return response
 
-# Make a call to the given target status URL
-# We don't want to cache the status request
-def status_request(target_url):
-    # Disable ssl certificate verification
-    response = requests.get(url = target_url, verify = False) 
+# Call the given target status URL, bypassing any cached data.
+# Form a dictionary describing what can be determined from calling the target status
+def _get_status_info(target_url:str, connection_timeout_in_secs:int=3, read_timeout_in_secs:int=5)->dict:
+    try:
+        # Disable ssl certificate verification,
+        # set connection timeout = 3s, read timeout = 5s
+        api_response = requests.get(url=target_url
+                                    , verify=False
+                                    , timeout=( connection_timeout_in_secs
+                                                , read_timeout_in_secs))
+        # Get only the MIME type in the same way Python does but will not expose for use:
+        # https://github.com/python/cpython/blob/f61e9fcdb623176994df5d3f9b0fd0ef4aa85e22/Lib/email/message.py#L29-L37
+        # https://github.com/psf/requests/issues/6362
+        a, sep, b = api_response.headers.get('Content-Type', '').partition(';')
+        resp_mime_type = a.strip()
 
-    return response
-
+        if resp_mime_type in ['application/json']:
+            return api_response.json()
+        elif resp_mime_type in ['text/html', 'text/plain']:
+            try:
+                # For services that send back JSON as the Response text, like Cells API, return a Python
+                # structure built from it, if it is valid JSON.
+                return json.loads(api_response.text)
+            except JSONDecodeError as jde:
+                if api_response.status_code in [HTTPStatus.OK] and api_response.text.lower() in ("ok"):
+                    # For services which only send 'ok' as a text body, like scfind
+                    return {'text': 'ok'}
+                else:
+                    return { 'error':   f"Unexpected response text '{api_response.text}'"
+                                        f" for HTTP {api_response.status_code}"}
+            except Exception as e:
+                return {'error': f"Unable to determine status from response text '{api_response.text}'"}
+        else:
+            return {'error': 'Unable to determine status from header content type'}
+    except requests.exceptions.ConnectTimeout:
+        return {'connection_timeout': True, 'read_timeout': None}
+    except requests.exceptions.ReadTimeout:
+        return {'connection_timeout': False, 'read_timeout': True}
+    except requests.exceptions.RequestException as re:
+        # Optional: handle other request errors
+        return {'error': str(re)}
+    # "Never" reach here :)
 
 # Dict of API status data
 def get_status_data():
@@ -373,16 +410,7 @@ def get_status_data():
     UKV_API = 'ukv_api'
     DATA_PRODUCTS_API = 'data_products_api'
     SCFIND_API = 'scfind_api'
-
-    MYSQL_CONNECTION = 'mysql_connection'
-    NEO4J_CONNECTION = 'neo4j_connection'
-    ELASTICSEARCH_CONNECTION = 'elasticsearch_connection'
-    ELASTICSEARCH_STATUS = 'elasticsearch_status'
-    FILE_ASSETS_STATUS = 'file_assets_status'
     SCFIND_STATUS = 'scfind_status'
-    BRANCH = 'branch'
-    COMMIT = 'commit'
-    POSTGRES_CONNECTION = 'postgres_connection'
 
     # Gateway version and build are parsed from VERSION and BUILD files directly
     # instead of making API calls. So they alwasy present
@@ -406,168 +434,47 @@ def get_status_data():
     }
 
     # uuid-api
-    uuid_api_response = status_request(app.config['UUID_API_STATUS_URL'])
-    if uuid_api_response.status_code == 200:
-        # Then parse the response json to determine if neo4j connection is working
-        response_json = uuid_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[UUID_API][VERSION] = response_json[VERSION]
-
-        if BUILD in response_json:
-            # Set build
-            status_data[UUID_API][BUILD] = response_json[BUILD]
-
-        if MYSQL_CONNECTION in response_json:
-            # Add the mysql connection status
-            status_data[UUID_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
+    status_data[UUID_API] = _get_status_info(target_url=app.config["UUID_API_STATUS_URL"])
 
     # entity-api
-    entity_api_response = status_request(app.config['ENTITY_API_STATUS_URL'])
-    if entity_api_response.status_code == 200:
-        # Then parse the response json to determine if neo4j connection is working
-        response_json = entity_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[ENTITY_API][VERSION] = response_json[VERSION]
-
-        if BUILD in response_json:
-            # Set build
-            status_data[ENTITY_API][BUILD] = response_json[BUILD]
-
-        if NEO4J_CONNECTION in response_json:
-            # Add the neo4j connection status
-            status_data[ENTITY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
+    status_data[ENTITY_API] = _get_status_info(target_url=app.config["ENTITY_API_STATUS_URL"])
 
     # ingest-api
-    ingest_api_response = status_request(app.config['INGEST_API_STATUS_URL'])
-    if ingest_api_response.status_code == 200:
-        # Then parse the response json to determine if neo4j connection is working
-        response_json = ingest_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[INGEST_API][VERSION] = response_json[VERSION]
-
-        if BUILD in response_json:
-            # Set build
-            status_data[INGEST_API][BUILD] = response_json[BUILD]
-
-        if NEO4J_CONNECTION in response_json:
-            # Add the neo4j connection status
-            status_data[INGEST_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
+    status_data[INGEST_API] = _get_status_info(target_url=app.config["INGEST_API_STATUS_URL"])
 
     # search-api
-    search_api_response = status_request(app.config['SEARCH_API_STATUS_URL'])
-    if search_api_response.status_code == 200:
-        # Then parse the response json to determine if elasticsearch cluster is connected
-        response_json = search_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[SEARCH_API][VERSION] = response_json[VERSION]
-
-        if BUILD in response_json:
-            # Set build
-            status_data[SEARCH_API][BUILD] = response_json[BUILD]
-
-        if ELASTICSEARCH_CONNECTION in response_json:
-            # Add the elasticsearch connection status
-            status_data[SEARCH_API][ELASTICSEARCH_CONNECTION] = response_json[ELASTICSEARCH_CONNECTION]
-
-        # Also check if the health status of elasticsearch cluster is available
-        if ELASTICSEARCH_STATUS in response_json:
-            # Add the elasticsearch cluster health status
-            status_data[SEARCH_API][ELASTICSEARCH_STATUS] = response_json[ELASTICSEARCH_STATUS]
+    status_data[SEARCH_API] = _get_status_info(target_url=app.config["SEARCH_API_STATUS_URL"])
 
     # file assets, no need to send headers
-    file_assets_response = status_request(app.config['FILE_ASSETS_STATUS_URL'])
-    if file_assets_response.status_code == 200:
-        # Then parse the response json to determine if neo4j connection is working
-        response_json = file_assets_response.json()
-        if FILE_ASSETS_STATUS in response_json:
-            # Add the file assets status since file is accessible via nginx
-            status_data[FILE_ASSETS][FILE_ASSETS_STATUS] = response_json[FILE_ASSETS_STATUS]
+    status_data[FILE_ASSETS] = _get_status_info(target_url=app.config["FILE_ASSETS_STATUS_URL"])
 
     # cells api
-    cells_api_response = status_request(app.config['CELLS_API_STATUS_URL'])
-    if cells_api_response.status_code == 200:
-        response_json = cells_api_response.json()
-        if BRANCH in response_json:
-            # Set branch
-            status_data[CELLS_API][BRANCH] = response_json[BRANCH]
-
-        if COMMIT in response_json:
-            # Set commit
-            status_data[CELLS_API][COMMIT] = response_json[COMMIT]
-
-        if VERSION in response_json:
-            # Set version
-            status_data[CELLS_API][VERSION] = response_json[VERSION]
-
-        if POSTGRES_CONNECTION in response_json:
-            # Set Postgres connection
-            status_data[CELLS_API][POSTGRES_CONNECTION] = response_json[POSTGRES_CONNECTION]
+    # N. B. CELLS_API_STATUS_URL does not return 'application/json' in api_response.headers.get('Content-Type')
+    #       but rather text/html.  However, the text body is JSON.
+    status_data[CELLS_API] = _get_status_info(target_url=app.config["CELLS_API_STATUS_URL"])
+    # cells_api_response = status_request(app.config['CELLS_API_STATUS_URL'])
 
     # workspaces REST api
-    workspaces_api_response = status_request(app.config['WORKSPACES_API_STATUS_URL'])
-    if workspaces_api_response.status_code == 200:
-        response_json = workspaces_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[WORKSPACES_API][VERSION] = response_json[VERSION]
-
-        if BUILD in response_json:
-            # Set build
-            status_data[WORKSPACES_API][BUILD] = response_json[BUILD]
+    status_data[WORKSPACES_API] = _get_status_info(target_url=app.config["WORKSPACES_API_STATUS_URL"])
 
     # ontology API
-    ontology_api_response = status_request(app.config["ONTOLOGY_API_STATUS_URL"])
-    if ontology_api_response.status_code == 200:
-        response_json = ontology_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[ONTOLOGY_API][VERSION] = response_json[VERSION]
-        if BUILD in response_json:
-            # Set build
-            status_data[ONTOLOGY_API][BUILD] = response_json[BUILD]
-        if NEO4J_CONNECTION in response_json:
-            # Set Neo4j connection
-            status_data[ONTOLOGY_API][NEO4J_CONNECTION] = response_json[NEO4J_CONNECTION]
+    status_data[ONTOLOGY_API] = _get_status_info(target_url=app.config["ONTOLOGY_API_STATUS_URL"])
 
     # ukv API
-    ukv_api_response = status_request(app.config["UKV_API_STATUS_URL"])
-    if ukv_api_response.status_code == 200:
-        response_json = ukv_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[UKV_API][VERSION] = response_json[VERSION]
-        if BUILD in response_json:
-            # Set build
-            status_data[UKV_API][BUILD] = response_json[BUILD]
-        if MYSQL_CONNECTION in response_json:
-            # Add the mysql connection status
-            status_data[UKV_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
+    status_data[UKV_API] = _get_status_info(target_url=app.config["UKV_API_STATUS_URL"])
 
     # data products API
-    data_products_api_response = status_request(app.config["DATA_PRODUCTS_API_STATUS_URL"])
-    if data_products_api_response.status_code == 200:
-        response_json = data_products_api_response.json()
-        if VERSION in response_json:
-            # Set version
-            status_data[DATA_PRODUCTS_API][VERSION] = response_json[VERSION]
-        if BUILD in response_json:
-            # Set build
-            status_data[DATA_PRODUCTS_API][BUILD] = response_json[BUILD]
-        if MYSQL_CONNECTION in response_json:
-            # Add the mysql connection status
-            status_data[DATA_PRODUCTS_API][MYSQL_CONNECTION] = response_json[MYSQL_CONNECTION]
+    status_data[DATA_PRODUCTS_API] = _get_status_info(target_url=app.config["DATA_PRODUCTS_API_STATUS_URL"])
 
-    # ScFind API
-    scfind_api_response = status_request(app.config["SCFIND_API_STATUS_URL"])
-    if scfind_api_response.status_code == 200:
-        status_data[SCFIND_API][SCFIND_STATUS] = True
-    else:
-        status_data[SCFIND_API][SCFIND_STATUS] = False
-
+    # N. B. SCFIND_API_STATUS_URL does not return 'application/json' in api_response.headers.get('Content-Type')
+    #       but rather text/html.  The text body is not JSON, but just the string 'ok'. The dict returned by
+    #       _get_status_info() reflects this value.
+    #       Insert into the Response JSON Object a JSON Object of the form
+    #       "scfind_api": {
+    #           "scfind_status": true
+    #       },
+    scfind_status_info = _get_status_info(target_url=app.config["SCFIND_API_STATUS_URL"])
+    status_data[SCFIND_API][SCFIND_STATUS] = 'text' in scfind_status_info and scfind_status_info['text'] in ("ok")
     # Final result
     return status_data
 
