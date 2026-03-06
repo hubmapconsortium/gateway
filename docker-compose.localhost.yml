@@ -1,0 +1,46 @@
+services:
+
+  hubmap-auth:
+    build:
+      context: ./hubmap-auth
+      # Uncomment if tesitng against a specific branch of commons other than the PyPI package
+      # Will also need to use the 'git+https://github.com/hubmapconsortium/commons.git@${COMMONS_BRANCH}#egg=hubmap-commons'
+      # in src/requirements.txt accordingly
+      args:
+        # The commons github branch to be used during image build (default to main if not set or null)
+        - COMMONS_BRANCH=${COMMONS_BRANCH:-main}
+    # Build the image with name and tag
+    # Exit with an error message containing err if unset or empty in the environment
+    image: hubmap/hubmap-auth:${HUBMAP_AUTH_VERSION:?err}
+    environment:
+      - DEPLOY_MODE=localhost
+    ports:
+      # Proxy pass to a REST API on localhost, which will be
+      # port used by an API running on a PSC VM for higher tiers e.g.
+      # 7777 for Workspaces API on vm001.hive.psc.edu.
+      # Entity API on localhost Docker Container listening on port 3333
+      # mapped to
+      - "7777:7777"
+    volumes:
+      # Mount the VERSION file and BUILD file
+      - "./VERSION:/usr/src/app/VERSION"
+      - "./BUILD:/usr/src/app/BUILD"
+      # Mount the source code to container
+      - "./hubmap-auth/src/:/usr/src/app/src"
+      # Mount conf.d-localhost to the nginx conf.d on container
+      - "./nginx/conf.d-localhost:/etc/nginx/conf.d"
+      # No SSL certificates mounted in container during
+      # localhost development, unlike containers on DEV or
+      # other servers
+      # - "/etc/letsencrypt:/etc/letsencrypt"
+      # Mount the API endpoints json file for API endpoints lookup
+      - "./api_endpoints.localhost.json:/usr/src/app/api_endpoints.json"
+    healthcheck:
+      # Replaces base healthcheck - checks localhost:7777 for entity-api instead of localhost:8080 for /
+      test: ["CMD", "curl", "--fail", "http://localhost:7777/status.json"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - gateway_hubmap # Docker network defined in docker-compose.yml
