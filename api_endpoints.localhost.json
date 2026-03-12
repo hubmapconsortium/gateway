@@ -2,7 +2,41 @@
   "_comment_services": "Service names below are Docker hostnames on the gateway_hubmap network. List with: docker network inspect gateway_hubmap | grep Name",
   "_comment_url_ingest-api": "http://localhost:12123",
   "_comment_url_entity-api": "http://localhost:3333",
+  "auth_grouping": {
+    "HuBMAP-Gateway-Read-Authorized-Groups": {
+      "description": "Globus Groups allow to access endpoints requiring a read role",
+      "groups": {
+        "HuBMAP-Read": "5777527e-ec11-11e8-ab41-0af86edb4424"
+      }
+    },
+    "HuBMAP-Gateway-Create-Authorized-Groups": {
+      "description": "Globus Groups allow to access endpoints requiring a create role for a data provider",
+      "groups": {
+        "HuBMAP-IEC": "e65f3980-20ea-11ee-b9e0-4f7fcf0abd92",
+        "HuBMAP-TESTING-GROUP": "5bd084c8-edc2-11e8-802f-0e368f3075e8",
+        "HuBMAP-CHOP-DP": "6574342e-20ea-11ee-b9e0-4f7fcf0abd92",
+        "HuBMAP-CMU-TC": "3ddb4f02-20e9-11ee-b515-955597948ffe",
+        "HuBMAP-HARVARD-DP": "cfa8b9dc-20ea-11ee-b9e0-4f7fcf0abd92",
+        "HuBMAP-HARVARD-TC": "b85040ac-20ea-11ee-a74e-ff8070cda04a",
+        "HuBMAP-IU-MC": "ff2283a0-20ea-11ee-9d2e-0bbf905dd76a",
+        "HuBMAP-NYGC-MC": "14fa7322-20eb-11ee-a74e-ff8070cda04a",
+        "HuBMAP-UF-TC": "9d7be1c8-20ea-11ee-b9e0-4f7fcf0abd92",
+        "HuBMAP-UIC-DP": "2abf73ec-20eb-11ee-b9e0-4f7fcf0abd92"
+      }
+    },
+    "HuBMAP-Gateway-Data-Admin-Authorized-Groups": {
+      "description": "Globus Groups allow to access endpoints requiring a data admin role",
+      "groups": {
+        "HuBMAP-Data-Admin": "89a69625-99d7-11ea-9366-0e98982705c1"
+      }
+    }
+  },
   "entity-api": [
+    {
+      "method": "GET",
+      "endpoint": "/",
+      "auth": false
+    },
     {
       "method": "GET",
       "endpoint": "/status",
@@ -10,19 +44,275 @@
     },
     {
       "method": "GET",
-      "endpoint": "/",
+      "endpoint": "/usergroups",
       "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "groups": ["5777527e-ec11-11e8-ab41-0af86edb4424"]
     },
     {
       "method": "GET",
-      "endpoint": "/usergroups",
+      "endpoint": "/entity-types",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/entities/<*>",
       "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "groups": ["5777527e-ec11-11e8-ab41-0af86edb4424"]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/<*>",
+      "auth": true,
+      "groups": ["5bd084c8-edc2-11e8-802f-0e368f3075e8"]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/provenance",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/revisions",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/tuplets",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/collections",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/uploads",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/globus-url",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/ancestor-organs",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/siblings",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/instanceof/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/type/<*>/instanceof/<*>",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/batch-ids",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/multiple-samples/<*>",
+      "auth": true,
+      "groups": ["5bd084c8-edc2-11e8-802f-0e368f3075e8"]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/ancestors/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/descendants/<*>",
+      "auth": true,
+      "groups": ["5777527e-ec11-11e8-ab41-0af86edb4424"]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/parents/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/children/<*>",
+      "auth": true,
+      "groups": ["5777527e-ec11-11e8-ab41-0af86edb4424"]
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/unpublished",
+      "auth": true,
+      "groups": ["5777527e-ec11-11e8-ab41-0af86edb4424"]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/sankey_data",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/prov-info",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/prov-metadata",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/revisions",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/revision",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/latest-revision",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/donors",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/samples",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/organs",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/paired-dataset",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/retract",
+      "auth": true,
+      "groups": ["89a69625-99d7-11ea-9366-0e98982705c1"]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/components",
+      "auth": true,
+      "groups": ["5bd084c8-edc2-11e8-802f-0e368f3075e8"]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/dataset/globus-url/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/dataset/globus-url/<*>",
+      "auth": false
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/uploads",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/previous_revisions/<*>",
+      "auth": true,
+      "groups": ["5777527e-ec11-11e8-ab41-0af86edb4424"]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/next_revisions/<*>",
+      "auth": true,
+      "groups": ["5777527e-ec11-11e8-ab41-0af86edb4424"]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/redirect/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/doi/redirect/<*>",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collection/redirect/<*>",
+      "auth": false
+    },
+    {
+      "method": "POST",
+      "endpoint": "/constraints",
+      "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/documents/<*>",
+      "auth": false
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/flush-cache/<*>",
+      "auth": true,
+      "groups": ["5777527e-ec11-11e8-ab41-0af86edb4424"]
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/flush-all-cache",
+      "auth": true,
+      "groups": ["89a69625-99d7-11ea-9366-0e98982705c1"]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "auth": false,
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "auth": false,
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "auth": false,
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "auth": false,
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
     }
   ],
   "ingest-api": [
