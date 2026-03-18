@@ -8,6 +8,7 @@ from http import HTTPStatus
 import re
 import os
 import time
+from datetime import datetime
 import json
 import logging
 from cachetools import cached, TTLCache
@@ -25,6 +26,12 @@ from hubmap_commons.exceptions import HTTPException
 # Do NOT handle log file and rotation via the Python logging to avoid issues with multi-worker processes
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG, datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
+
+# For the hooks used to log endpoint usage, set the level to use while
+# logging these events, and to be used to return quickly when the
+# logger is not enabled for that level.
+ENDPOINT_LOG_LEVEL=logging.INFO-1
+logging.addLevelName(ENDPOINT_LOG_LEVEL, "API_USAGE")
 
 # Specify the absolute path of the instance folder and use the config file relative to the instance path
 app = Flask(__name__, instance_path=os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance'), instance_relative_config=True)
@@ -157,8 +164,18 @@ def api_auth():
                     # Remove trailing slash for comparison
                     if item['endpoint'].strip('/') == target_endpoint.strip('/'):
                         if api_access_allowed(item, request):
+                            _log_auth_decision( response_code=200
+                                                , authority=authority
+                                                , method=method
+                                                , endpoint=endpoint
+                                                , matched_pattern=item['endpoint'])
                             return response_200
                         else:
+                            _log_auth_decision( response_code=401
+                                                , authority=authority
+                                                , method=method
+                                                , endpoint=endpoint
+                                                , matched_pattern=item['endpoint'])
                             return response_401
 
             # Second pass, loop through the list to do the wildcard match
@@ -174,18 +191,44 @@ def api_auth():
                     # Remove trailing slash for comparison
                     if re.fullmatch(endpoint_pattern.strip('/'), target_endpoint.strip('/')) is not None:
                         if api_access_allowed(item, request):
+                            _log_auth_decision( response_code=200
+                                                , authority=authority
+                                                , method=method
+                                                , endpoint=endpoint
+                                                , matched_pattern=item['endpoint'])
+
                             return response_200
                         else:
+                            _log_auth_decision( response_code=401
+                                                , authority=authority
+                                                , method=method
+                                                , endpoint=endpoint
+                                                , matched_pattern=item['endpoint'])
                             return response_401
 
             # After two passes and still no match found
             # It could be either unknown request method or unknown path
+            _log_auth_decision(response_code=401
+                               , authority=authority
+                               , method=method
+                               , endpoint=endpoint
+                               , matched_pattern=item['endpoint'])
             return response_401
 
-        # Handle the cases when authority not in data.keys() 
+        # Handle the cases when authority not in data.keys()
+        _log_auth_decision(response_code=401
+                           , authority=authority
+                           , method=method
+                           , endpoint=endpoint
+                           , matched_pattern="NO_MATCH")
         return response_401
     else:
         # Missing lookup_key
+        _log_auth_decision(response_code=401
+                           , authority=authority
+                           , method=method
+                           , endpoint=endpoint
+                           , matched_pattern="UNKNOWN_SERVICE")
         return response_401
 
 
@@ -478,6 +521,76 @@ def get_status_data():
     # Final result
     return status_data
 
+
+def _log_auth_decision(response_code, authority, method, endpoint, matched_pattern=None):
+    """
+    Log authorization decision in Common Log Format.
+
+    Logs each authorization check with details about the request and decision.
+    Format matches entity-api's after_request logging style.
+
+    Args:
+        response_code: HTTP status code (200 for authorized, 401 for denied)
+        authority: The service/host making the request (e.g., "entity-api")
+        method: HTTP method (GET, POST, PUT, DELETE)
+        endpoint: The original endpoint being accessed (e.g., "/entities/abc123")
+        matched_pattern: The pattern that matched from api_endpoints.json (e.g., "/entities/<*>")
+                        or special values: "NO_MATCH", "UNKNOWN_SERVICE", "MISSING_HEADERS"
+    """
+    # Bail out immediately if this log level wouldn't be logged
+    if not logger.isEnabledFor(ENDPOINT_LOG_LEVEL):
+        return
+
+    # Get client IP from X-Forwarded-For header (set by nginx) or remote_addr
+    client_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if client_ip and ',' in client_ip:
+        # X-Forwarded-For can be comma-separated list, take first
+        client_ip = client_ip.split(',')[0].strip()
+    source_ip = client_ip or '-'
+
+    # Caller - not available without AWS IAM, use '-'
+    caller = '-'
+
+    # User - not available at authorization time (token not yet validated)
+    # Could extract from Authorization header if needed, but use '-' for now
+    user = '-'
+
+    # Request time in AWS/Apache format: [DD/MMM/YYYY:HH:MM:SS +0000]
+    request_time = datetime.utcnow().strftime('%d/%b/%Y:%H:%M:%S +0000')
+
+    # HTTP method and resource path from parameters
+    # method and endpoint are passed as parameters (not from Flask request object)
+    # because they come from X-Original-* headers, not the /api_auth request itself
+
+    # Protocol - assume HTTP/1.1 for auth requests
+    protocol = 'HTTP/1.1'
+
+    # Response status code
+    status = response_code
+
+    # Response length - auth responses are small JSON messages (~34 bytes for 401, ~26 for 200)
+    # Use approximate sizes or '-'
+    response_length = 34 if response_code == 401 else 26
+
+    # Generate request ID (timestamp-based for tracking)
+    request_id = f"auth-{int(time.time() * 1000)}"
+
+    # Add matched pattern as additional info if available
+    # This helps understand which rule was applied
+    pattern_info = f" pattern={matched_pattern}" if matched_pattern else ""
+
+    # Format log message matching Common Log Format:
+    # $sourceIp $caller $user [$requestTime] "$method $resourcePath $protocol" $status $responseLength $requestId
+    log_message = (
+        f'{source_ip} {caller} {user} '
+        f'[{request_time}] '
+        f'"{method} {endpoint} {protocol}" '
+        f'{status} {response_length} {request_id}'
+        f'{pattern_info}'  # Add pattern info for debugging
+    )
+
+    logger.log(level=ENDPOINT_LOG_LEVEL
+               , msg=log_message)
 
 # Get user information dict based on the http request(headers)
 # `group_required` is a boolean, when True, 'hmgroupids' is in the output

@@ -38,7 +38,7 @@ services:
     healthcheck:
       # Replaces base healthcheck - checks localhost:7777 for entity-api instead of localhost:8080 for /
       test: ["CMD", "curl", "--fail", "http://localhost:7777/status.json"]
-      interval: 10s
+      interval: 12h # Set long on localhost to avoid logging that interferes with development
       timeout: 5s
       retries: 5
       start_period: 30s
