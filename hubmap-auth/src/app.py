@@ -8,7 +8,7 @@ from http import HTTPStatus
 import re
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import logging
 from cachetools import cached, TTLCache
@@ -556,7 +556,7 @@ def _log_auth_decision(response_code, authority, method, endpoint, matched_patte
     user = '-'
 
     # Request time in AWS/Apache format: [DD/MMM/YYYY:HH:MM:SS +0000]
-    request_time = datetime.utcnow().strftime('%d/%b/%Y:%H:%M:%S +0000')
+    request_time = datetime.now(timezone.utc).strftime('%d/%b/%Y:%H:%M:%S +0000')
 
     # HTTP method and resource path from parameters
     # method and endpoint are passed as parameters (not from Flask request object)
