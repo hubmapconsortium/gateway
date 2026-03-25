@@ -159,7 +159,7 @@ def api_auth():
 
     # method and endpoint are always not None as long as authority is not None
     if authority is not None:
-        # Load endpoints from json
+        # Load endpoints from JSON file, using method decorated with @cached()
         data = load_file(app.config['API_ENDPOINTS_FILE'])
 
         if authority in data.keys():
@@ -189,7 +189,7 @@ def api_auth():
                                                                      , endpoint=endpoint
                                                                      , client_ip=req_ip_addr
                                                                      , matched_pattern=item['endpoint'])
-                            return response_401 # KBKBKB @TODO return HTTP 200 if not found, subrequest to back-end API, let it return 404 separately.  Delegate to hand 404 because nginx won't return 404 with auth request module.
+                            return response_401
 
             # Second pass, loop through the list to do the wildcard match
             for item in data[authority]:
@@ -222,18 +222,23 @@ def api_auth():
                                                                      , endpoint=endpoint
                                                                      , client_ip=req_ip_addr
                                                                      , matched_pattern=item['endpoint'])
-                            return response_401  # KBKBKB @TODO return HTTP 200
+                            return response_401
 
-            # After two passes and still no match found
-            # It could be either unknown request method or unknown path
-            endpoint_auth_instance.log_auth_decision(response_code=401
-                                                     , response_length=len(response_401.data)
+            # With no match to the combination of endpoint path and
+            # endpoint HTTP method, the proper response is an HTTP 404.
+            # Due to limitations in nginx's response codes, delegate generating
+            # a 404 Response back to the authority API by authorizing access with
+            # an HTTP 200 response to this subrequest.
+            endpoint_auth_instance.log_auth_decision(response_code=200
+                                                     , response_length=len(response_200.data)
                                                      , auth_req_api=authority
                                                      , method=method
                                                      , endpoint=endpoint
                                                      , client_ip=req_ip_addr
-                                                     , matched_pattern="NO_MATCHED_ENDPOINT")
-            return response_401
+                                                     , matched_pattern="NO_MATCHED_ENDPOINT_DELEGATED_TO_API")
+            delegate_404_response = make_response(jsonify({"message": "Endpoint not configured in gateway"}), 200)
+            delegate_404_response.headers['X-Delegate-404-Response'] = f"{authority} should send HTTP 404 Response"
+            return delegate_404_response
 
         # Handle the cases when authority not in data.keys()
         endpoint_auth_instance.log_auth_decision(response_code=401
@@ -545,31 +550,6 @@ def get_status_data():
     # Final result
     return status_data
 
-# # Authorizer handlers
-# def _handle_read_auth(request)->bool:
-#     # invoke existing read logic (e.g., likely simplified Lambda read authorizer logic)
-#     return 'kbkbkb'=='kbkbkb'
-#
-# def _handle_write_auth(request)->bool:
-#     # invoke existing create/write logic (e.g., likely simplified Lambda create/write authorizer logic)
-#     return 'KBKBKB'=='kbkbkb'
-#
-# def _handle_data_admin_auth(request)->bool:
-#     # invoke existing data-admin logic (e.g., likely simplified Lambda data-admin authorizer logic)
-#     return 'KBKBKB'=='kbkbkb'
-#
-# def _handle_unknown_auth(auth_type: str)->bool:
-#     raise ValueError(f"Authorization method '{auth_type}' not supported")
-#
-# # Create a dict which allows preceding authorization functions to be invoked with
-# # less if-then-else coding.
-# auth_functions = {
-#     'read': _handle_read_auth,
-#     'create': _handle_write_auth,
-#     'data-admin': _handle_data_admin_auth
-#     # All other authorization types handled by _handle_unknown_auth()
-# }
-
 # Get user information dict based on the http request(headers)
 # `group_required` is a boolean, when True, 'hmgroupids' is in the output
 def get_user_info_for_access_check(request, group_required):
@@ -816,43 +796,6 @@ def validate_umls_key(umls_key):
         return True
     else:
         return False
-
-
-# # Always pass through the requests with using modified version of the globus app secret as internal token
-# def is_secret_token(request):
-#     internal_token = auth_helper_instance.getProcessSecret()
-#     parsed_token = None
-#
-#     if 'Authorization' in request.headers:
-#         auth_header = request.headers['Authorization']
-#         parsed_token = auth_header[6:].strip()
-#
-#     if internal_token == parsed_token:
-#         return True
-#
-#     return False
-
-# # Check if access to the given endpoint item is allowed
-# # Also check if the globus token associated user is a member of the specified group associated with the endpoint item
-# def api_access_allowed(item, request)->bool:
-#     logger.info("======Matched endpoint======")
-#     logger.info(item)
-#
-#     # API access to item is allowed when item does not have an authorizer specified.
-#     if 'authorizer' not in item:
-#         return True
-#
-#     # API access to item is allowed when the Globus internal secret token is presented.
-#     if is_secret_token(request):
-#         return True
-#
-#     # Retrieve the appropriate authorization function based upon the
-#     # code, or the HTTP 500 handling function if nothing is mapped.
-#     auth_handler = auth_functions.get(item['authorizer'])
-#     if auth_handler is None:
-#         _handle_unknown_auth(item['authorizer'])
-#     # Execute the authorization handler associated with item['authorizer']
-#     return auth_handler(request)
 
 # If the given uuid is a file uuid, get the parent entity uuid
 # If the given uuid itself is an entity uuid, just return it

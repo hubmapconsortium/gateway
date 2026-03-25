@@ -9,8 +9,7 @@
     },
     {
       "method": "GET",
-      "endpoint": "/status",
-      "authorizer": "kbkbkb"
+      "endpoint": "/status"
     },
     {
       "method": "GET",

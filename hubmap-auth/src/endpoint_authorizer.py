@@ -32,9 +32,6 @@ def _find_available_level(start_level: int, max_level: int) -> int | None:
     A level is considered unnamed if logging.getLevelName() returns the
     default 'Level <N>' string that Python assigns to unregistered levels.
     """
-    # KBKBKB @TODO confirm with Joe how he might use logging levels and if this scheme is okay e.g.
-    # KBKBKB @TODO might this have been a problem in AWS CloudWatch if filtering to alert for anything
-    # KBKBKB @TODO above the INFO level?  Will we be doing that at PSC?
     for candidate in range(start_level, max_level):
         if logging.getLevelName(candidate) == f"Level {candidate}":
             return candidate
