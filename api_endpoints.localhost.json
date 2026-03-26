@@ -1,7 +1,9 @@
 {
   "_comment_services": "Service names below are Docker hostnames on the gateway_hubmap network. List with: docker network inspect gateway_hubmap | grep Name",
   "_comment_url_ingest-api": "http://localhost:12123",
+  "_comment_url_uuid-api": "http://localhost:2222",
   "_comment_url_entity-api": "http://localhost:3333",
+  "_comment_url_search-api": "http://localhost:4444",
   "entity-api": [
     {
       "method": "GET",
@@ -233,616 +235,636 @@
       "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
     }
   ],
+  "uuid-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/uuid"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uuid/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uuid/<*>/exists",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/hmuuid/<*>"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/hmuuid",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/hmuuid/<*>/exists",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/file-id/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/files",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/ancestors"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    }
+  ],
+  "search-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/search"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/search"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/indices"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/mapping"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/mget"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/attribute-values"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/reindex-status"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/reindex-status/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/param-search/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/search"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>/search"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/mapping"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/attribute-values"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>/mget"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>/scroll-search"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reindex-all",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reindex/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/update/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/update/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/update/<*>/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/add/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/add/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/add/<*>/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/clear-docs/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/clear-docs/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/clear-docs/<*>/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    }
+  ],
   "ingest-api": [
     {
       "method": "GET",
-      "endpoint": "/",
-      "auth": false
+      "endpoint": "/"
     },
     {
       "method": "GET",
-      "endpoint": "/favicon.ico",
-      "auth": false
+      "endpoint": "/favicon.ico"
     },
     {
       "method": "GET",
-      "endpoint": "/status",
-      "auth": false
+      "endpoint": "/status"
     },
     {
       "method": "POST",
       "endpoint": "/notify",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/datasets",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/datasets/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/datasets",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/publications",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/datasets/<*>/verifytitleinfo",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
-      "endpoint": "/entities/<*>",
-      "auth": false
+      "endpoint": "/entities/<*>"
     },
     {
       "method": "POST",
-      "endpoint": "/datasets/derived",
-      "auth": false
+      "endpoint": "/datasets/derived"
     },
     {
       "method": "PUT",
-      "endpoint": "/datasets/<*>/status/<*>",
-      "auth": false
+      "endpoint": "/datasets/<*>/status/<*>"
     },
     {
       "method": "GET",
-      "endpoint": "/datasets/<*>/file-system-abs-path",
-      "auth": false
+      "endpoint": "/datasets/<*>/file-system-abs-path"
     },
     {
       "method": "POST",
-      "endpoint": "/datasets/file-system-abs-path",
-      "auth": false
+      "endpoint": "/datasets/file-system-abs-path"
     },
     {
       "method": "POST",
-      "endpoint": "/uploads/file-system-abs-path",
-      "auth": false
+      "endpoint": "/uploads/file-system-abs-path"
     },
     {
       "method": "POST",
-      "endpoint": "/entities/file-system-rel-path",
-      "auth": false
+      "endpoint": "/entities/file-system-rel-path"
     },
     {
       "method": "POST",
-      "endpoint": "/entities/accessible-data-directories",
-      "auth": false
+      "endpoint": "/entities/accessible-data-directories"
     },
     {
       "method": "GET",
-      "endpoint": "/uploads/<*>/file-system-abs-path",
-      "auth": false
+      "endpoint": "/uploads/<*>/file-system-abs-path"
     },
     {
       "method": "POST",
-      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async",
-      "auth": false
+      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async"
     },
     {
       "method": "POST",
       "endpoint": "/datasets/ingest",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
-      "endpoint": "/datasets/submissions/request_ingest",
-      "auth": false
+      "endpoint": "/datasets/submissions/request_ingest"
     },
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/validate",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/publish",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "data-admin"
     },
     {
       "method": "PUT",
       "endpoint": "/collections/<*>/register-doi",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "data-admin"
     },
     {
       "method": "PUT",
       "endpoint": "/datasets/bulk/submit",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "data-admin"
     },
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/metadata-json",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "data-admin"
     },
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/submit",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>/unpublish",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "PUT",
       "endpoint": "/datasets/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/new-collection",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
-      "endpoint": "/login",
-      "auth": false
+      "endpoint": "/login"
     },
     {
       "method": "GET",
-      "endpoint": "/logout",
-      "auth": false
+      "endpoint": "/logout"
     },
     {
       "method": "POST",
       "endpoint": "/file-upload",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/file-commit",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/file-remove",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/uploads",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "PUT",
       "endpoint": "/uploads/<*>/validate",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "PUT",
       "endpoint": "/uploads/<*>/reorganize",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "data-admin"
     },
     {
       "method": "PUT",
       "endpoint": "/uploads/<*>/submit",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "PUT",
       "endpoint": "/uploads/<*>/arrange-into-datasets",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/data-provider-groups",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
-      "endpoint": "/metadata/usergroups",
-      "auth": false
+      "endpoint": "/metadata/usergroups"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/userroles",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/usercanedit/type",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/usercanedit/type/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/usercanedit/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/groups/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/source/type/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/source/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/metadata/<*>",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/metadata/validate",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/specimens/<*>/ingest-group-ids",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
       "endpoint": "/entities/<*>/allowable-edit-states",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/donors/bulk-upload",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/donors/bulk",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/samples/bulk-upload",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/samples/bulk",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "PUT",
       "endpoint": "/sample-bulk-metadata",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/dataset/extract-cell-count-from-secondary-analysis-files",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
-      "endpoint": "/datasets/data-status",
-      "auth": false
+      "endpoint": "/datasets/data-status"
     },
     {
       "method": "GET",
-      "endpoint": "/uploads/data-status",
-      "auth": false
+      "endpoint": "/uploads/data-status"
     },
     {
       "method": "GET",
-      "endpoint": "/data-ingest-board-login",
-      "auth": false
+      "endpoint": "/data-ingest-board-login"
     },
     {
       "method": "GET",
-      "endpoint": "/data-ingest-board-logout",
-      "auth": false
+      "endpoint": "/data-ingest-board-logout"
     },
     {
       "method": "GET",
-      "endpoint": "/umls-auth",
-      "auth": false
+      "endpoint": "/umls-auth"
     },
     {
       "method": "GET",
-      "endpoint": "/ubkg-download-file-list",
-      "auth": false
+      "endpoint": "/ubkg-download-file-list"
     },
     {
       "method": "POST",
       "endpoint": "/datasets/components",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
-      "endpoint": "/assaytype",
-      "auth": false
+      "endpoint": "/assaytype"
     },
     {
       "method": "GET",
-      "endpoint": "/assaytype/<*>",
-      "auth": false
+      "endpoint": "/assaytype/<*>"
     },
     {
       "method": "GET",
-      "endpoint": "/assaytype/metadata/<*>",
-      "auth": false
+      "endpoint": "/assaytype/metadata/<*>"
     },
     {
       "method": "PUT",
       "endpoint": "/reload-assaytypes",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "data-admin"
     },
     {
       "method": "GET",
-      "endpoint": "/privs/has-data-admin",
-      "auth": false
+      "endpoint": "/privs/has-data-admin"
     },
     {
       "method": "GET",
-      "endpoint": "/has-pipeline-test-privs",
-      "auth": false
+      "endpoint": "/has-pipeline-test-privs"
     },
     {
       "method": "POST",
       "endpoint": "/datasets/<*>/submit-for-pipeline-testing",
-      "auth": true,
-      "groups": [
-        "3e5bc7c0-d292-11ef-8694-9f2bd25b4aac",
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "pipeline-test"
     },
     {
       "method": "POST",
       "endpoint": "/datasets/submit-for-pipeline-testing",
-      "auth": true,
-      "groups": [
-        "3e5bc7c0-d292-11ef-8694-9f2bd25b4aac",
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "pipeline-test"
     },
     {
       "method": "POST",
       "endpoint": "/datasets/validate",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "data-admin"
     },
     {
       "method": "POST",
       "endpoint": "/uploads/validate",
-      "auth": true,
-      "groups": [
-        "89a69625-99d7-11ea-9366-0e98982705c1"
-      ]
+      "authorizer": "data-admin"
     }
   ],
   "antibody-api": [
     {
       "method": "GET",
-      "endpoint": "/",
-      "auth": false
+      "endpoint": "/"
     },
     {
       "method": "GET",
-      "endpoint": "/static/<*>",
-      "auth": false
+      "endpoint": "/static/<*>"
     },
     {
       "method": "GET",
-      "endpoint": "/static/dist/<*>",
-      "auth": false
+      "endpoint": "/static/dist/<*>"
     },
     {
       "method": "GET",
-      "endpoint": "/css/<*>",
-      "auth": false
+      "endpoint": "/css/<*>"
     },
     {
       "method": "GET",
-      "endpoint": "/login",
-      "auth": false
+      "endpoint": "/login"
     },
     {
       "method": "GET",
-      "endpoint": "/logout",
-      "auth": false
+      "endpoint": "/logout"
     },
     {
       "method": "GET",
-      "endpoint": "/antibodies",
-      "auth": false
+      "endpoint": "/antibodies"
     },
     {
       "method": "POST",
       "endpoint": "/antibodies",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "POST",
       "endpoint": "/antibodies/import",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "PUT",
       "endpoint": "/restore_elasticsearch",
-      "auth": true,
-      "groups": [
-        "5777527e-ec11-11e8-ab41-0af86edb4424"
-      ]
+      "authorizer": "read"
     },
     {
       "method": "GET",
-      "endpoint": "/upload",
-      "auth": false
+      "endpoint": "/upload"
     },
     {
       "method": "POST",
-      "endpoint": "/_search",
-      "auth": false
+      "endpoint": "/_search"
     },
     {
       "method": "GET",
-      "endpoint": "/status",
-      "auth": false
+      "endpoint": "/status"
     }
   ]
 }
