@@ -63,9 +63,10 @@ class EndpointAuthorizer:
         self.logger = logging.getLogger('gateway')
         self.effective_endpoint_log_level = _register_endpoint_log_level(self.logger)
         self._auth_functions = {
-            'read':       self._handle_read_auth,
-            'create':     self._handle_write_auth,
-            'data-admin': self._handle_data_admin_auth,
+            'read':             self._handle_read_auth,
+            'create':           self._handle_write_auth,
+            'data-admin':       self._handle_data_admin_auth,
+            'pipeline-test':    self._handle_pipeline_testing_auth
         }
         self._auth_helper_instance: AuthHelper = ahi
 
@@ -83,6 +84,9 @@ class EndpointAuthorizer:
 
     def _handle_data_admin_auth(self, request_token) -> bool:
         return self._auth_helper_instance.has_data_admin_privs(request_token)
+
+    def _handle_pipeline_testing_auth(self, request_token) -> bool:
+        return self._auth_helper_instance.has_pipeline_testing_privs(request_token)
 
     def _handle_unknown_auth(self, auth_type: str) -> bool:
         raise ValueError(f"Authorization method '{auth_type}' not supported")
