@@ -14,6 +14,9 @@ from cachetools import cached, TTLCache
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
+# local imports
+from endpoint_authorizer import EndpointAuthorizer
+
 # HuBMAP commons
 from hubmap_commons.hm_auth import AuthHelper
 from hubmap_commons.exceptions import HTTPException
@@ -23,7 +26,9 @@ from hubmap_commons.exceptions import HTTPException
 # All the API logging is forwarded to the uWSGI server and gets written into the log file `uwsgi-hubmap-auth.log`
 # Log rotation is handled via logrotate on the host system with a configuration file
 # Do NOT handle log file and rotation via the Python logging to avoid issues with multi-worker processes
-logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG, datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+                    , level=logging.DEBUG
+                    , datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
 # Specify the absolute path of the instance folder and use the config file relative to the instance path
@@ -76,6 +81,12 @@ except Exception:
     # Log the full stack trace, prepend a line with our message
     logger.exception(msg)
 
+####################################################################################################
+## EndpointAuthorizer instance instantiation
+####################################################################################################
+
+# Module-level singleton - import and use directly in app.py
+endpoint_auth_instance = EndpointAuthorizer(auth_helper_instance)
 
 ####################################################################################################
 ## Default route
@@ -107,7 +118,6 @@ def cache_clear():
     cache.clear()
     logger.info("All gateway API Auth function cache cleared.")
     return "All function cache cleared."
-
 
 # Auth for private API services
 # All endpoints access need to be authenticated
@@ -142,10 +152,14 @@ def api_auth():
         authority = request.headers.get("Host")
         method = request.headers.get("X-Original-Request-Method")
         endpoint = request.headers.get("X-Original-URI")
+    # Grab the IP address the request came from for logging. If there is a comma-separated
+    # list in X-Forwarded-For, strip off everything but the original client IP
+    forwarded_for = request.headers.get('X-Forwarded-For')
+    req_ip_addr = forwarded_for.split(',')[0].strip() if forwarded_for else request.remote_addr
 
     # method and endpoint are always not None as long as authority is not None
     if authority is not None:
-        # Load endpoints from json
+        # Load endpoints from JSON file, using method decorated with @cached()
         data = load_file(app.config['API_ENDPOINTS_FILE'])
 
         if authority in data.keys():
@@ -156,9 +170,25 @@ def api_auth():
                     target_endpoint = endpoint.split("?")[0]
                     # Remove trailing slash for comparison
                     if item['endpoint'].strip('/') == target_endpoint.strip('/'):
-                        if api_access_allowed(item, request):
+
+                        if endpoint_auth_instance.api_access_allowed(   item=item
+                                                                        , request=request):
+                            endpoint_auth_instance.log_auth_decision(response_code=200
+                                                                     , response_length=len(response_200.data)
+                                                                     , auth_req_api=authority
+                                                                     , method=method
+                                                                     , endpoint=endpoint
+                                                                     , client_ip=req_ip_addr
+                                                                     , matched_pattern=item['endpoint'])
                             return response_200
                         else:
+                            endpoint_auth_instance.log_auth_decision(response_code=401
+                                                                     , response_length=len(response_401.data)
+                                                                     , auth_req_api=authority
+                                                                     , method=method
+                                                                     , endpoint=endpoint
+                                                                     , client_ip=req_ip_addr
+                                                                     , matched_pattern=item['endpoint'])
                             return response_401
 
             # Second pass, loop through the list to do the wildcard match
@@ -173,19 +203,61 @@ def api_auth():
                     target_endpoint = endpoint.split("?")[0]
                     # Remove trailing slash for comparison
                     if re.fullmatch(endpoint_pattern.strip('/'), target_endpoint.strip('/')) is not None:
-                        if api_access_allowed(item, request):
+                        if endpoint_auth_instance.api_access_allowed(   item=item
+                                                                        , request=request):
+                            endpoint_auth_instance.log_auth_decision(response_code=200
+                                                                     , response_length=len(response_200.data)
+                                                                     , auth_req_api=authority
+                                                                     , method=method
+                                                                     , endpoint=endpoint
+                                                                     , client_ip=req_ip_addr
+                                                                     , matched_pattern=item['endpoint'])
+
                             return response_200
                         else:
+                            endpoint_auth_instance.log_auth_decision(response_code=401
+                                                                     , response_length=len(response_401.data)
+                                                                     , auth_req_api=authority
+                                                                     , method=method
+                                                                     , endpoint=endpoint
+                                                                     , client_ip=req_ip_addr
+                                                                     , matched_pattern=item['endpoint'])
                             return response_401
 
-            # After two passes and still no match found
-            # It could be either unknown request method or unknown path
-            return response_401
+            # With no match to the combination of endpoint path and
+            # endpoint HTTP method, the proper response is an HTTP 404.
+            # Due to limitations in nginx's response codes, delegate generating
+            # a 404 Response back to the authority API by authorizing access with
+            # an HTTP 200 response to this subrequest.
+            endpoint_auth_instance.log_auth_decision(response_code=200
+                                                     , response_length=len(response_200.data)
+                                                     , auth_req_api=authority
+                                                     , method=method
+                                                     , endpoint=endpoint
+                                                     , client_ip=req_ip_addr
+                                                     , matched_pattern="NO_MATCHED_ENDPOINT_DELEGATED_TO_API")
+            delegate_404_response = make_response(jsonify({"message": "Endpoint not configured in gateway"}), 200)
+            delegate_404_response.headers['X-Delegate-404-Response'] = f"{authority} should send HTTP 404 Response"
+            return delegate_404_response
 
-        # Handle the cases when authority not in data.keys() 
+        # Handle the cases when authority not in data.keys()
+        endpoint_auth_instance.log_auth_decision(response_code=401
+                                                 , response_length=len(response_401.data)
+                                                 , auth_req_api=authority
+                                                 , method=method
+                                                 , endpoint=endpoint
+                                                 , client_ip=req_ip_addr
+                                                 , matched_pattern="NO_MATCHED_AUTHORITY")
         return response_401
     else:
         # Missing lookup_key
+        endpoint_auth_instance.log_auth_decision(response_code=401
+                                                 , response_length=len(response_401.data)
+                                                 , auth_req_api=authority
+                                                 , method=method
+                                                 , endpoint=endpoint
+                                                 , client_ip=req_ip_addr
+                                                 , matched_pattern="UNKNOWN_SERVICE")
         return response_401
 
 
@@ -478,7 +550,6 @@ def get_status_data():
     # Final result
     return status_data
 
-
 # Get user information dict based on the http request(headers)
 # `group_required` is a boolean, when True, 'hmgroupids' is in the output
 def get_user_info_for_access_check(request, group_required):
@@ -725,64 +796,6 @@ def validate_umls_key(umls_key):
         return True
     else:
         return False
-
-
-# Always pass through the requests with using modified version of the globus app secret as internal token
-def is_secrect_token(request):
-    internal_token = auth_helper_instance.getProcessSecret()
-    parsed_token = None
-
-    if 'Authorization' in request.headers:
-        auth_header = request.headers['Authorization']
-        parsed_token = auth_header[6:].strip()
-
-    if internal_token == parsed_token:
-        return True
-
-    return False
-
-
-# Check if access to the given endpoint item is allowed
-# Also check if the globus token associated user is a member of the specified group associated with the endpoint item
-def api_access_allowed(item, request):
-    logger.info("======Matched endpoint======")
-    logger.info(item)
-
-    # Check if auth is required for this endpoint
-    if item['auth'] == False:
-        return True
-
-    # Check if using modified version of the globus app secret as internal token
-    if is_secrect_token(request):
-        return True
-
-    # When auth is required, we need to check if group access is also required
-    group_required = True if 'groups' in item else False
-
-    # Get user info and do further parsing
-    user_info = get_user_info_for_access_check(request, group_required)
-    
-    logger.info("======user_info======")
-    logger.info(user_info)
-
-    # If returns error response, invalid header or token
-    if isinstance(user_info, Response):
-        return False
-
-    # Otherwise, user_info is a dict and we check if the group ID of target endpoint can be found
-    # in user_info['hmgroupids'] list
-    # Key 'hmgroupids' presents only when group_required is True
-    if group_required:
-        for group in user_info['hmgroupids']:
-            if group in item['groups']:
-                return True
-
-        # None of the assigned groups match the group ID specified in item['groups']
-        return False
-
-    # When no group access required and user_info dict gets returned
-    return True
-
 
 # If the given uuid is a file uuid, get the parent entity uuid
 # If the given uuid itself is an entity uuid, just return it

@@ -1,0 +1,870 @@
+{
+  "_comment_services": "Service names below are Docker hostnames on the gateway_hubmap network. List with: docker network inspect gateway_hubmap | grep Name",
+  "_comment_url_ingest-api": "http://localhost:12123",
+  "_comment_url_uuid-api": "http://localhost:2222",
+  "_comment_url_entity-api": "http://localhost:3333",
+  "_comment_url_search-api": "http://localhost:4444",
+  "entity-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/usergroups",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entity-types"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/entities/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/<*>",
+      "authorizer": "create"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/provenance"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/revisions"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/tuplets"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/collections"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/uploads"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/globus-url"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/ancestor-organs"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/siblings"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/instanceof/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/type/<*>/instanceof/<*>"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/batch-ids"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/multiple-samples/<*>",
+      "authorizer": "create"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/ancestors/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/descendants/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/parents/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/children/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/unpublished",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/sankey_data"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/prov-info"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/prov-metadata"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/revisions"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/revision"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/latest-revision"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/donors"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/samples"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/organs"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/paired-dataset"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/retract",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/components",
+      "authorizer": "create"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/dataset/globus-url/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/dataset/globus-url/<*>"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/uploads"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/previous_revisions/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/next_revisions/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/redirect/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/doi/redirect/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/collection/redirect/<*>"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/constraints"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/documents/<*>"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/flush-cache/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/flush-all-cache",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    }
+  ],
+  "uuid-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/uuid"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uuid/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uuid/<*>/exists",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/hmuuid/<*>"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/hmuuid",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/hmuuid/<*>/exists",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/file-id/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/files",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/ancestors"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    }
+  ],
+  "search-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/search"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/search"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/indices"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/mapping"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/mget"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/attribute-values"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/reindex-status"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/reindex-status/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/param-search/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/search"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>/search"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/mapping"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>/attribute-values"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>/mget"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>/scroll-search"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reindex-all",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reindex/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/update/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/update/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/update/<*>/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/add/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/add/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/add/<*>/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/clear-docs/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/clear-docs/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/clear-docs/<*>/<*>/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    }
+  ],
+  "ingest-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/notify",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/publications",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/verifytitleinfo",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/derived"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/status/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/<*>/file-system-abs-path"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/file-system-abs-path"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/uploads/file-system-abs-path"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/file-system-rel-path"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/entities/accessible-data-directories"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uploads/<*>/file-system-abs-path"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/ingest",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/submissions/request_ingest"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/validate",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/publish",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/collections/<*>/register-doi",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/bulk/submit",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/metadata-json",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/submit",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>/unpublish",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/datasets/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/new-collection",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/login"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/logout"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/file-upload",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/file-commit",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/file-remove",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/uploads",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/uploads/<*>/validate",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/uploads/<*>/reorganize",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/uploads/<*>/submit",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/uploads/<*>/arrange-into-datasets",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/data-provider-groups",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/usergroups"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/userroles",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/usercanedit/type",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/usercanedit/type/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/usercanedit/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/groups/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/source/type/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/source/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/metadata/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/metadata/validate",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/specimens/<*>/ingest-group-ids",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/entities/<*>/allowable-edit-states",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/donors/bulk-upload",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/donors/bulk",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/samples/bulk-upload",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/samples/bulk",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/sample-bulk-metadata",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/dataset/begin-extract-cell-count-from-secondary-analysis-files-async",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/dataset/extract-cell-count-from-secondary-analysis-files",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/datasets/data-status"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/uploads/data-status"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/data-ingest-board-login"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/data-ingest-board-logout"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/umls-auth"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/ubkg-download-file-list"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/components",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/assaytype"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/assaytype/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/assaytype/metadata/<*>"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/reload-assaytypes",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/privs/has-data-admin"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/has-pipeline-test-privs"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/<*>/submit-for-pipeline-testing",
+      "authorizer": "pipeline-test"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/submit-for-pipeline-testing",
+      "authorizer": "pipeline-test"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/datasets/validate",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/uploads/validate",
+      "authorizer": "data-admin"
+    }
+  ],
+  "antibody-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/static/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/static/dist/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/css/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/login"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/logout"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/antibodies"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/antibodies",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/antibodies/import",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/restore_elasticsearch",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/upload"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/_search"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    }
+  ]
+}
