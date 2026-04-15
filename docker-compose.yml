@@ -7,6 +7,9 @@ services:
     init: true
     # Specifying a restart policy to avoid downtime
     restart: always
+    sysctls:
+      # Set to 512 to match uwsgi.ini listen = 512
+      net.core.somaxconn: 512
     environment:
       # UID and GID 1001 to match the hive user by default
       - HOST_GID=${HOST_GID:-1001}
