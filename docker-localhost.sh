@@ -4,6 +4,20 @@
 echo
 echo "==================== HUBMAP-AUTH ===================="
 
+function tier_check() {
+  # Get the script name and extract DEPLOY_TIER
+  SCRIPT_NAME=$(basename "$0")
+
+  # Extract deploy tier from script name (docker-*.sh pattern)
+  if [[ $SCRIPT_NAME =~ docker-(.*)\.sh ]]; then
+    DEPLOY_TIER="${BASH_REMATCH[1]}"
+  else
+    echo "Error: Script name doesn't match pattern 'docker-*.sh'"
+    exit 1
+  fi
+  echo "Executing ${SCRIPT_NAME} to deploy in Docker on ${DEPLOY_TIER}"
+}
+
 # Set the version environment variable for the docker build
 # Version number is from the VERSION file
 # Also remove newlines and leading/trailing slashes if present in that VERSION file
@@ -45,6 +59,9 @@ function get_dir_of_this_script () {
 if [[ "$1" != "check" && "$1" != "config" && "$1" != "build" && "$1" != "start" && "$1" != "stop" && "$1" != "down" ]]; then
     echo "Unknown command '$1', specify one of the following: check|config|build|start|stop|down"
 else
+    # echo this script name and the tier expected for Docker deployment
+    tier_check
+
     # Always show the script dir
     get_dir_of_this_script
 
@@ -66,13 +83,13 @@ else
         for pth in "${config_paths[@]}"; do
             if [ ! -e $pth ]; then
                 echo "Missing file (relative path to DIR of script) :$pth"
-                exit -1
+                exit 1
             fi
         done
 
         echo 'Checks complete, all good :)'
     elif [ "$1" = "config" ]; then
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway config
+        docker compose -f docker-compose.yml -f docker-compose.${DEPLOY_TIER}.yml -p gateway config
     elif [ "$1" = "build" ]; then
         # Delete old VERSION and BUILD files if found
         if [ -f "hubmap-auth/VERSION" ]; then
@@ -87,13 +104,12 @@ else
         cp ./VERSION hubmap-auth
         cp ./BUILD hubmap-auth
 
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway build --no-cache
+        docker compose -f docker-compose.yml -f docker-compose.${DEPLOY_TIER}.yml -p gateway build --no-cache
     elif [ "$1" = "start" ]; then
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway up -d
+        docker compose -f docker-compose.yml -f docker-compose.${DEPLOY_TIER}.yml -p gateway up -d
     elif [ "$1" = "stop" ]; then
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway stop
+        docker compose -f docker-compose.yml -f docker-compose.${DEPLOY_TIER}.yml -p gateway stop
     elif [ "$1" = "down" ]; then
-        docker compose -f docker-compose.yml -f docker-compose.development.yml -p gateway down
+        docker compose -f docker-compose.yml -f docker-compose.${DEPLOY_TIER}.yml -p gateway down
     fi
 fi
-
