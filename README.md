@@ -24,7 +24,6 @@ Different from the above use cases, the following APIs are protected by AWS API 
 - UUID API
 - Workspaces API (only the REST API part on DEV and PROD)
 - User Templates API
-- Files API
 - UBKG Ontology API
 
 More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
