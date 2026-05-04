@@ -609,6 +609,11 @@
       "method": "GET",
       "endpoint": "/status",
       "auth": false
+    },
+    {
+      "method": "GET",
+      "endpoint": "/publication-and-usage-stats",
+      "auth": false
     }
   ]
 }
