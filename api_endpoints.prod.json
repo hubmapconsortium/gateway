@@ -533,6 +533,11 @@
       "groups": [
         "89a69625-99d7-11ea-9366-0e98982705c1"
       ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/publication-and-usage-stats",
+      "auth": false
     }
   ],
   "avr.xconsortia.org": [
@@ -599,11 +604,6 @@
     {
       "method": "GET",
       "endpoint": "/status",
-      "auth": false
-    },
-    {
-      "method": "GET",
-      "endpoint": "/publication-and-usage-stats",
       "auth": false
     }
   ]
