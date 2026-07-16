@@ -91,7 +91,16 @@
     },
     {
       "method": "GET",
+      "endpoint": "/ancestors-info/<*>"
+    },
+    {
+      "method": "GET",
       "endpoint": "/descendants/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/descendants-info/<*>",
       "authorizer": "read"
     },
     {
@@ -100,8 +109,29 @@
     },
     {
       "method": "GET",
+      "endpoint": "/parents-info/<*>"
+    },
+    {
+      "method": "GET",
       "endpoint": "/children/<*>",
       "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/children-info/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/sources-info/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/origins-info/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/donors-info/<*>"
     },
     {
       "method": "PUT",
@@ -374,11 +404,6 @@
     {
       "method": "POST",
       "endpoint": "/<*>/scroll-search"
-    },
-    {
-      "method": "PUT",
-      "endpoint": "/reindex-all",
-      "authorizer": "data-admin"
     },
     {
       "method": "PUT",
@@ -808,6 +833,10 @@
       "method": "POST",
       "endpoint": "/uploads/validate",
       "authorizer": "data-admin"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/publication-and-usage-stats"
     }
   ],
   "antibody-api": [
@@ -841,18 +870,15 @@
     },
     {
       "method": "POST",
-      "endpoint": "/antibodies",
-      "authorizer": "read"
+      "endpoint": "/antibodies"
     },
     {
       "method": "POST",
-      "endpoint": "/antibodies/import",
-      "authorizer": "read"
+      "endpoint": "/antibodies/import"
     },
     {
       "method": "PUT",
-      "endpoint": "/restore_elasticsearch",
-      "authorizer": "read"
+      "endpoint": "/restore_elasticsearch"
     },
     {
       "method": "GET",
