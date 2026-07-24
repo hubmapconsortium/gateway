@@ -4,6 +4,7 @@
   "_comment_url_uuid-api": "http://localhost:2222",
   "_comment_url_entity-api": "http://localhost:3333",
   "_comment_url_search-api": "http://localhost:4444",
+  "_comment_url_hs-ontology-api": "http://localhost:6666",
   "entity-api": [
     {
       "method": "GET",
@@ -276,7 +277,8 @@
     },
     {
       "method": "POST",
-      "endpoint": "/uuid"
+      "endpoint": "/uuid",
+      "authorizer": "read"
     },
     {
       "method": "GET",
@@ -313,7 +315,8 @@
     },
     {
       "method": "GET",
-      "endpoint": "/<*>/ancestors"
+      "endpoint": "/<*>/ancestors",
+      "authorizer": "read"
     },
     {
       "method": "GET",
@@ -837,6 +840,316 @@
     {
       "method": "GET",
       "endpoint": "/publication-and-usage-stats"
+    }
+  ],
+  "hs-ontology-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/property-types"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/sabs"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/sabs/codes/counts"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/sabs/<*>/codes/counts"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/sabs/<*>/codes/details"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/sabs/<*>/term-types"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/pathways/with-genes"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/pathways/<*>/participants"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/valueset"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/genes-info"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/genes/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/genes/<*>/detail"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/proteins-info"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/proteins/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/celltypes-info"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/celltypes/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/celltypes/<*>/detail"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-assays"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-assays/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-descriptions"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-descriptions/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-entities"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-entities/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-schemas"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-schemas/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-types"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-types/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/field-types-info"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/terms/<*>/codes"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/terms/<*>/concepts"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/codes/<*>/terms"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/codes/<*>/codes"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/codes/<*>/concepts"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/codes"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/concepts"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/definitions"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/nodeobjects"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/paths/expand"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/paths/shortestpath/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/paths/subgraph/sequential"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/paths/subgraph/sequential/sequential"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/<*>/paths/trees"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/paths/subgraph"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/concepts/paths/subgraph/sequential"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/node-types"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/node-types/<*>/counts"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/node-types/<*>/counts-by-sab"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/relationship-types"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/relationships/gene/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/semantics/semantic-types"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/semantics/semantic-types/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/semantics/semantic-types/<*>/subtypes"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/organs"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/organs/by-code"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/sources"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/annotations"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/annotations/organs"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/annotations/organ-levels"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/annotations/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/annotations/<*>/organs"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/annotations/<*>/organ-levels"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/assayclasses"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/assayclasses/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/dataset-types"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/dataset-types/hierarchy"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/dataset-types/hierarchy/valueset"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/dataset-types/hierarchy/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/dataset-types/hierarchy/<*>/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/dataset-types/hierarchy/<*>/<*>/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/database/server"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
     }
   ],
   "antibody-api": [

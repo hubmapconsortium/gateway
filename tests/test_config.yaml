@@ -1,0 +1,73 @@
+localhost:
+  entity-api:
+    base_url: "http://localhost:3333"
+    status_endpoint: "/status"
+    auth_token_env: "ENTITY_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  hs-ontology-api:
+    base_url: "http://localhost:6666"
+    status_endpoint: "/status"
+    auth_token_env: "HS_ONTOLOGY_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  search-api:
+    base_url: "http://localhost:4444"
+    status_endpoint: "/status"
+    auth_token_env: "SEARCH_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  uuid-api:
+    base_url: "http://localhost:2222"
+    status_endpoint: "/status"
+    auth_token_env: "UUID_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  ingest-api:
+    base_url: "http://localhost:12123"
+    status_endpoint: "/status"
+    auth_token_env: "INGEST_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  antibody-api:
+    base_url: "http://localhost:5000"
+    status_endpoint: "/status"
+    auth_token_env: "ANTIBODY_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+dev:
+  entity-api:
+    base_url: "https://entity-api.dev.hubmapconsortium.org"
+    status_endpoint: "/status"
+    auth_token_env: "ENTITY_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  hs-ontology-api:
+    base_url: "https://ontology-api.dev.hubmapconsortium.org"
+    status_endpoint: "/status"
+    auth_token_env: "HS_ONTOLOGY_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  search-api:
+    base_url: "https://search-api.dev.hubmapconsortium.org/v3"
+    status_endpoint: "/status"
+    auth_token_env: "SEARCH_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  uuid-api:
+    base_url: "https://uuid-api.dev.hubmapconsortium.org"
+    status_endpoint: "/status"
+    auth_token_env: "UUID_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  ingest-api:
+    base_url: "https://ingest-api.dev.hubmapconsortium.org"
+    status_endpoint: "/status"
+    auth_token_env: "INGEST_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
+
+  antibody-api:
+    base_url: "https://avr.hubmapconsortium.org"
+    status_endpoint: "/status"
+    auth_token_env: "ANTIBODY_API_AUTH_TOKEN"
+    fake_uuid: "32323232323232323232323232323232"
