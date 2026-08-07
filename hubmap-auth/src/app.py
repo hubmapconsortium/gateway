@@ -567,17 +567,9 @@ def get_file_access(uuid, token_from_query, request):
     # making a call to entity-api to retrieve the entity first
     # NOTE: so far only `status`, `entity_type`, and `data_access_level` are needed
     # to avoid 303 response with S3 redirect link when the payload is over 10MB, 
-    # exclude the trigger generated fields (mainly used for Datasets)
-    # that may contain large data - Zhou 8/7/2026
-    excluded = ",".join([
-        "direct_ancestors",
-        "files",
-        "metadata",
-        "ingest_metadata",
-        "collections",
-        "upload",
-    ])
-    entity_api_full_url = f"{app.config['ENTITY_API_URL']}/entities/{entity_uuid}?exclude={excluded}"
+    # use `/documents/<id>` instead of the regular `/entities/<id>`
+    # Based on tests, `/documents/<id>` is much faster than `/entities/<id>?exclude=irect_ancestors,files` - Zhou 8/7/2026
+    entity_api_full_url = f"{app.config['ENTITY_API_URL']}/documents/{entity_uuid}"
 
     # Function cache to improve performance
     # Possible response status codes: 200, 401, and 500 to be handled below
