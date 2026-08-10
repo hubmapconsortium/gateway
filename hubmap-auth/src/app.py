@@ -565,7 +565,11 @@ def get_file_access(uuid, token_from_query, request):
     # For non-AVR entities:
     # Next to determine the data access level of the given uuid by 
     # making a call to entity-api to retrieve the entity first
-    entity_api_full_url = app.config['ENTITY_API_URL'] + '/entities/' + entity_uuid
+    # NOTE: so far only `status`, `entity_type`, and `data_access_level` are needed
+    # to avoid 303 response with S3 redirect link when the payload is over 10MB, 
+    # use `/documents/<id>` instead of the regular `/entities/<id>`
+    # Based on tests, `/documents/<id>` is much faster than `/entities/<id>?exclude=irect_ancestors,files` - Zhou 8/7/2026
+    entity_api_full_url = f"{app.config['ENTITY_API_URL']}/documents/{entity_uuid}"
 
     # Function cache to improve performance
     # Possible response status codes: 200, 401, and 500 to be handled below
