@@ -559,6 +559,30 @@
       "groups": [
         "5777527e-ec11-11e8-ab41-0af86edb4424"
       ]
+    },
+    {
+      "method": "POST",
+      "endpoint": "/client-logs",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/client-logs",
+      "auth": true,
+      "groups": [
+        "89a69625-99d7-11ea-9366-0e98982705c1"
+      ]
+    },
+    {
+      "method": "GET",
+      "endpoint": "/client-log/meta",
+      "auth": true,
+      "groups": [
+        "5777527e-ec11-11e8-ab41-0af86edb4424"
+      ]
     }
   ]
 }
