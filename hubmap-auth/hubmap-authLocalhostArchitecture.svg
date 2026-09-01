@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 1200 900"
+   version="1.1"
+   id="svg48"
+   sodipodi:docname="hubmap-localhost-architecture-editable.svg"
+   inkscape:version="1.4.3 (fcd0343856, 2026-01-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview48"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.84888889"
+     inkscape:cx="599.60733"
+     inkscape:cy="450"
+     inkscape:window-width="1880"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg48" />
+  <!-- Docker Network Layer -->
+  <rect
+     x="50"
+     y="50"
+     width="1100"
+     height="800"
+     fill="#e3f2fd"
+     stroke="#1976d2"
+     stroke-width="3"
+     rx="10"
+     id="rect1" />
+  <text
+     x="600"
+     y="85"
+     text-anchor="middle"
+     font-size="24"
+     font-weight="bold"
+     fill="#1565c0"
+     id="text1">Docker Network (gateway)</text>
+  <!-- Host Machine Layer -->
+  <rect
+     x="25"
+     y="25"
+     width="1150"
+     height="20"
+     fill="#cfd8dc"
+     stroke="#546e7a"
+     stroke-width="2"
+     id="rect2" />
+  <text
+     x="600"
+     y="40"
+     text-anchor="middle"
+     font-size="16px"
+     font-weight="bold"
+     fill="#263238"
+     id="text2">Host Machine (of Containers generated using 'localhost' setting)</text>
+  <!-- hubmap-auth Container -->
+  <g
+     id="hubmap-auth-container">
+    <rect
+       x="100"
+       y="120"
+       width="450"
+       height="650"
+       fill="#fff3e0"
+       stroke="#f57c00"
+       stroke-width="3"
+       rx="8"
+       id="rect3" />
+    <text
+       x="325"
+       y="150"
+       text-anchor="middle"
+       font-size="20"
+       font-weight="bold"
+       fill="#e65100"
+       id="text3">hubmap-auth Container</text>
+    <!-- Port mappings -->
+    <text
+       x="120"
+       y="180"
+       font-size="14"
+       fill="#666"
+       id="text4">Host:7777 → Container:7777</text>
+    <!-- nginx Layer -->
+    <rect
+       x="130"
+       y="210"
+       width="390"
+       height="180"
+       fill="#e8f5e9"
+       stroke="#388e3c"
+       stroke-width="2"
+       rx="5"
+       id="rect4" />
+    <text
+       x="325"
+       y="235"
+       text-anchor="middle"
+       font-size="16"
+       font-weight="bold"
+       fill="#2e7d32"
+       id="text5">nginx</text>
+    <!-- Port 7777 server -->
+    <rect
+       x="150"
+       y="250"
+       width="160"
+       height="120"
+       fill="#c8e6c9"
+       stroke="#388e3c"
+       stroke-width="1.5"
+       rx="3"
+       id="rect5" />
+    <text
+       x="230"
+       y="270"
+       text-anchor="middle"
+       font-size="14"
+       font-weight="bold"
+       id="text6">Port 7777</text>
+    <text
+       x="230"
+       y="290"
+       text-anchor="middle"
+       font-size="12"
+       id="text7">(External Gateway)</text>
+    <text
+       x="230"
+       y="310"
+       text-anchor="middle"
+       font-size="11"
+       fill="#555"
+       id="text8">CORS enabled</text>
+    <text
+       x="230"
+       y="330"
+       text-anchor="middle"
+       font-size="11"
+       fill="#555"
+       id="text9">Public access</text>
+    <text
+       x="230"
+       y="350"
+       text-anchor="middle"
+       font-size="11"
+       fill="#555"
+       id="text10">→ uwsgi://127.0.0.1:5000</text>
+    <!-- Port 8000 server -->
+    <rect
+       x="330"
+       y="250"
+       width="160"
+       height="120"
+       fill="#c8e6c9"
+       stroke="#388e3c"
+       stroke-width="1.5"
+       rx="3"
+       id="rect10" />
+    <text
+       x="410"
+       y="270"
+       text-anchor="middle"
+       font-size="14"
+       font-weight="bold"
+       id="text11">Port 8000</text>
+    <text
+       x="410"
+       y="290"
+       text-anchor="middle"
+       font-size="12"
+       id="text12">(Internal Auth)</text>
+    <text
+       x="410"
+       y="310"
+       text-anchor="middle"
+       font-size="11"
+       fill="#555"
+       id="text13">No CORS</text>
+    <text
+       x="410"
+       y="330"
+       text-anchor="middle"
+       font-size="11"
+       fill="#555"
+       id="text14">For other APIs</text>
+    <text
+       x="410"
+       y="350"
+       text-anchor="middle"
+       font-size="11"
+       fill="#555"
+       id="text15">→ uwsgi://127.0.0.1:5000</text>
+    <!-- uWSGI Layer -->
+    <rect
+       x="130"
+       y="420"
+       width="390"
+       height="120"
+       fill="#fce4ec"
+       stroke="#c2185b"
+       stroke-width="2"
+       rx="5"
+       id="rect15" />
+    <text
+       x="325"
+       y="445"
+       text-anchor="middle"
+       font-size="16"
+       font-weight="bold"
+       fill="#880e4f"
+       id="text16">uWSGI Server</text>
+    <text
+       x="325"
+       y="470"
+       text-anchor="middle"
+       font-size="14"
+       id="text17">Port 5000 (internal)</text>
+    <text
+       x="325"
+       y="495"
+       text-anchor="middle"
+       font-size="12"
+       fill="#555"
+       id="text18">Handles both nginx routes</text>
+    <text
+       x="325"
+       y="515"
+       text-anchor="middle"
+       font-size="12"
+       fill="#555"
+       id="text19">Communicates with Flask app</text>
+    <!-- Flask App Layer -->
+    <rect
+       x="130"
+       y="570"
+       width="390"
+       height="120"
+       fill="#f3e5f5"
+       stroke="#7b1fa2"
+       stroke-width="2"
+       rx="5"
+       id="rect19" />
+    <text
+       x="325"
+       y="595"
+       text-anchor="middle"
+       font-size="16"
+       font-weight="bold"
+       fill="#4a148c"
+       id="text20">Flask Application</text>
+    <text
+       x="325"
+       y="620"
+       text-anchor="middle"
+       font-size="14"
+       id="text21">hubmap-auth logic</text>
+    <text
+       x="325"
+       y="645"
+       text-anchor="middle"
+       font-size="12"
+       fill="#555"
+       id="text22">Authorization &amp; authentication</text>
+    <text
+       x="325"
+       y="665"
+       text-anchor="middle"
+       font-size="12"
+       fill="#555"
+       id="text23">/api_auth, /status.json, etc.</text>
+  </g>
+  <!-- entity-api Container -->
+  <g
+     id="entity-api-container">
+    <rect
+       x="650"
+       y="120"
+       width="450"
+       height="650"
+       fill="#fff3e0"
+       stroke="#f57c00"
+       stroke-width="3"
+       rx="8"
+       id="rect23" />
+    <text
+       x="875"
+       y="150"
+       text-anchor="middle"
+       font-size="20"
+       font-weight="bold"
+       fill="#e65100"
+       id="text24">entity-api Container</text>
+    <!-- Port mappings -->
+    <text
+       x="670"
+       y="180"
+       font-size="14"
+       fill="#666"
+       id="text25">Host:3333 → Container:3333</text>
+    <!-- nginx Layer -->
+    <rect
+       x="680"
+       y="210"
+       width="390"
+       height="180"
+       fill="#e8f5e9"
+       stroke="#388e3c"
+       stroke-width="2"
+       rx="5"
+       id="rect25" />
+    <text
+       x="875"
+       y="235"
+       text-anchor="middle"
+       font-size="16"
+       font-weight="bold"
+       fill="#2e7d32"
+       id="text26">nginx</text>
+    <!-- Port 3333 server -->
+    <rect
+       x="700"
+       y="250"
+       width="350"
+       height="120"
+       fill="#c8e6c9"
+       stroke="#388e3c"
+       stroke-width="1.5"
+       rx="3"
+       id="rect26" />
+    <text
+       x="875"
+       y="270"
+       text-anchor="middle"
+       font-size="14"
+       font-weight="bold"
+       id="text27">Port 3333</text>
+    <text
+       x="875"
+       y="290"
+       text-anchor="middle"
+       font-size="12"
+       id="text28">(External API Gateway)</text>
+    <text
+       x="875"
+       y="310"
+       text-anchor="middle"
+       font-size="11"
+       fill="#555"
+       id="text29">1. auth_request → /api_auth</text>
+    <text
+       x="875"
+       y="330"
+       text-anchor="middle"
+       font-size="11"
+       fill="#555"
+       id="text30">2. If authorized → uwsgi://localhost:5000</text>
+    <text
+       x="875"
+       y="350"
+       text-anchor="middle"
+       font-size="11"
+       fill="#d32f2f"
+       id="text31">/api_auth → http://hubmap-auth:7777</text>
+    <!-- uWSGI Layer -->
+    <rect
+       x="680"
+       y="420"
+       width="390"
+       height="120"
+       fill="#fce4ec"
+       stroke="#c2185b"
+       stroke-width="2"
+       rx="5"
+       id="rect31" />
+    <text
+       x="875"
+       y="445"
+       text-anchor="middle"
+       font-size="16"
+       font-weight="bold"
+       fill="#880e4f"
+       id="text32">uWSGI Server</text>
+    <text
+       x="875"
+       y="470"
+       text-anchor="middle"
+       font-size="14"
+       id="text33">Port 5000 (internal)</text>
+    <text
+       x="875"
+       y="495"
+       text-anchor="middle"
+       font-size="12"
+       fill="#555"
+       id="text34">Processes authorized requests</text>
+    <text
+       x="875"
+       y="515"
+       text-anchor="middle"
+       font-size="12"
+       fill="#555"
+       id="text35">Communicates with Flask app</text>
+    <!-- Flask App Layer -->
+    <rect
+       x="680"
+       y="570"
+       width="390"
+       height="120"
+       fill="#f3e5f5"
+       stroke="#7b1fa2"
+       stroke-width="2"
+       rx="5"
+       id="rect35" />
+    <text
+       x="875"
+       y="595"
+       text-anchor="middle"
+       font-size="16"
+       font-weight="bold"
+       fill="#4a148c"
+       id="text36">Flask Application</text>
+    <text
+       x="875"
+       y="620"
+       text-anchor="middle"
+       font-size="14"
+       id="text37">entity-api logic</text>
+    <text
+       x="875"
+       y="645"
+       text-anchor="middle"
+       font-size="12"
+       fill="#555"
+       id="text38">Entity operations</text>
+    <text
+       x="875"
+       y="665"
+       text-anchor="middle"
+       font-size="12"
+       fill="#555"
+       id="text39">/entities, /donors, /samples, etc.</text>
+  </g>
+  <!-- External Request Arrow -->
+  <defs
+     id="defs41">
+    <marker
+       id="arrowhead-blue"
+       markerWidth="10"
+       markerHeight="7"
+       refX="9"
+       refY="3.5"
+       orient="auto">
+      <polygon
+         points="0 0, 10 3.5, 0 7"
+         fill="#1976d2"
+         id="polygon39" />
+    </marker>
+    <marker
+       id="arrowhead-red"
+       markerWidth="10"
+       markerHeight="7"
+       refX="9"
+       refY="3.5"
+       orient="auto">
+      <polygon
+         points="0 0, 10 3.5, 0 7"
+         fill="#d32f2f"
+         id="polygon40" />
+    </marker>
+    <marker
+       id="arrowhead-green"
+       markerWidth="10"
+       markerHeight="7"
+       refX="9"
+       refY="3.5"
+       orient="auto">
+      <polygon
+         points="0 0, 10 3.5, 0 7"
+         fill="#388e3c"
+         id="polygon41" />
+    </marker>
+  </defs>
+  <!-- Request 1: External to hubmap-auth -->
+  <line
+     x1="325"
+     y1="55"
+     x2="325"
+     y2="110"
+     stroke="#1976d2"
+     stroke-width="3"
+     marker-end="url(#arrowhead-blue)"
+     id="line41" />
+  <text
+     x="340"
+     y="107"
+     font-size="13px"
+     fill="#1565c0"
+     font-weight="bold"
+     id="text41">① http://localhost:7777/status.json</text>
+  <!-- Request 2: External to entity-api -->
+  <line
+     x1="875"
+     y1="55"
+     x2="875"
+     y2="110"
+     stroke="#1976d2"
+     stroke-width="3"
+     marker-end="url(#arrowhead-blue)"
+     id="line42" />
+  <text
+     x="890"
+     y="105"
+     font-size="13px"
+     fill="#1565c0"
+     font-weight="bold"
+     id="text42">② http://localhost:3333/entities</text>
+  <!-- Auth Request: entity-api to hubmap-auth -->
+  <path
+     d="M 680 310 Q 575 310, 520 310"
+     fill="none"
+     stroke="#d32f2f"
+     stroke-width="3"
+     marker-end="url(#arrowhead-red)"
+     stroke-dasharray="5,5"
+     id="path42" />
+  <text
+     x="552"
+     y="300"
+     font-size="13px"
+     fill="#c62828"
+     font-weight="bold"
+     id="text43">③ auth_request</text>
+  <text
+     x="554"
+     y="326"
+     font-size="11px"
+     fill="#c62828"
+     id="text44">(Docker network)</text>
+  <!-- Internal flow arrows within hubmap-auth -->
+  <line
+     x1="230"
+     y1="370"
+     x2="230"
+     y2="410"
+     stroke="#388e3c"
+     stroke-width="2"
+     marker-end="url(#arrowhead-green)"
+     id="line44" />
+  <line
+     x1="410"
+     y1="370"
+     x2="410"
+     y2="410"
+     stroke="#388e3c"
+     stroke-width="2"
+     marker-end="url(#arrowhead-green)"
+     id="line45" />
+  <line
+     x1="325"
+     y1="540"
+     x2="325"
+     y2="560"
+     stroke="#7b1fa2"
+     stroke-width="2"
+     marker-end="url(#arrowhead-green)"
+     id="line46" />
+  <!-- Internal flow arrows within entity-api -->
+  <line
+     x1="875"
+     y1="370"
+     x2="875"
+     y2="410"
+     stroke="#388e3c"
+     stroke-width="2"
+     marker-end="url(#arrowhead-green)"
+     id="line47" />
+  <line
+     x1="875"
+     y1="540"
+     x2="875"
+     y2="560"
+     stroke="#7b1fa2"
+     stroke-width="2"
+     marker-end="url(#arrowhead-green)"
+     id="line48" />
+</svg>

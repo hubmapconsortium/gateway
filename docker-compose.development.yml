@@ -23,7 +23,7 @@ services:
       - "./BUILD:/usr/src/app/BUILD"
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
-      # Mount conf.d-test to the nginx conf.d on container
+      # Mount conf.d-dev to the nginx conf.d on container
       - "./nginx/conf.d-dev:/etc/nginx/conf.d"
       # Mount ssl certificates from host to container
       - "/etc/letsencrypt:/etc/letsencrypt"
