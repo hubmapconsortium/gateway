@@ -41,7 +41,6 @@ app.config['ENTITY_API_STATUS_URL'] = app.config['ENTITY_API_STATUS_URL'].strip(
 app.config['INGEST_API_STATUS_URL'] = app.config['INGEST_API_STATUS_URL'].strip('/')
 app.config['SEARCH_API_STATUS_URL'] = app.config['SEARCH_API_STATUS_URL'].strip('/')
 app.config['FILE_ASSETS_STATUS_URL'] = app.config['FILE_ASSETS_STATUS_URL'].strip('/')
-app.config['CELLS_API_STATUS_URL'] = app.config['CELLS_API_STATUS_URL'].strip('/')
 app.config['WORKSPACES_API_STATUS_URL'] = app.config['WORKSPACES_API_STATUS_URL'].strip('/')
 app.config['ONTOLOGY_API_STATUS_URL'] = app.config['ONTOLOGY_API_STATUS_URL'].strip('/')
 app.config['UKV_API_STATUS_URL'] = app.config['UKV_API_STATUS_URL'].strip('/')
@@ -404,7 +403,6 @@ def get_status_data():
     INGEST_API = 'ingest_api'
     SEARCH_API = 'search_api'
     FILE_ASSETS = 'file_assets'
-    CELLS_API = 'cells_api'
     WORKSPACES_API = 'workspaces_api'
     ONTOLOGY_API = 'ontology_api'
     UKV_API = 'ukv_api'
@@ -425,7 +423,6 @@ def get_status_data():
         INGEST_API: {},
         SEARCH_API: {},
         FILE_ASSETS: {},
-        CELLS_API: {},
         WORKSPACES_API: {},
         ONTOLOGY_API: {},
         UKV_API: {},
@@ -447,12 +444,6 @@ def get_status_data():
 
     # file assets, no need to send headers
     status_data[FILE_ASSETS] = _get_status_info(target_url=app.config["FILE_ASSETS_STATUS_URL"])
-
-    # cells api
-    # N. B. CELLS_API_STATUS_URL does not return 'application/json' in api_response.headers.get('Content-Type')
-    #       but rather text/html.  However, the text body is JSON.
-    status_data[CELLS_API] = _get_status_info(target_url=app.config["CELLS_API_STATUS_URL"])
-    # cells_api_response = status_request(app.config['CELLS_API_STATUS_URL'])
 
     # workspaces REST api
     status_data[WORKSPACES_API] = _get_status_info(target_url=app.config["WORKSPACES_API_STATUS_URL"])
