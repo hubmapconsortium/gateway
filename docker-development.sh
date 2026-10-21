@@ -22,7 +22,7 @@ function generate_build_version() {
     truncate -s 0 BUILD
     # Note: echo to file appends newline
     echo $GIT_BRANCH_NAME:$GIT_SHORT_COMMIT_HASH >> BUILD
-    # Remmove the trailing newline character
+    # Remove the trailing newline character
     truncate -s -1 BUILD
 
     echo "BUILD(git branch name:short commit hash): $GIT_BRANCH_NAME:$GIT_SHORT_COMMIT_HASH"
