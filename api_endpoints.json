@@ -986,22 +986,6 @@
     },
     {
       "method": "GET",
-      "endpoint": "/field-entities"
-    },
-    {
-      "method": "GET",
-      "endpoint": "/field-entities/<*>"
-    },
-    {
-      "method": "GET",
-      "endpoint": "/field-schemas"
-    },
-    {
-      "method": "GET",
-      "endpoint": "/field-schemas/<*>"
-    },
-    {
-      "method": "GET",
       "endpoint": "/field-types"
     },
     {
