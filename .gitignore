@@ -27,6 +27,7 @@ hubmap-auth/src/instance/app.cfg
 
 #ignore PyCharm files
 .idea/
+.vscode
 venv
 
 #ignore Eclipse files
