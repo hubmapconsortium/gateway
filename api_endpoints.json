@@ -840,6 +840,55 @@
     {
       "method": "GET",
       "endpoint": "/publication-and-usage-stats"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/batches/<*>"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/batches",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/bulk/retry/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/client-logs",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/client-logs",
+      "authorizer": "data-admin"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/client-logs/meta",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
     }
   ],
   "hs-ontology-api": [
@@ -1204,6 +1253,66 @@
     {
       "method": "GET",
       "endpoint": "/status"
+    }
+  ],
+   "ukv-api": [
+    {
+      "method": "GET",
+      "endpoint": "/"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/status"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/user/keys/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/user/keys/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/user/keys/<*>",
+      "authorizer": "read"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/user/keys",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/user/keys",
+      "authorizer": "read"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/user/find/keys",
+      "authorizer": "read"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "PUT",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
+    },
+    {
+      "method": "DELETE",
+      "endpoint": "/<*>",
+      "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
     }
   ]
 }
