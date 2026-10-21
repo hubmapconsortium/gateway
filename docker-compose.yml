@@ -35,6 +35,8 @@ services:
       - "./hubmap-auth/log:/usr/src/app/log"
       # favicon.ico and portal/ingest UI maintenance page
       - "./nginx/html:/usr/share/nginx/html"
+      # Mount the API endpoints json file for API endpoints lookup
+      - "./api_endpoints.json:/usr/src/app/api_endpoints.json"
 
 networks:
   # This is the network created by gateway to enable communication between multiple docker-compose projects
