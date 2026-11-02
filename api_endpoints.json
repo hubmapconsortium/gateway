@@ -871,6 +871,11 @@
       "authorizer": "read"
     },
     {
+      "method": "POST",
+      "endpoint": "/usage-analytics/query",
+      "authorizer": "read"
+    }
+    {
       "method": "GET",
       "endpoint": "/<*>",
       "_comment": "Catch-all - allows Flask to return proper 404 for undefined routes"
