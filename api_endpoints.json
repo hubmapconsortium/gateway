@@ -874,7 +874,7 @@
       "method": "POST",
       "endpoint": "/usage-analytics/query",
       "authorizer": "read"
-    }
+    },
     {
       "method": "GET",
       "endpoint": "/<*>",
