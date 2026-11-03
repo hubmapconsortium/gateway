@@ -14,19 +14,14 @@ services:
     image: hubmap/hubmap-auth:${HUBMAP_AUTH_VERSION:?err}
     environment:
       - DEPLOY_MODE=dev
-    ports:
-      # Proxy pass to workspaces REST API on PSC VM
-      - "7777:7777"
     volumes:
       # Mount the VERSION file and BUILD file
       - "./VERSION:/usr/src/app/VERSION"
       - "./BUILD:/usr/src/app/BUILD"
       # Mount the source code to container
       - "./hubmap-auth/src/:/usr/src/app/src"
-      # Mount conf.d-test to the nginx conf.d on container
+      # Mount conf.d-dev to the nginx conf.d on container
       - "./nginx/conf.d-dev:/etc/nginx/conf.d"
       # Mount ssl certificates from host to container
       - "/etc/letsencrypt:/etc/letsencrypt"
-      # Mount the API endpoints json file for API endpoints lookup
-      - "./api_endpoints.dev.json:/usr/src/app/api_endpoints.json"
       
