@@ -155,6 +155,10 @@ def api_auth():
     # list in X-Forwarded-For, strip off everything but the original client IP
     forwarded_for = request.headers.get('X-Forwarded-For')
     req_ip_addr = forwarded_for.split(',')[0].strip() if forwarded_for else request.remote_addr
+    # Pull the bearer token (if any) so the user can be resolved for logging on
+    # the authed path. Safe/None if absent or malformed.
+    auth_header = request.headers.get('Authorization', '')
+    request_token = auth_header[6:].strip() if auth_header.upper().startswith('BEARER ') else None
 
     # method and endpoint are always not None as long as authority is not None
     if authority is not None:
@@ -178,7 +182,9 @@ def api_auth():
                                                                      , method=method
                                                                      , endpoint=endpoint
                                                                      , client_ip=req_ip_addr
-                                                                     , matched_pattern=item['endpoint'])
+                                                                     , matched_pattern=item['endpoint']
+                                                                     , user_agent=request.headers.get('User-Agent')
+                                                                     , user=(endpoint_auth_instance.get_user_for_logging(request_token) if ('authorizer' in item and request_token) else '-'))
                             return response_200
                         else:
                             endpoint_auth_instance.log_auth_decision(response_code=401
@@ -187,7 +193,8 @@ def api_auth():
                                                                      , method=method
                                                                      , endpoint=endpoint
                                                                      , client_ip=req_ip_addr
-                                                                     , matched_pattern=item['endpoint'])
+                                                                     , matched_pattern=item['endpoint']
+                                                                     , user_agent=request.headers.get('User-Agent'))
                             return response_401
 
             # Second pass, loop through the list to do the wildcard match
@@ -210,8 +217,9 @@ def api_auth():
                                                                      , method=method
                                                                      , endpoint=endpoint
                                                                      , client_ip=req_ip_addr
-                                                                     , matched_pattern=item['endpoint'])
-
+                                                                     , matched_pattern=item['endpoint']
+                                                                     , user_agent=request.headers.get('User-Agent')
+                                                                     , user=(endpoint_auth_instance.get_user_for_logging(request_token) if ('authorizer' in item and request_token) else '-'))
                             return response_200
                         else:
                             endpoint_auth_instance.log_auth_decision(response_code=401
@@ -220,7 +228,8 @@ def api_auth():
                                                                      , method=method
                                                                      , endpoint=endpoint
                                                                      , client_ip=req_ip_addr
-                                                                     , matched_pattern=item['endpoint'])
+                                                                     , matched_pattern=item['endpoint']
+                                                                     , user_agent=request.headers.get('User-Agent'))
                             return response_401
 
             # With no match to the combination of endpoint path and
@@ -234,7 +243,8 @@ def api_auth():
                                                      , method=method
                                                      , endpoint=endpoint
                                                      , client_ip=req_ip_addr
-                                                     , matched_pattern="NO_MATCHED_ENDPOINT_DELEGATED_TO_API")
+                                                     , matched_pattern="NO_MATCHED_ENDPOINT_DELEGATED_TO_API"
+                                                     , user_agent=request.headers.get('User-Agent'))
             delegate_404_response = make_response(jsonify({"message": "Endpoint not configured in gateway"}), 200)
             delegate_404_response.headers['X-Delegate-404-Response'] = f"{authority} should send HTTP 404 Response"
             return delegate_404_response
@@ -246,7 +256,8 @@ def api_auth():
                                                  , method=method
                                                  , endpoint=endpoint
                                                  , client_ip=req_ip_addr
-                                                 , matched_pattern="NO_MATCHED_AUTHORITY")
+                                                 , matched_pattern="NO_MATCHED_AUTHORITY"
+                                                 , user_agent=request.headers.get('User-Agent'))
         return response_401
     else:
         # Missing lookup_key
@@ -256,7 +267,8 @@ def api_auth():
                                                  , method=method
                                                  , endpoint=endpoint
                                                  , client_ip=req_ip_addr
-                                                 , matched_pattern="UNKNOWN_SERVICE")
+                                                 , matched_pattern="UNKNOWN_SERVICE"
+                                                 , user_agent=request.headers.get('User-Agent'))
         return response_401
 
 
