@@ -164,7 +164,17 @@ class EndpointAuthorizer:
         self.logger.debug(determination_log_msg.replace('_DETERMINATION_', f"{access_allowed_determination}"))
         return access_allowed_determination
 
-    def log_auth_decision(self, response_code, response_length, auth_req_api, method, endpoint, client_ip, matched_pattern=None):
+    def get_user_for_logging(self, token) -> str:
+        try:
+            user_info = self._auth_helper_instance.getUserInfo(token, getGroups=True)
+            # getUserInfo returns a Flask Response (not a dict) on any auth problem
+            if isinstance(user_info, dict) and user_info.get('username'):
+                return user_info['username']
+        except Exception:
+            self.logger.debug("Could not resolve username for logging", exc_info=True)
+        return '-'
+
+    def log_auth_decision(self, response_code, response_length, auth_req_api, method, endpoint, client_ip, matched_pattern=None, user_agent=None, user='-'):
         """
         Log authorization decision in Common Log Format.
 
@@ -190,9 +200,8 @@ class EndpointAuthorizer:
         # Caller - not available without AWS IAM, use '-'
         caller = '-'
 
-        # User - not available at authorization time (token not yet validated)
-        # Could extract from Authorization header if needed, but use '-' for now
-        user = '-'
+        # User - resolved from the validated token on the authed path, or '-'
+        user = user or '-'
 
         # Request time in AWS/Apache format: [DD/MMM/YYYY:HH:MM:SS +0000]
         request_time = datetime.now(timezone.utc).strftime('%d/%b/%Y:%H:%M:%S +0000')
@@ -215,6 +224,9 @@ class EndpointAuthorizer:
         # Add the API originating the authorization as additional info need by API Usage reporting
         authority_info = f"authority={auth_req_api}" if auth_req_api else ""
 
+        user_agent = user_agent or '-'
+        user_agent_info = f'user_agent="{user_agent}"'
+
         # Format log message matching Common Log Format, aligned with these AWS API Gateway fields for
         # custom access logs:
         # $sourceIp $caller $user [$requestTime] "$method $resourcePath $protocol" $status $responseLength
@@ -228,6 +240,7 @@ class EndpointAuthorizer:
             f' {response_length}'
             f' {pattern_info}'    # Supplemental data for reporting, beyond Common Log Format
             f' {authority_info}'  # Supplemental data for reporting, beyond Common Log Format
+            f' {user_agent_info}'
         )
 
         self.logger.log(level=self.effective_endpoint_log_level
