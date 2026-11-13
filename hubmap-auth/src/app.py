@@ -184,7 +184,7 @@ def api_auth():
                                                                      , client_ip=req_ip_addr
                                                                      , matched_pattern=item['endpoint']
                                                                      , user_agent=request.headers.get('User-Agent')
-                                                                     , user=(endpoint_auth_instance.get_user_for_logging(request_token) if ('authorizer' in item and request_token) else '-'))
+                                                                     , user=(endpoint_auth_instance.get_user_for_logging(request_token) if request_token else '-'))
                             return response_200
                         else:
                             endpoint_auth_instance.log_auth_decision(response_code=401
@@ -219,7 +219,7 @@ def api_auth():
                                                                      , client_ip=req_ip_addr
                                                                      , matched_pattern=item['endpoint']
                                                                      , user_agent=request.headers.get('User-Agent')
-                                                                     , user=(endpoint_auth_instance.get_user_for_logging(request_token) if ('authorizer' in item and request_token) else '-'))
+                                                                     , user=(endpoint_auth_instance.get_user_for_logging(request_token) if request_token else '-'))
                             return response_200
                         else:
                             endpoint_auth_instance.log_auth_decision(response_code=401
