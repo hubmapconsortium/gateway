@@ -166,7 +166,7 @@ class EndpointAuthorizer:
 
     def get_user_for_logging(self, token) -> str:
         try:
-            user_info = self._auth_helper_instance.getUserInfo(token, getGroups=True)
+            user_info = self._auth_helper_instance.getUserInfo(token, getGroups=False)
             # getUserInfo returns a Flask Response (not a dict) on any auth problem
             if isinstance(user_info, dict) and user_info.get('username'):
                 return user_info['username']
