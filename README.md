@@ -4,27 +4,26 @@ This HuBMAP Gateway serves as an authentication and authorization gateway for so
 
 HTTP requests to the following APIs will be proxied to this gateway service for authentication and authorization against Globus Auth before reaching to the target endpoints. 
 
+- Entity API
+- Search API
 - Ingest API
+- UUID API
+- User Key-Value API
+- User Templates API (managed by PSC)
+- Workspaces API (managed by PSC)
 - AVR Antibody API
+- UBKG Ontology API
 
 And following are the APIs and UI applications that only use this gateway as reverse proxy without any authentication/authoriztion involved:
 
 - AVR UI
 - Ingest Portal UI
 - Data Portal UI
+- Data Ingest Board UI
 
 The file assets service is not an API per se, the gateway only does the auth cehck for requests made to
 
 - `https://assets.hubmapconsortium.org/<uuid>/<relative-file-path>[?token=<globus-token>]`
-
-Different from the above use cases, the following APIs are protected by AWS API Gateway with using Lambda Authorizors:
-
-- Entity API
-- Search API
-- UUID API
-- Workspaces API (only the REST API part on DEV and PROD)
-- User Templates API
-- UBKG Ontology API
 
 More details are described in the [aws-api-gateway](https://github.com/hubmapconsortium/aws-api-gateway) repository.
 
@@ -69,9 +68,9 @@ Note: Environment variables set like this are only stored temporally. When you e
 ./docker-development.sh [check|config|build|start|stop|down]
 ```
 
-## Docker build for deployment on TEST/PROD
+## Docker build for deployment on PROD
 
 ```
 cd docker
-./docker-deployment.sh [test|prod] [start|stop|down]
+./docker-deployment.sh [start|stop|down]
 ```
